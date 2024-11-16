@@ -57,9 +57,6 @@ const renderer = {
 
 const onClickCluster = (e, cluster) => {
   // map.fitBounds(cluster.bounds)
-  cluster.markers.forEach((marker) => {
-    console.log(marker.content.getAttribute('title'))
-  })
   if (cluster.marker.content.classList.contains("popup")) {
     cluster.marker.content.classList.remove("popup");
     cluster.marker.zIndex = null;
@@ -83,6 +80,8 @@ onMounted(async () => {
   const { AdvancedMarkerElement } = await loader.importLibrary("marker");
 
   class CustomOverlay extends OverlayView {
+    position;
+    div;
     constructor(position, content, map) {
       super();
       this.position = position;
@@ -99,15 +98,15 @@ onMounted(async () => {
       this.div.appendChild(this.content);
       CustomOverlay.preventMapHitsAndGesturesFrom(this.div);
       const panes = this.getPanes();
-      panes.overlayLayer.appendChild(this.div);
+      panes.floatPane.appendChild(this.div);
     }
 
     draw() {
       if (this.div) {
         const overlayProjection = this.getProjection();
         const position = overlayProjection.fromLatLngToDivPixel(this.position);
-        this.div.style.left = `${position.x}px`;
-        this.div.style.top = `${position.y - 400}px`;
+        this.div.style.left = `${position.x - 180}px`;
+        this.div.style.top = `${position.y - 335}px`;
         this.div.style.zIndex = '1000';
       }
     }
@@ -138,10 +137,6 @@ onMounted(async () => {
   for (const article of articles.value) {
     const markerTag = document.createElement("div");
     markerTag.classList.add("marker");
-    // markerTag.innerHTML = `
-    //   <div class="detail">
-    //     <div>${article.title}<div>
-    //   </div>`
     markerTag.setAttribute('title', article.title)
     article.marker = new library.AdvancedMarkerElement({
       map,
@@ -154,6 +149,7 @@ onMounted(async () => {
       const container = document.createElement("div");
       const app = createApp(MarkerPopup, {
         closeWindow: closeOverlay,
+        article: article,
       });
       app.mount(container)
 
@@ -162,18 +158,6 @@ onMounted(async () => {
         container,
         map
       );
-      // infowindow = new InfoWindow({
-      //   content: container
-      // });
-      // infowindow.open(map, article.marker)
-
-      // if (article.marker.content.classList.contains("popup")) {
-      //   article.marker.content.classList.remove("popup");
-      //   article.marker.zIndex = null;
-      // } else {
-      //   article.marker.content.classList.add("popup");
-      //   article.marker.zIndex = 1;
-      // }
     })
   }
 
