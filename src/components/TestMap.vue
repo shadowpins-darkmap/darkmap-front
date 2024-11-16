@@ -5,6 +5,7 @@ import { MarkerClusterer } from "@googlemaps/markerclusterer";
 import { storeToRefs } from 'pinia'
 import { useNewsListStore } from '@/store/newsListStore';
 import MarkerPopup from './MarkerPopup.vue'
+import ClusterPopup from './ClusterPopup.vue';
 import ControlPopup from './ControlPopup.vue';
 
 const { articles } = storeToRefs(useNewsListStore())
@@ -27,43 +28,6 @@ let map = null;
 const library = {
   Map: null,
   AdvancedMarkerElement: null,
-}
-
-const renderer = {
-  render: ({ count, position, markers }) => {
-    const clusterTag = document.createElement("div");
-    clusterTag.classList.add("cluster");
-    let innerHTML = `
-      <div>${String(count)}<div>
-      <div class="detail">
-    `
-    markers.forEach((marker) => {
-      innerHTML = innerHTML + `
-          <div>${marker.content.getAttribute('title')}</div>
-      `
-    })
-    clusterTag.innerHTML = innerHTML + `
-      </div>`
-    const mark = new library.AdvancedMarkerElement({
-      map,
-      content: clusterTag,
-      position,
-      zIndex: 1000 + count,
-    })
-
-    return mark
-  }
-}
-
-const onClickCluster = (e, cluster) => {
-  // map.fitBounds(cluster.bounds)
-  if (cluster.marker.content.classList.contains("popup")) {
-    cluster.marker.content.classList.remove("popup");
-    cluster.marker.zIndex = null;
-  } else {
-    cluster.marker.content.classList.add("popup");
-    cluster.marker.zIndex = 1;
-  }
 }
 
 let overlay = null;
@@ -137,7 +101,8 @@ onMounted(async () => {
   for (const article of articles.value) {
     const markerTag = document.createElement("div");
     markerTag.classList.add("marker");
-    markerTag.setAttribute('title', article.title)
+    markerTag.setAttribute('article_title', article.title)
+    markerTag.setAttribute('article_url', article.url)
     article.marker = new library.AdvancedMarkerElement({
       map,
       position: article.position,
@@ -160,6 +125,46 @@ onMounted(async () => {
       );
     })
   }
+
+  const renderer = {
+  render: ({ count, position }) => {
+    const clusterTag = document.createElement("div");
+    clusterTag.classList.add("cluster");
+    clusterTag.innerHTML = `
+      <div>${String(count)}<div>
+    `
+    const mark = new library.AdvancedMarkerElement({
+      map,
+      content: clusterTag,
+      position,
+      zIndex: 1000 + count,
+    })
+
+    return mark
+  }
+}
+
+const onClickCluster = (e, cluster) => {
+  closeOverlay()
+
+  const clusterPosition = { lat: cluster.position.lat(), lng: cluster.position.lng() }
+  const clusterArticles = cluster.markers.map(({ content }) => {
+    return { title: content.getAttribute('article_title'), url: content.getAttribute('article_url') }
+  })
+
+  const container = document.createElement("div");
+  const app = createApp(ClusterPopup, {
+    closeWindow: closeOverlay,
+    articles: clusterArticles,
+  });
+  app.mount(container)
+
+  overlay = new CustomOverlay(
+    clusterPosition,
+    container,
+    map
+  );
+}
 
   new MarkerClusterer({ map, markers: articles.value.map(({ marker }) => marker), renderer, onClusterClick: onClickCluster })
 })
@@ -200,106 +205,5 @@ div:deep(.cluster) {
   width: 100vw;
   height: 100vh;
   z-index: 1;
-}
-
-:deep(.marker .detail) {
-  display: none;
-  flex-direction: column;
-  flex: 1;
-}
-
-:deep(.marker.popup .detail) {
-  position: relative;
-  display: flex;
-  color: #FFEFEB;
-  font-size: 14px;
-  width: 400px;
-  height: 368px;
-  border: solid 1px #4E5277;
-  background-color: #313457;
-  border-radius: 2px;
-  top: -390px;
-  left: -168px;
-}
-
-:deep(.marker.popup .detail::after) {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border: 20px solid transparent;
-  border-top-color: #313457;
-  border-bottom: 0;
-  border-left: 0;
-  margin-left: -10px;
-  margin-bottom: -20px;
-  z-index: 2;
-}
-
-:deep(.marker.popup .detail::before) {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border: 22px solid transparent;
-  border-top-color: #4E5277;
-  border-bottom: 0;
-  border-left: 0;
-  margin-left: -11px;
-  margin-bottom: -22px;
-  z-index: 1;
-}
-
-:deep(.cluster .detail) {
-  display: none;
-  flex-direction: column;
-  flex: 1;
-}
-
-:deep(.cluster.popup .detail) {
-  position: relative;
-  display: flex;
-  width: 400px;
-  height: 368px;
-  border: solid 1px #4E5277;
-  background-color: #313457;
-  border-radius: 2px;
-  top: -410px;
-  left: -168px;
-}
-
-:deep(.cluster.popup .detail::after) {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border: 20px solid transparent;
-  border-top-color: #313457;
-  border-bottom: 0;
-  border-left: 0;
-  margin-left: -10px;
-  margin-bottom: -20px;
-  z-index: 2;
-}
-
-:deep(.cluster.popup .detail::before) {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border: 22px solid transparent;
-  border-top-color: #4E5277;
-  border-bottom: 0;
-  border-left: 0;
-  margin-left: -11px;
-  margin-bottom: -22px;
 }
 </style>

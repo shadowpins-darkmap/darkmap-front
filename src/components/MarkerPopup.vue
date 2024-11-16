@@ -50,6 +50,9 @@ const openNews = () => {
   pointer-events: all;
   box-sizing: border-box;
   padding: 18px;
+  &:hover {
+    cursor: default;
+  }
 }
 
 .popup:after {
