@@ -29,6 +29,13 @@ const library = {
   Map: null,
   AdvancedMarkerElement: null,
 }
+const markerColor = { '바바리맨': '#FF7272', '헌팅': '#1CD6FF', '미행': '#B56BFF' }
+const clusters = {
+  '바바리맨': null,
+  '헌팅': null,
+  '미행': null,
+  '기타': null,
+}
 
 let overlay = null;
 
@@ -101,8 +108,12 @@ onMounted(async () => {
   for (const article of articles.value) {
     const markerTag = document.createElement("div");
     markerTag.classList.add("marker");
+    if (Object.keys(markerColor).includes(article.category)) {
+      markerTag.style.backgroundColor = markerColor[article.category]
+    }
     markerTag.setAttribute('article_title', article.title)
     markerTag.setAttribute('article_url', article.url)
+    markerTag.setAttribute('article_data', article.date)
     article.marker = new library.AdvancedMarkerElement({
       map,
       position: article.position,
@@ -127,12 +138,15 @@ onMounted(async () => {
   }
 
   const renderer = {
-  render: ({ count, position }) => {
+  render: ({ count, position, markers }) => {
     const clusterTag = document.createElement("div");
     clusterTag.classList.add("cluster");
     clusterTag.innerHTML = `
-      <div>${String(count)}<div>
+      <div style="line-height: ${16 + count}px">${String(count)}<div>
     `
+    clusterTag.style.backgroundColor = markers[0].content.style.backgroundColor
+    clusterTag.style.width = (16 + count) + 'px'
+    clusterTag.style.height = (16 + count) + 'px'
     const mark = new library.AdvancedMarkerElement({
       map,
       content: clusterTag,
@@ -149,7 +163,7 @@ const onClickCluster = (e, cluster) => {
 
   const clusterPosition = { lat: cluster.position.lat(), lng: cluster.position.lng() }
   const clusterArticles = cluster.markers.map(({ content }) => {
-    return { title: content.getAttribute('article_title'), url: content.getAttribute('article_url') }
+    return { title: content.getAttribute('article_title'), url: content.getAttribute('article_url'), date: content.getAttribute('article_date') }
   })
 
   const container = document.createElement("div");
@@ -166,7 +180,10 @@ const onClickCluster = (e, cluster) => {
   );
 }
 
-  new MarkerClusterer({ map, markers: articles.value.map(({ marker }) => marker), renderer, onClusterClick: onClickCluster })
+  clusters.바바리맨 = new MarkerClusterer({ map, markers: articles.value.filter(({ category }) => { return category === '바바리맨' }).map(({ marker }) => marker), renderer, onClusterClick: onClickCluster })
+  //clusters.미행 = new MarkerClusterer({ map, markers: articles.value.filter(({ category }) => { return category === '미행' }).map(({ marker }) => marker), renderer, onClusterClick: onClickCluster })
+  //clusters.헌팅 = new MarkerClusterer({ map, markers: articles.value.filter(({ category }) => { return category === '헌팅' }).map(({ marker }) => marker), renderer, onClusterClick: onClickCluster })
+  clusters.기타 = new MarkerClusterer({ map, markers: articles.value.filter(({ category }) => { return category === '폭행' || category === '' }).map(({ marker }) => marker), renderer, onClusterClick: onClickCluster })
 })
 
 
@@ -183,7 +200,7 @@ div:deep(.marker) {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background-color: #FF7272;
+  background-color: #00FFC2;
   align-items: center;
   justify-content: center;
 }
@@ -193,7 +210,7 @@ div:deep(.cluster) {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background-color: #FF7272;
+  background-color: #00FFC2;
   border: 2px solid #000000;
   color: black;
   font-size: 15px;
