@@ -1,21 +1,21 @@
 <script setup>
-import { ref, onMounted, createApp } from 'vue';
-import { Loader } from '@googlemaps/js-api-loader'
+import { ref, onMounted, createApp } from "vue";
+import { Loader } from "@googlemaps/js-api-loader";
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
-import { storeToRefs } from 'pinia'
-import { useNewsListStore } from '@/store/newsListStore';
-import MarkerPopup from './MarkerPopup.vue'
-import ClusterPopup from './ClusterPopup.vue';
-import ControlPopup from './ControlPopup.vue';
+import { storeToRefs } from "pinia";
+import { useNewsListStore } from "@/store/newsListStore";
+import MarkerPopup from "./MarkerPopup.vue";
+// import ClusterPopup from "./ClusterPopup.vue";
+import ControlPopup from "./ControlPopup.vue";
 
-const { articles } = storeToRefs(useNewsListStore())
+const { articles } = storeToRefs(useNewsListStore());
 
 const mapDiv = ref(null);
 
 const loader = new Loader({
-  apiKey: 'AIzaSyDH9fUnHstrmNdS8qGou60swHdvZlVK9Y8',
-  version: 'weekly',
-})
+  apiKey: "AIzaSyDH9fUnHstrmNdS8qGou60swHdvZlVK9Y8",
+  version: "weekly",
+});
 
 let map = null;
 
@@ -28,14 +28,14 @@ let map = null;
 const library = {
   Map: null,
   AdvancedMarkerElement: null,
-}
-const markerColor = { '바바리맨': '#FF7272', '헌팅': '#1CD6FF', '미행': '#B56BFF' }
+};
+const markerColor = { 바바리맨: "#FF7272", 헌팅: "#1CD6FF", 미행: "#B56BFF" };
 const clusters = {
-  '바바리맨': null,
-  '헌팅': null,
-  '미행': null,
-  '기타': null,
-}
+  바바리맨: null,
+  헌팅: null,
+  미행: null,
+  기타: null,
+};
 
 let overlay = null;
 
@@ -63,9 +63,9 @@ onMounted(async () => {
     }
 
     onAdd() {
-      this.div = document.createElement('div');
-      this.div.style.position = 'absolute';
-      this.div.style.pointerEvents = 'auto'; // 클릭 이벤트 허용
+      this.div = document.createElement("div");
+      this.div.style.position = "absolute";
+      this.div.style.pointerEvents = "auto"; // 클릭 이벤트 허용
       this.div.appendChild(this.content);
       CustomOverlay.preventMapHitsAndGesturesFrom(this.div);
       const panes = this.getPanes();
@@ -78,7 +78,7 @@ onMounted(async () => {
         const position = overlayProjection.fromLatLngToDivPixel(this.position);
         this.div.style.left = `${position.x - 180}px`;
         this.div.style.top = `${position.y - 335}px`;
-        this.div.style.zIndex = '1000';
+        this.div.style.zIndex = "1000";
       }
     }
 
@@ -94,8 +94,8 @@ onMounted(async () => {
     }
   }
 
-  library.Map = Map
-  library.AdvancedMarkerElement = AdvancedMarkerElement
+  library.Map = Map;
+  library.AdvancedMarkerElement = AdvancedMarkerElement;
   map = new library.Map(mapDiv.value, {
     center: { lat: 37.66727, lng: 127.07242 },
     zoom: 10,
@@ -103,22 +103,22 @@ onMounted(async () => {
     fullscreenControl: false,
     mapTypeControl: false,
     streetViewControl: false,
-  })
+  });
 
   for (const article of articles.value) {
     const markerTag = document.createElement("div");
     markerTag.classList.add("marker");
     if (Object.keys(markerColor).includes(article.category)) {
-      markerTag.style.backgroundColor = markerColor[article.category]
+      markerTag.style.backgroundColor = markerColor[article.category];
     }
-    markerTag.setAttribute('article_title', article.title)
-    markerTag.setAttribute('article_url', article.url)
-    markerTag.setAttribute('article_data', article.date)
+    markerTag.setAttribute("article_title", article.title);
+    markerTag.setAttribute("article_url", article.url);
+    markerTag.setAttribute("article_data", article.date);
     article.marker = new library.AdvancedMarkerElement({
       map,
       position: article.position,
-      content: markerTag
-    })
+      content: markerTag,
+    });
     article.marker.addListener("click", () => {
       closeOverlay();
 
@@ -127,66 +127,82 @@ onMounted(async () => {
         closeWindow: closeOverlay,
         article: article,
       });
-      app.mount(container)
+      app.mount(container);
 
-      overlay = new CustomOverlay(
-        article.position,
-        container,
-        map
-      );
-    })
+      overlay = new CustomOverlay(article.position, container, map);
+    });
   }
 
   const renderer = {
-  render: ({ count, position, markers }) => {
-    const clusterTag = document.createElement("div");
-    clusterTag.classList.add("cluster");
-    clusterTag.innerHTML = `
+    render: ({ count, position, markers }) => {
+      const clusterTag = document.createElement("div");
+      clusterTag.classList.add("cluster");
+      clusterTag.innerHTML = `
       <div style="line-height: ${16 + count}px">${String(count)}<div>
-    `
-    clusterTag.style.backgroundColor = markers[0].content.style.backgroundColor
-    clusterTag.style.width = (16 + count) + 'px'
-    clusterTag.style.height = (16 + count) + 'px'
-    const mark = new library.AdvancedMarkerElement({
-      map,
-      content: clusterTag,
-      position,
-      zIndex: 1000 + count,
-    })
+    `;
+      clusterTag.style.backgroundColor =
+        markers[0].content.style.backgroundColor;
+      clusterTag.style.width = 16 + count + "px";
+      clusterTag.style.height = 16 + count + "px";
+      const mark = new library.AdvancedMarkerElement({
+        map,
+        content: clusterTag,
+        position,
+        zIndex: 1000 + count,
+      });
 
-    return mark
-  }
-}
+      return mark;
+    },
+  };
 
-const onClickCluster = (e, cluster) => {
-  closeOverlay()
+  const onClickCluster = (e, cluster) => {
+    closeOverlay();
 
-  const clusterPosition = { lat: cluster.position.lat(), lng: cluster.position.lng() }
-  const clusterArticles = cluster.markers.map(({ content }) => {
-    return { title: content.getAttribute('article_title'), url: content.getAttribute('article_url'), date: content.getAttribute('article_date') }
-  })
+    const clusterPosition = {
+      lat: cluster.position.lat(),
+      lng: cluster.position.lng(),
+    };
 
-  const container = document.createElement("div");
-  const app = createApp(ClusterPopup, {
-    closeWindow: closeOverlay,
-    articles: clusterArticles,
+    // 클러스터 내 마커들의 원본 기사 데이터를 찾아서 전달
+    const clusterArticles = cluster.markers.map((marker) => {
+      // marker의 content에서 title을 가져와서 원본 데이터 찾기
+      const title = marker.content.getAttribute("article_title");
+      return articles.value.find((article) => article.title === title);
+    });
+
+    const container = document.createElement("div");
+    const app = createApp(MarkerPopup, {
+      closeWindow: closeOverlay,
+      article: clusterArticles, // 완전한 기사 객체 배열 전달
+    });
+    app.mount(container);
+
+    overlay = new CustomOverlay(clusterPosition, container, map);
+  };
+
+  clusters.바바리맨 = new MarkerClusterer({
+    map,
+    markers: articles.value
+      .filter(({ category }) => {
+        return category === "바바리맨";
+      })
+      .map(({ marker }) => marker),
+    renderer,
+    onClusterClick: onClickCluster,
   });
-  app.mount(container)
-
-  overlay = new CustomOverlay(
-    clusterPosition,
-    container,
-    map
-  );
-}
-
-  clusters.바바리맨 = new MarkerClusterer({ map, markers: articles.value.filter(({ category }) => { return category === '바바리맨' }).map(({ marker }) => marker), renderer, onClusterClick: onClickCluster })
   //clusters.미행 = new MarkerClusterer({ map, markers: articles.value.filter(({ category }) => { return category === '미행' }).map(({ marker }) => marker), renderer, onClusterClick: onClickCluster })
   //clusters.헌팅 = new MarkerClusterer({ map, markers: articles.value.filter(({ category }) => { return category === '헌팅' }).map(({ marker }) => marker), renderer, onClusterClick: onClickCluster })
-  clusters.기타 = new MarkerClusterer({ map, markers: articles.value.filter(({ category }) => { return category === '폭행' || category === '' }).map(({ marker }) => marker), renderer, onClusterClick: onClickCluster })
-})
-
-
+  clusters.기타 = new MarkerClusterer({
+    map,
+    markers: articles.value
+      .filter(({ category }) => {
+        return category === "폭행" || category === "";
+      })
+      .map(({ marker }) => marker),
+    renderer,
+    onClusterClick: onClickCluster,
+  });
+});
 </script>
 
 <template>
@@ -200,7 +216,7 @@ div:deep(.marker) {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background-color: #00FFC2;
+  background-color: #00ffc2;
   align-items: center;
   justify-content: center;
 }
@@ -210,7 +226,7 @@ div:deep(.cluster) {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background-color: #00FFC2;
+  background-color: #00ffc2;
   border: 2px solid #000000;
   color: black;
   font-size: 15px;

@@ -1,0 +1,141 @@
+.popup {
+  position: relative;
+  width: 400px;
+  height: auto; // 280px; // Height is automatic based on content
+  //TODO: 팝업 위치 기준점을 아래로 잡고 위로 커지도록 설정
+  // bottom: 20px;
+  // transform: translateY(0);
+  box-shadow: 0 0 0 1px #4e5277;
+  background-color: #313457;
+  border-radius: 2px;
+  z-index: 2;
+  pointer-events: all;
+  box-sizing: border-box;
+  padding: 20px;
+
+  &:hover {
+    cursor: default;
+  }
+
+  // arrow
+  &:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border: 37px solid transparent;
+    border-top-color: #313457;
+    border-bottom: 0;
+    border-left: 0;
+    margin-left: -18.5px;
+    margin-bottom: -36px;
+    z-index: 3;
+  }
+
+  &:before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border: 38px solid transparent;
+    border-top-color: #4e5277;
+    border-bottom: 0;
+    border-left: 0;
+    margin-left: -19.5px;
+    margin-bottom: -38px;
+    z-index: 2;
+  }
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  color: #ffefeb;
+  font-weight: bold;
+  margin-bottom: 12px;
+  // Clear the space taken by the floating close button
+  padding-right: 24px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+
+  h2 {
+    font-size: 18px;
+    margin: 0;
+    text-align: left;
+  }
+}
+
+p {
+  font-size: 13px;
+  text-align: left;
+}
+
+.close {
+  width: 18px;
+  height: 18px;
+  float: right;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.location-info {
+  .location-badge {
+    background-color: #01ffc2;
+    padding: 4px 8px;
+    border-radius: 10px;
+    margin-right: 8px;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  .address {
+    color: #79a6ff;
+    font-size: 14px;
+  }
+  text-align: left;
+}
+
+.category-underline {
+  border-bottom: 7px solid #1dd6ff;
+  padding-bottom: 2px;
+}
+
+.incident-count {
+  color: #ffefeb;
+}
+
+.news-section {
+  border-bottom: 2.5px solid rgba(255, 255, 255, 0.1);
+  padding-top: 10px;
+
+  .news-header {
+    border-bottom: 2.5px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 5px;
+  }
+
+  h2 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #ffefeb;
+    text-align: left;
+  }
+}
+
+.news_title {
+  color: #ffefeb;
+  margin: 8px 0;
+  line-height: 1.4;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    cursor: pointer;
+    text-decoration: underline;
+  }
+}
