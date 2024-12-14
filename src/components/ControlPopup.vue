@@ -54,7 +54,9 @@
     </div>
     <div style="display: flex; margin-top: 30px">
       <div class="body_title">지역 투어</div>
-      <gu-dropdown @change="changeGu"></gu-dropdown>
+      <address-filter
+        :address-data="addressData"
+        @change="changeGu"></address-filter>
     </div>
     <div class="select_all">
       <div @click="clickAllDong">
@@ -67,7 +69,7 @@
       <div class="checkbox_text">{{ selectGu }} 전체</div>
     </div>
     <div class="checkboxes">
-      <div class="checkbox" v-for="(d, idx) in dong[selectGu]" v-bind:key="idx">
+      <div class="checkbox" v-for="(d, idx) in dongList" v-bind:key="idx">
         <div @click="clickDong(idx)">
           <img v-if="d.checked" class="check" src="../assets/checkbox.svg" />
           <img v-if="!d.checked" class="check" src="../assets/unchecked.svg" />
@@ -126,11 +128,13 @@
 </template>
 
 <script setup>
-import { dong, gu } from "@/constant/seoul"
+// import { dong, gu } from "@/constant/seoul"
 import { useNewsListStore } from "@/store/newsListStore"
 import { storeToRefs } from "pinia"
 import { computed, ref } from "vue"
-import GuDropdown from "./GuDropdown.vue"
+import AddressFilter from "./AddressFilter.vue"
+import addressData from "@/constant/addresses.json"
+import "@/styles/ControlPopup.scss"
 
 const { articles } = storeToRefs(useNewsListStore())
 
@@ -147,10 +151,14 @@ const crimeTypes = ref([
     crimeType: "미행",
     checked: true,
   },
+  {
+    crimeType: "폭행",
+    checked: true,
+  },
 ])
 
 const allCrimeChecked = computed(() => {
-  return crimeTypes.value.filter(({ checked }) => checked).length === 3
+  return crimeTypes.value.filter(({ checked }) => checked).length === 4
 })
 
 const clickAllCrime = () => {
@@ -172,213 +180,42 @@ const clickCrimeType = (idx) => {
   // 필터링 로직 넣기
 }
 
-const selectGu = ref(gu[0])
-const changeGu = (idx) => {
-  selectGu.value = gu[idx]
+// Address handling
+const selectGu = ref(addressData[0].lv1)
+const dongList = ref([])
+
+// Initialize dongList with checked property
+const initializeDongList = (lv1) => {
+  const selectedAddress = addressData.find((addr) => addr.lv1 === lv1)
+  if (selectedAddress) {
+    dongList.value = selectedAddress.lv2.map((dong) => ({
+      name: dong,
+      checked: true,
+    }))
+  }
+}
+
+// Initialize dongList with first lv1
+initializeDongList(selectGu.value)
+
+const changeGu = (newGu) => {
+  // Changed to receive single parameter
+  selectGu.value = newGu
+  initializeDongList(newGu)
 }
 
 const allDongChecked = computed(() => {
-  return (
-    dong.value[selectGu.value].filter(({ checked }) => checked).length ===
-    dong.value[selectGu.value].length
-  )
+  return dongList.value.every((dong) => dong.checked)
 })
 
 const clickAllDong = () => {
-  if (allDongChecked.value) {
-    dong.value[selectGu.value].forEach((d) => {
-      d.checked = false
-    })
-  } else {
-    dong.value[selectGu.value].forEach((d) => {
-      d.checked = true
-    })
-  }
-  // 필터링 로직 넣기
+  const newCheckedState = !allDongChecked.value
+  dongList.value.forEach((dong) => {
+    dong.checked = newCheckedState
+  })
 }
 
 const clickDong = (idx) => {
-  // 체크 박스 연동
-  dong.value[selectGu.value][idx].checked =
-    !dong.value[selectGu.value][idx].checked
-  // 필터링 로직 넣기
+  dongList.value[idx].checked = !dongList.value[idx].checked
 }
 </script>
-
-<style lang="scss" scoped>
-.logo {
-  position: fixed;
-  top: 102px;
-  left: 531px;
-  width: 198px;
-  height: 198px;
-  z-index: 2;
-}
-
-.head_panel {
-  position: fixed;
-  display: flex;
-  justify-content: space-between;
-  top: 102px;
-  left: 71px;
-  width: 436px;
-  height: 50px;
-  padding: 0 26px;
-  box-sizing: border-box;
-  background: no-repeat;
-  background-image: url(../assets/header.svg);
-  z-index: 2;
-}
-
-.crime_logo {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 10px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  z-index: 3;
-}
-
-.header_text {
-  margin-left: 10px;
-  margin-top: 14px;
-  line-height: 23px;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: bold;
-  text-align: center;
-}
-
-.body_panel {
-  position: fixed;
-  top: 205px;
-  left: 71px;
-  height: 562px;
-  width: 436px;
-  background: no-repeat;
-  background-image: url(../assets/panel.svg);
-  padding: 26px 31px;
-  z-index: 2;
-  box-sizing: border-box;
-}
-
-.body_title {
-  width: 66px;
-  height: 24px;
-  margin-bottom: 15px;
-  text-align: center;
-  line-height: 24px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #000000;
-  border-radius: 12px;
-  background-color: #ffefeb;
-  z-index: 3;
-}
-
-.select_all {
-  display: flex;
-}
-
-.checkbox_text {
-  margin-left: 6px;
-  line-height: 18px;
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: medium;
-  text-align: center;
-}
-
-.checkboxes {
-  display: grid;
-  margin-top: 15px;
-  grid-template-columns: 78px 78px 78px 78px 78px;
-  grid-auto-rows: 18px;
-  row-gap: 12px;
-}
-
-.checkbox {
-  display: flex;
-}
-
-.check {
-  width: 18px;
-  height: 18px;
-}
-
-.check:hover {
-  cursor: pointer;
-}
-
-.street-harrasment {
-  position: absolute;
-  width: 436px;
-  height: 50px;
-  background-color: #6d54ce;
-  border-style: solid;
-  border-width: 2px;
-  border-color: #f1cfc8;
-  z-index: 2;
-}
-
-.article_table {
-  display: grid;
-  grid-template-columns: 97px 277px;
-  grid-auto-rows: 27px;
-  align-items: center;
-}
-
-.table_position {
-  color: #ffefeb;
-  font-size: 12px;
-  text-align: left;
-}
-
-.table_title {
-  color: #ffefeb;
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: left;
-}
-
-.paging {
-  margin-top: 20px;
-  margin-left: 55px;
-  margin-right: 55px;
-  width: 263.5px;
-  height: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.paging_numbers {
-  display: flex;
-  gap: 12px;
-}
-
-.paging_number {
-  color: #ffefeb;
-  font-size: 14px;
-  width: 30px;
-  height: 30px;
-  line-height: 30px;
-  text-align: center;
-}
-
-.selected_page {
-  background-image: url("../assets/selectedPage.svg");
-  background-size: cover;
-}
-
-.hover_page {
-  background-image: url("../assets/hoverPage.svg");
-  background-size: cover;
-  color: #4b7de2;
-}
-</style>
