@@ -8,7 +8,8 @@ import MarkerPopup from "./MarkerPopup.vue";
 // import ClusterPopup from "./ClusterPopup.vue";
 import ControlPopup from "./ControlPopup.vue";
 
-const { articles } = storeToRefs(useNewsListStore());
+const { loadArticles } = useNewsListStore()
+const { articles } = storeToRefs(useNewsListStore())
 
 const mapDiv = ref(null);
 
@@ -19,21 +20,16 @@ const loader = new Loader({
 
 let map = null;
 
-// const locations = ref([
-//   { lat: 37.517864, lng: 126.972226 },
-//   { lat: 37.496640, lng: 127.028218 },
-//   { lat: 37.496740, lng: 127.031304 },
-// ])
-
 const library = {
   Map: null,
   AdvancedMarkerElement: null,
 };
-const markerColor = { 바바리맨: "#FF7272", 헌팅: "#1CD6FF", 미행: "#B56BFF" };
+const markerColor = { 바바리맨: "#FF7272", 헌팅: "#1CD6FF", 미행: "#B56BFF", 폭행: "#FFED89" };
 const clusters = {
   바바리맨: null,
   헌팅: null,
   미행: null,
+  폭행: null,
   기타: null,
 };
 
@@ -47,6 +43,7 @@ const closeOverlay = () => {
 };
 
 onMounted(async () => {
+  await loadArticles()
   const { Map, OverlayView } = await loader.importLibrary("maps");
   const { AdvancedMarkerElement } = await loader.importLibrary("marker");
 
@@ -190,24 +187,48 @@ onMounted(async () => {
     renderer,
     onClusterClick: onClickCluster,
   });
-  //clusters.미행 = new MarkerClusterer({ map, markers: articles.value.filter(({ category }) => { return category === '미행' }).map(({ marker }) => marker), renderer, onClusterClick: onClickCluster })
-  //clusters.헌팅 = new MarkerClusterer({ map, markers: articles.value.filter(({ category }) => { return category === '헌팅' }).map(({ marker }) => marker), renderer, onClusterClick: onClickCluster })
+  clusters.미행 = new MarkerClusterer({ map, markers: articles.value.filter(({ category }) => { return category === '미행' }).map(({ marker }) => marker), renderer, onClusterClick: onClickCluster })
+  clusters.헌팅 = new MarkerClusterer({ map, markers: articles.value.filter(({ category }) => { return category === '헌팅' }).map(({ marker }) => marker), renderer, onClusterClick: onClickCluster })
+  clusters.폭행 = new MarkerClusterer({ map, markers: articles.value.filter(({ category }) => { return category === '폭행' }).map(({ marker }) => marker), renderer, onClusterClick: onClickCluster })
   clusters.기타 = new MarkerClusterer({
     map,
-    markers: articles.value
-      .filter(({ category }) => {
-        return category === "폭행" || category === "";
-      })
-      .map(({ marker }) => marker),
+    markers: articles.value.filter(({ category }) => { return category === '기타' }).map(({ marker }) => marker),
     renderer,
     onClusterClick: onClickCluster,
   });
 });
+
+const changeFilter = (crimeTypes, selectedSido, dongList) => {
+  // 임시 
+  const filterSido = selectedSido
+  const filterSigungu = dongList.filter(({ checked }) => checked).map(({ name }) => name)
+  const filterCrime = crimeTypes.filter(({ checked }) => checked).map(({ crimeType }) => crimeType)
+  if (filterCrime.length === crimeTypes.length) {
+    filterCrime.push("기타")
+  }
+
+  Object.keys(clusters).forEach((crimeType) => {
+    // filter에서 선택되지 않은 crimeType 거르기
+    if (!filterCrime.includes(crimeType)) {
+      clusters[crimeType].clearMarkers()
+      return
+    }
+    const updatedMarkers = articles.value.filter((article) => {
+      if (filterSigungu.length === dongList.length) {
+        return article.category === crimeType && filterSido === article.sido
+      }
+      return article.category === crimeType && filterSido === article.sido && filterSigungu.includes(article.sigungu)
+    }).map(({ marker }) => marker)
+
+    clusters[crimeType].clearMarkers()
+    clusters[crimeType].addMarkers(updatedMarkers)
+  })
+}
 </script>
 
 <template>
   <div class="map" ref="mapDiv"></div>
-  <ControlPopup />
+  <ControlPopup @change-filter="changeFilter" />
 </template>
 
 <style lang="scss" scoped>

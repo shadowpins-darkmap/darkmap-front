@@ -22,7 +22,7 @@
       <div class="header_text">미행</div>
     </div>
     <div style="display: flex">
-      <div class="crime_logo" style="background: #b56bff">
+      <div class="crime_logo" style="background: #ffed89">
         <img src="../assets/assaultLogo.svg" />
       </div>
       <div class="header_text">폭행</div>
@@ -87,30 +87,30 @@
       "></div>
     <div class="article_table">
       <div class="table_position">
-        {{ articles[0].sigungu }} {{ articles[0].dong }}
+        시군구 주소
       </div>
-      <div class="table_title">{{ articles[0].title }}</div>
+      <div class="table_title">제목</div>
     </div>
     <div style="border: 0; height: 1px; background: #00ffc2"></div>
     <div class="article_table">
       <div class="table_position">
-        {{ articles[1].sigungu }} {{ articles[1].dong }}
+        시군구 주소
       </div>
-      <div class="table_title">{{ articles[1].title }}</div>
+      <div class="table_title">제목목</div>
     </div>
     <div style="border: 0; height: 1px; background: #00ffc2"></div>
     <div class="article_table">
       <div class="table_position">
-        {{ articles[2].sigungu }} {{ articles[2].dong }}
+        시군구 주소
       </div>
-      <div class="table_title">{{ articles[2].title }}</div>
+      <div class="table_title">제목</div>
     </div>
     <div style="border: 0; height: 1px; background: #00ffc2"></div>
     <div class="article_table">
       <div class="table_position">
-        {{ articles[3].sigungu }} {{ articles[3].dong }}
+        시군구 주소소
       </div>
-      <div class="table_title">{{ articles[3].title }}</div>
+      <div class="table_title">제목</div>
     </div>
     <div style="border: 0; height: 2px; background: #00ffc2"></div>
     <div class="paging">
@@ -128,15 +128,16 @@
 </template>
 
 <script setup>
-// import { dong, gu } from "@/constant/seoul"
-import { useNewsListStore } from "@/store/newsListStore"
-import { storeToRefs } from "pinia"
-import { computed, ref } from "vue"
+// import { useNewsListStore } from "@/store/newsListStore"
+// import { storeToRefs } from "pinia"
 import AddressFilter from "./AddressFilter.vue"
 import addressData from "@/constant/addresses.json"
 import "@/styles/ControlPopup.scss"
+import { ref, computed, defineEmits } from 'vue';
 
-const { articles } = storeToRefs(useNewsListStore())
+const emits = defineEmits(['changeFilter'])
+
+// const { articles } = storeToRefs(useNewsListStore())
 
 const crimeTypes = ref([
   {
@@ -172,12 +173,14 @@ const clickAllCrime = () => {
     })
   }
   // 필터링 로직 넣기
+  emits('changeFilter', crimeTypes.value, selectGu.value, dongList.value)
 }
 
 const clickCrimeType = (idx) => {
   // 체크 박스 연동
   crimeTypes.value[idx].checked = !crimeTypes.value[idx].checked
   // 필터링 로직 넣기
+  emits('changeFilter', crimeTypes.value, selectGu.value, dongList.value)
 }
 
 // Address handling
@@ -202,6 +205,7 @@ const changeGu = (newGu) => {
   // Changed to receive single parameter
   selectGu.value = newGu
   initializeDongList(newGu)
+  emits('changeFilter', crimeTypes.value, selectGu.value, dongList.value)
 }
 
 const allDongChecked = computed(() => {
@@ -213,9 +217,15 @@ const clickAllDong = () => {
   dongList.value.forEach((dong) => {
     dong.checked = newCheckedState
   })
+  // 필터링 로직 넣기
+  emits('changeFilter', crimeTypes.value, selectGu.value, dongList.value)
 }
 
 const clickDong = (idx) => {
   dongList.value[idx].checked = !dongList.value[idx].checked
+  console.log(selectGu.value)
+  console.log(dongList.value);
+  // 필터링 로직 넣기
+  emits('changeFilter', crimeTypes.value, selectGu.value, dongList.value)
 }
 </script>
