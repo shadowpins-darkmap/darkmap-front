@@ -5,16 +5,15 @@ import { MarkerClusterer } from "@googlemaps/markerclusterer";
 import { storeToRefs } from "pinia";
 import { useNewsListStore } from "@/store/newsListStore";
 import MarkerPopup from "./MarkerPopup.vue";
-// import ClusterPopup from "./ClusterPopup.vue";
 import ControlPopup from "./ControlPopup.vue";
 
 const { loadArticles } = useNewsListStore()
-const { articles } = storeToRefs(useNewsListStore())
+const { articles, filteredArticles } = storeToRefs(useNewsListStore())
 
 const mapDiv = ref(null);
 
 const loader = new Loader({
-  apiKey: "AIzaSyDH9fUnHstrmNdS8qGou60swHdvZlVK9Y8",
+  apiKey: process.env.VUE_APP_API_KEY,
   version: "weekly",
 });
 
@@ -50,12 +49,13 @@ onMounted(async () => {
   class CustomOverlay extends OverlayView {
     position;
     div;
-    constructor(position, content, map) {
+    constructor(position, content, map, num) {
       super();
       this.position = position;
       this.content = content;
       this.map = map;
       this.div = null;
+      this.num = num;
       this.setMap(map);
     }
 
@@ -74,7 +74,7 @@ onMounted(async () => {
         const overlayProjection = this.getProjection();
         const position = overlayProjection.fromLatLngToDivPixel(this.position);
         this.div.style.left = `${position.x - 180}px`;
-        this.div.style.top = `${position.y - 335}px`;
+        this.div.style.top = `${position.y - 318 - this.num * 24.39}px`;
         this.div.style.zIndex = "1000";
       }
     }
@@ -94,8 +94,8 @@ onMounted(async () => {
   library.Map = Map;
   library.AdvancedMarkerElement = AdvancedMarkerElement;
   map = new library.Map(mapDiv.value, {
-    center: { lat: 37.66727, lng: 127.07242 },
-    zoom: 10,
+    center: { lat: 36.36727, lng: 127.07242 },
+    zoom: 7.5,
     mapId: "503c7df556477029",
     fullscreenControl: false,
     mapTypeControl: false,
@@ -126,7 +126,7 @@ onMounted(async () => {
       });
       app.mount(container);
 
-      overlay = new CustomOverlay(article.position, container, map);
+      overlay = new CustomOverlay(article.position, container, map, 1);
     });
   }
 
@@ -174,7 +174,7 @@ onMounted(async () => {
     });
     app.mount(container);
 
-    overlay = new CustomOverlay(clusterPosition, container, map);
+    overlay = new CustomOverlay(clusterPosition, container, map, cluster.count);
   };
 
   clusters.바바리맨 = new MarkerClusterer({
@@ -196,10 +196,11 @@ onMounted(async () => {
     renderer,
     onClusterClick: onClickCluster,
   });
+  filteredArticles.value = [...articles.value]
 });
 
 const changeFilter = (crimeTypes, selectedSido, dongList) => {
-  // 임시 
+  filteredArticles.value = []
   const filterSido = selectedSido
   const filterSigungu = dongList.filter(({ checked }) => checked).map(({ name }) => name)
   const filterCrime = crimeTypes.filter(({ checked }) => checked).map(({ crimeType }) => crimeType)
@@ -213,15 +214,17 @@ const changeFilter = (crimeTypes, selectedSido, dongList) => {
       clusters[crimeType].clearMarkers()
       return
     }
-    const updatedMarkers = articles.value.filter((article) => {
+    const updatedArticles = articles.value.filter((article) => {
       if (filterSigungu.length === dongList.length) {
         return article.category === crimeType && filterSido === article.sido
       }
       return article.category === crimeType && filterSido === article.sido && filterSigungu.includes(article.sigungu)
-    }).map(({ marker }) => marker)
+    })
+
+    filteredArticles.value = [ ...filteredArticles.value, ...updatedArticles ]
 
     clusters[crimeType].clearMarkers()
-    clusters[crimeType].addMarkers(updatedMarkers)
+    clusters[crimeType].addMarkers(updatedArticles.map(({ marker }) => marker))
   })
 }
 </script>

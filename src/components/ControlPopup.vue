@@ -81,63 +81,105 @@
     <div
       style="
         border: 0;
-        height: 2px;
+        height: 1.5px;
         background: #00ffc2;
         margin-top: 20px;
       "></div>
-    <div class="article_table">
+    <div v-for="(tArticle, i) in tableArticles" :key="i" class="article_table">
       <div class="table_position">
-        시군구 주소
+        {{ tArticle.address || '-' }}
       </div>
-      <div class="table_title">제목</div>
+      <div class="table_title" @click="clickTitle(tArticle.url)">{{ tArticle.title || '-' }}</div>
     </div>
-    <div style="border: 0; height: 1px; background: #00ffc2"></div>
-    <div class="article_table">
-      <div class="table_position">
-        시군구 주소
-      </div>
-      <div class="table_title">제목목</div>
-    </div>
-    <div style="border: 0; height: 1px; background: #00ffc2"></div>
-    <div class="article_table">
-      <div class="table_position">
-        시군구 주소
-      </div>
-      <div class="table_title">제목</div>
-    </div>
-    <div style="border: 0; height: 1px; background: #00ffc2"></div>
-    <div class="article_table">
-      <div class="table_position">
-        시군구 주소소
-      </div>
-      <div class="table_title">제목</div>
-    </div>
-    <div style="border: 0; height: 2px; background: #00ffc2"></div>
+    <div style="border: 0; height: 1.5px; background: #00ffc2" />
     <div class="paging">
-      <img style="width: 4px" src="../assets/leftArrow.svg" />
-      <div class="paging_numbers" style="margin: 0 30px">
-        <div class="selected_page paging_number">1</div>
-        <div class="paging_number">2</div>
-        <div class="paging_number">3</div>
-        <div class="paging_number">4</div>
-        <div class="paging_number">5</div>
+      <div class="prev_next" @click="clickPrev">
+        <img style="width: 4px" src="../assets/leftArrow.svg" />
       </div>
-      <img style="width: 4px" src="../assets/rightArrow.svg" />
+      <div class="paging_numbers" style="margin: 0 30px">
+        <div v-for="page in pageNumbers" :key="page" @click="pageChange(page)" :class="{ selected_page: page === currentPage }" class="paging_number">{{ page }}</div>
+      </div>
+      <div class="prev_next" @click="clickNext">
+        <img style="width: 4px" src="../assets/rightArrow.svg" />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-// import { useNewsListStore } from "@/store/newsListStore"
-// import { storeToRefs } from "pinia"
+import { useNewsListStore } from "@/store/newsListStore"
+import { storeToRefs } from "pinia"
 import AddressFilter from "./AddressFilter.vue"
 import addressData from "@/constant/addresses.json"
 import "@/styles/ControlPopup.scss"
-import { ref, computed, defineEmits } from 'vue';
+import { ref, computed, defineEmits, watch } from 'vue';
 
 const emits = defineEmits(['changeFilter'])
 
-// const { articles } = storeToRefs(useNewsListStore())
+const clickTitle = (url) => {
+  window.open(url, '_blank')
+}
+
+const { filteredArticles } = storeToRefs(useNewsListStore())
+
+const tableArticles = ref([{ title: '', address: '', url: '' }, { title: '', address: '', url: '' }, { title: '', address: '', url: '' }, { title: '', address: '', url: '' }])
+const pageNumbers = ref([1])
+const totalPages = computed(() => parseInt(filteredArticles.value.length / 4) + 1)
+const currentPage = ref(1)
+
+watch(filteredArticles, () => {
+  initPage()
+})
+
+const pageChange = (p) => {
+  currentPage.value = p
+
+  // tableArticles를 현재 페이지에 맞춰서 변경
+  for (let i = 0; i < 4; i++) {
+      if ((p-1)*4 + i < filteredArticles.value.length) {
+        const tableArticle = filteredArticles.value[(p-1)*4 + i]
+        const address = tableArticle.address.split(' ').slice(0, 2).join(' ')
+        tableArticles.value[i] = { title: tableArticle.title , address: address , url: tableArticle.url }
+      } else {
+        tableArticles.value[i] = { title: '-' , address: '-' , url: '-' }
+      }
+    }
+}
+
+const chagnePageNumbers = () => {
+  if (totalPages.value >= currentPage.value + 4) {
+    pageNumbers.value = Array(5).fill().map((v, i) => currentPage.value + i)
+  } else {
+    pageNumbers.value = Array(totalPages.value - currentPage.value + 1).fill().map((v, i) => currentPage.value + i)
+  }
+}
+
+const initPage = () => {
+  pageChange(1)
+  chagnePageNumbers()
+}
+
+const clickPrev = () => {
+  // 이전 클릭 불가능 시 바로 return
+  if (parseInt((currentPage.value - 1) / 5) === 0) {
+    return
+  }
+
+  // 이전 버튼 클릭
+  pageChange(parseInt((currentPage.value - 6) / 5) * 5 + 1)
+  chagnePageNumbers()
+}
+
+const clickNext = () => {
+  //다음 클릭 불가능 시 바로 return
+  if (parseInt((currentPage.value - 1) / 5) === parseInt((totalPages.value - 1) / 5)) {
+    return
+  }
+
+  // 다음 버튼 클릭
+  pageChange(parseInt((currentPage.value + 4) / 5) * 5 + 1)
+  chagnePageNumbers()
+}
 
 const crimeTypes = ref([
   {

@@ -50,8 +50,9 @@
   left: 71px;
   height: auto;
   width: 436px;
-  background: no-repeat;
-  background-image: url(../assets/panel.svg);
+  border-radius: 20px;
+  border: #f1cfc8 2px solid;
+  background-color: #6D54CE;
   padding: 26px 31px;
   z-index: 2;
   box-sizing: border-box;
@@ -81,7 +82,8 @@
   color: #ffffff;
   font-size: 12px;
   font-weight: medium;
-  text-align: center;
+  word-break: keep-all;
+  text-align: left;
 }
 
 .checkboxes {
@@ -121,6 +123,8 @@
   grid-template-columns: 97px 277px;
   grid-auto-rows: 27px;
   align-items: center;
+  border-top: #00ffc2 0.5px solid;
+  border-bottom: #00ffc2 0.5px solid;
 }
 
 .table_position {
@@ -136,6 +140,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: left;
+  &:hover {
+    cursor: pointer;
+    text-decoration-line: underline;
+    font-weight: bold;
+  }
 }
 
 .paging {
@@ -161,6 +170,12 @@
   height: 30px;
   line-height: 30px;
   text-align: center;
+  &:hover {
+    cursor: pointer;
+    background-image: url("../assets/hoverPage.svg");
+    background-size: cover;
+    color: #4b7de2;
+  }
 }
 
 .selected_page {
@@ -168,8 +183,9 @@
   background-size: cover;
 }
 
-.hover_page {
-  background-image: url("../assets/hoverPage.svg");
-  background-size: cover;
-  color: #4b7de2;
+.prev_next {
+  width: 4px;
+  &:hover {
+    cursor: pointer;
+  }
 }

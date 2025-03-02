@@ -5,6 +5,7 @@ import axios from 'axios'
 export const useNewsListStore = defineStore('counter', () => {
     // TODO 임시
     const articles = ref([])
+    const filteredArticles = ref([])
 
     const loadArticles = async () => {
       const res = await axios.get('/articles', { headers: {'Content-Type': 'application/json'} })
@@ -14,6 +15,7 @@ export const useNewsListStore = defineStore('counter', () => {
     
   return {
     articles,
+    filteredArticles,
     loadArticles,
   }
 })

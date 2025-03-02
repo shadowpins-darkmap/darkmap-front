@@ -5,7 +5,7 @@
       <h1>
         {{
           isCluster
-            ? `${article[0].sido} ${article[0].sigungu}`
+            ? `${article[0].sido}`
             : `${article.sido} ${article.sigungu}`
         }}
       </h1>
@@ -15,7 +15,7 @@
       <div class="location-info">
         <span class="location-badge">상세주소</span>
         <span class="address">{{
-          isCluster ? article[0].address : article.address
+          isCluster ? '' : article.address
         }}</span>
       </div>
 
