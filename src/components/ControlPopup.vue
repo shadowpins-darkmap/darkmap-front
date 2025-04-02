@@ -1,6 +1,6 @@
 <template>
   <div class="logo">
-    <img width="198px" height="198px" src="../assets/logo1.svg" />
+    <img width="198px" height="198px" src="../assets/logo.svg" />
   </div>
   <div class="head_panel">
     <div style="display: flex">
