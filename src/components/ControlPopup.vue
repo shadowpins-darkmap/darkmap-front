@@ -52,7 +52,7 @@
         <div class="checkbox_text">{{ c.crimeType }}</div>
       </div>
     </div>
-    <div style="display: flex; margin-top: 30px">
+    <div style="display: flex; margin-top: 32px">
       <div class="body_title">지역 투어</div>
       <address-filter
         :address-data="addressData"
@@ -77,7 +77,7 @@
         <div class="checkbox_text">{{ d.name }}</div>
       </div>
     </div>
-    <div class="body_title" style="margin-top: 30px">뉴스 투어</div>
+    <div class="body_title" style="margin-top: 32px">뉴스 투어</div>
     <div
       style="
         border: 0;

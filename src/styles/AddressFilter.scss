@@ -1,12 +1,12 @@
 .dropdown {
   display: flex;
   justify-content: center; //space-between;
-  align-items: cetner;
+  align-items: center;
   width: 125px;
-  height: 24px;
+  height: 32px;
   border-radius: 12px;
   border: solid 2px #ffefeb;
-  padding-left: 6px;
+  padding: 7px 0 7px 6px;
   box-sizing: border-box;
 }
 

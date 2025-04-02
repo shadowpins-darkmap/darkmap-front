@@ -26,9 +26,7 @@ const isLast = (idx) => idx === props.addressData.length - 1
   <div style="position: relative; margin-left: 8px">
     <div class="dropdown" @click="() => (openDropdown = !openDropdown)">
       <div class="dropdown_text">{{ selectedGu }}</div>
-      <img
-        style="width: 22px; height: 22px"
-        src="../assets/arrowDropDown.svg" />
+      <img src="../assets/arrowDropDown.svg" />
     </div>
     <div class="dropdown-list" v-if="openDropdown">
       <div v-for="(address, idx) in addressData" :key="idx">

@@ -60,16 +60,18 @@
 
 .body_title {
   width: 66px;
-  height: 24px;
-  margin-bottom: 15px;
+  height: 12px;
+  padding: 10px 8px;
+  margin-bottom: 16px;
   text-align: center;
-  line-height: 24px;
+  line-height: 14px;
   font-size: 14px;
   font-weight: 600;
   color: #000000;
   border-radius: 12px;
   background-color: #ffefeb;
   z-index: 3;
+  
 }
 
 .select_all {
@@ -148,7 +150,7 @@
 }
 
 .paging {
-  margin-top: 20px;
+  margin-top: 26px;
   margin-left: 55px;
   margin-right: 55px;
   width: 263.5px;
