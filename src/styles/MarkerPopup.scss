@@ -1,4 +1,4 @@
-.popup {
+.MarkerPopup {
   position: relative;
   width: 400px;
   height: auto; // 280px; // Height is automatic based on content
@@ -18,124 +18,136 @@
   }
 
   // arrow
-  &:after {
-    content: "";
+  &::after {
+    content: '';
     position: absolute;
-    bottom: 0;
-    left: 50%;
+    top: 50%;
+    left: 0;
+    transform: translate(-100%, -50%);
     width: 0;
     height: 0;
-    border: 37px solid transparent;
-    border-top-color: #313457;
-    border-bottom: 0;
-    border-left: 0;
-    margin-left: -18.5px;
-    margin-bottom: -36px;
+    border-style: solid;
+    border-width: 30px 30px 0 0; // 위 + 오른쪽만
+    border-color: transparent #313457 transparent transparent;
     z-index: 3;
   }
 
-  &:before {
-    content: "";
+  &::before {
+    content: '';
     position: absolute;
-    bottom: 0;
-    left: 50%;
+    top: 50%;
+    left: 0;
+    transform: translate(-100%, -50%);
     width: 0;
     height: 0;
-    border: 38px solid transparent;
-    border-top-color: #4e5277;
-    border-bottom: 0;
-    border-left: 0;
-    margin-left: -19.5px;
-    margin-bottom: -38px;
+    border-style: solid;
+    border-width: 31px 31px 0 0;
+    border-color: transparent #4e5277 transparent transparent;
     z-index: 2;
   }
-}
 
-.popup-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 15px;
-  color: #ffefeb;
-  font-weight: bold;
-  margin-bottom: 12px;
-  // Clear the space taken by the floating close button
-  padding-right: 24px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    color: #ffefeb;
+    font-weight: bold;
+    margin-bottom: 12px;
+    padding-right: 24px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 
-  h2 {
-    font-size: 18px;
-    margin: 0;
+    h2 {
+      font-size: 18px;
+      margin: 0;
+      text-align: left;
+    }
+  }
+
+  p {
+    font-size: 13px;
     text-align: left;
   }
-}
 
-p {
-  font-size: 13px;
-  text-align: left;
-}
+  &__close {
+    width: 18px;
+    height: 18px;
+    float: right;
 
-.close {
-  width: 18px;
-  height: 18px;
-  float: right;
-
-  &:hover {
-    cursor: pointer;
+    &:hover {
+      cursor: pointer;
+    }
   }
-}
 
-.location-info {
-  .location-badge {
+  &__location {
+    text-align: left;
+  }
+
+  &__locationTitle {
     background-color: #01ffc2;
     padding: 4px 8px;
     border-radius: 10px;
     margin-right: 8px;
-    font-size: 14px;
     font-weight: bold;
   }
-  .address {
+
+  &__locationAddress {
     color: #79a6ff;
-    font-size: 14px;
-  }
-  text-align: left;
-}
-
-.category-underline {
-  border-bottom: 7px solid #1dd6ff;
-  padding-bottom: 2px;
-}
-
-.incident-count {
-  color: #ffefeb;
-}
-
-.news-section {
-  border-bottom: 2.5px solid rgba(255, 255, 255, 0.1);
-  padding-top: 10px;
-
-  .news-header {
-    border-bottom: 2.5px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 5px;
   }
 
-  h2 {
-    font-size: 16px;
-    margin-bottom: 10px;
+  &__incident {
     color: #ffefeb;
-    text-align: left;
   }
-}
 
-.news_title {
-  color: #ffefeb;
-  margin: 8px 0;
-  line-height: 1.4;
-  cursor: pointer;
-  text-align: left;
+  &__category {
+    border-bottom: 7px solid #1dd6ff;
+    padding-bottom: 2px;
+  }
 
-  &:hover {
+  &__articleData {
+    padding-top: 10px;
+  }
+
+  &__articleList {
+    margin-top: 24px;
+    border-top: 2px solid #00ffc2;
+    border-bottom: 2px solid #00ffc2;
+  }
+
+  &__articleItem {
+    display: block;
+    color: #ffefeb;
+    padding: 8px 0 6px;
+    line-height: 1.4;
+    font-size: 14px;
+    text-decoration: none;
+
+    & + & {
+      border-top: 1px solid #00ffc2;
+    }
+  }
+
+  &__pagination {
+    margin-top: 24px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  &__paginationItem {
+    color: #dae6fe;
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
     cursor: pointer;
-    text-decoration: underline;
+    background: none;
+    border-radius: 50%;
+    border: 0;
+
+    &.active {
+      border: 1px solid #4b7de2;
+      background-color: #4b7de2;
+      color: #fff;
+    }
   }
 }

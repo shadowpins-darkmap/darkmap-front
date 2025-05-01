@@ -71,11 +71,18 @@ onMounted(async () => {
 
     draw() {
       if (this.div) {
-        const overlayProjection = this.getProjection();
-        const position = overlayProjection.fromLatLngToDivPixel(this.position);
-        this.div.style.left = `${position.x - 180}px`;
-        this.div.style.top = `${position.y - 318 - this.num * 24.39}px`;
-        this.div.style.zIndex = "1000";
+        const overlayProjection = this.getProjection()
+        const position = overlayProjection.fromLatLngToDivPixel(this.position)
+
+        const popupHeight = this.div.offsetHeight
+
+        const offsetX = 16
+        const offsetY = popupHeight / 2
+
+        const gap = 20
+        this.div.style.left = `${position.x + offsetX + gap}px`
+        this.div.style.top = `${position.y - offsetY}px`
+        this.div.style.zIndex = '1000'
       }
     }
 
