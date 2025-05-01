@@ -1,7 +1,11 @@
 <template>
-  <div class="popup" ref="popupRef" @mousedown.stop>
-    <img @click="closeWindow" class="close" src="../assets/closePopup.svg" />
-    <div class="popup-header">
+  <div class="MarkerPopup" ref="popupRef" @mousedown.stop>
+    <img
+      @click="closeWindow"
+      class="MarkerPopup__close"
+      src="../assets/closePopup.svg"
+    />
+    <div class="MarkerPopup__header">
       <h1>
         {{
           isCluster
@@ -10,37 +14,42 @@
         }}
       </h1>
     </div>
-
-    <div class="article-container">
-      <div class="location-info">
-        <span class="location-badge">상세주소</span>
-        <span class="address">{{
+    <div class="MarkerPopup__content">
+      <div class="MarkerPopup__location">
+        <span class="MarkerPopup__locationTitle">상세주소</span>
+        <span class="MarkerPopup__locationAddress">{{
           isCluster ? '' : article.address
         }}</span>
       </div>
-
-      <div class="incident-count">
+      <div class="MarkerPopup__incident">
         <p>
           이 지역에서 총 {{ isCluster ? article.length : 1 }}건의
-          <span class="category-underline">{{ getCategoryText }}</span> 길거리
-          괴롭힘이 있었습니다.
+          <span class="MarkerPopup__category">{{ getCategoryText }}</span>
+          길거리 괴롭힘이 있었습니다.
         </p>
       </div>
-
-      <!-- Article list -->
-      <div class="news-section">
-        <h2 class="news-header">관련 뉴스기사 {{ article.length }} 건</h2>
-        <div v-if="isCluster">
-          <div
-            v-for="(item, index) in article"
+      <div class="MarkerPopup__articleData">
+        <div class="MarkerPopup__articleList">
+          <a
+            v-for="(item, index) in paginatedArticles"
             :key="index"
-            class="news_title"
-            @click="openNews(item.url)">
+            class="MarkerPopup__articleItem"
+            :href="item.url"
+            target="_blank"
+          >
             {{ item.title }}
-          </div>
+          </a>
         </div>
-        <div v-else class="news_title" @click="openNews(article.url)">
-          {{ article.title }}
+        <div class="MarkerPopup__pagination" v-if="totalPages > 1">
+          <button
+            v-for="page in totalPages"
+            class="MarkerPopup__paginationItem"
+            :key="page"
+            :class="{ active: currentPage === page }"
+            @click="currentPage = page"
+          >
+            {{ page }}
+          </button>
         </div>
       </div>
     </div>
@@ -55,10 +64,9 @@ import {
   onMounted,
   onUnmounted,
   ref,
-} from "vue";
-import "../styles/MarkerPopup.scss";
+} from 'vue'
+import '../styles/MarkerPopup.scss'
 
-// Define props for the component
 const props = defineProps({
   closeWindow: {
     type: Function,
@@ -68,57 +76,52 @@ const props = defineProps({
     type: [Array, Object],
     required: true,
   },
-});
+})
 
-// Reference to the popup element
-const popupRef = ref(null);
-const isCluster = computed(() => Array.isArray(props.article));
+const popupRef = ref(null)
+const isCluster = computed(() => Array.isArray(props.article))
 
-// Compute the category text based on the articles
+const currentPage = ref(1)
+const pageSize = 5
+
+const articleList = computed(() => {
+  return Array.isArray(props.article) ? props.article : [props.article]
+})
+
+const totalPages = computed(() =>
+  Math.ceil(articleList.value.length / pageSize)
+)
+
+const paginatedArticles = computed(() => {
+  const start = (currentPage.value - 1) * pageSize
+  return articleList.value.slice(start, start + pageSize)
+})
+
 const getCategoryText = computed(() => {
   if (isCluster.value) {
     const categories = props.article
       .map((item) => item.category)
-      .filter(Boolean); // Get non-empty categories
-    const uniqueCategories = [...new Set(categories)]; // Get unique categories
-
-    if (uniqueCategories.length === 0) {
-      return "기타"; // All categories are empty
-    } else if (uniqueCategories.length === 1) {
-      return uniqueCategories[0]; // Only one unique category
-    } else {
-      return "여러 유형"; // Multiple unique categories
-    }
+      .filter(Boolean)
+    const unique = [...new Set(categories)]
+    if (unique.length === 0) return '기타'
+    else if (unique.length === 1) return unique[0]
+    else return '여러 유형'
   }
-  return props.article.category || "기타"; // Single article case
-});
+  return props.article.category || '기타'
+})
 
-// Open news article in new tab
-// This function opens the provided URL in a new browser tab
-const openNews = (url) => {
-  window.open(url, "_blank");
-};
-
-// Handle clicks outside the popup
-// This function closes the popup if a click occurs outside of it
 const handleClickOutside = (event) => {
-  if (popupRef.value && popupRef.value.contains(event.target)) {
-    return;
-  }
-  props.closeWindow();
-};
+  if (popupRef.value && popupRef.value.contains(event.target)) return
+  props.closeWindow()
+}
 
-// Add event listener on mount
-// This lifecycle hook adds a mousedown event listener to detect clicks outside the popup
 onMounted(() => {
   nextTick(() => {
-    window.addEventListener("mousedown", handleClickOutside);
-  });
-});
+    window.addEventListener('mousedown', handleClickOutside)
+  })
+})
 
-// Clean up event listener on unmount
-// This lifecycle hook removes the mousedown event listener when the component is unmounted
 onUnmounted(() => {
-  window.removeEventListener("mousedown", handleClickOutside);
-});
+  window.removeEventListener('mousedown', handleClickOutside)
+})
 </script>

@@ -76,11 +76,11 @@ onMounted(async () => {
 
         const popupHeight = this.div.offsetHeight
 
-        const offsetX = 16 // 마커와의 가로 간격 (px)
-        const offsetY = popupHeight / 2 // 수직 중앙 정렬
+        const offsetX = 16
+        const offsetY = popupHeight / 2
 
-        // 마커 오른쪽에 위치하도록
-        this.div.style.left = `${position.x + offsetX}px`
+        const gap = 20
+        this.div.style.left = `${position.x + offsetX + gap}px`
         this.div.style.top = `${position.y - offsetY}px`
         this.div.style.zIndex = '1000'
       }
