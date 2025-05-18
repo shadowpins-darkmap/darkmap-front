@@ -8,13 +8,10 @@
         {{ selectedLabel }}
       </button>
       <ul class="BaseDropdown__menuList">
-        <li
-          v-for="(item, index) in list"
-          :key="index"
-          class="BaseDropdown__menuItem"
-          @click="handleSelect(item)"
-        >
-          {{ item }}
+        <li v-for="(item, index) in list" :key="index">
+          <button class="BaseDropdown__menuItem" @click="handleSelect(item)">
+            {{ item }}
+          </button>
         </li>
       </ul>
     </div>
@@ -95,6 +92,7 @@ onUnmounted(() => window.removeEventListener('mousedown', onClickOutside));
     display: flex;
     align-items: center;
     justify-content: space-between;
+    cursor: pointer;
 
     &::after {
       margin-left: 8px;
@@ -165,14 +163,22 @@ onUnmounted(() => window.removeEventListener('mousedown', onClickOutside));
       margin: 6px 0;
       border-radius: 6px;
     }
+
+    li &:first-child {
+      margin-top: 4px;
+    }
   }
 
   &__menuItem {
+    width: 100%;
+    text-align: left;
     padding: 5px 0;
     cursor: pointer;
-    &:first-child {
-      margin-top: 4px;
-    }
+    color: inherit;
+    background: inherit;
+    border: 0;
+    font-weight: 700;
+    line-height: 1;
   }
 }
 </style>
