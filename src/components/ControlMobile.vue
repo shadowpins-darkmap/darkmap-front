@@ -93,23 +93,23 @@
       <div class="ControlMobile__body-title ControlMobile__section">
         뉴스 투어
       </div>
-      <div class="ControlMobile__divider"></div>
-      <div
-        v-for="(tArticle, i) in tableArticles"
-        :key="i"
-        class="ControlMobile__article-table"
-      >
-        <div class="ControlMobile__table-position">
-          {{ tArticle.address || '-' }}
-        </div>
+      <div class="ControlMobile__articleTable">
         <div
-          class="ControlMobile__table-title"
-          @click="clickTitle(tArticle.url)"
+          v-for="(tArticle, i) in tableArticles"
+          :key="i"
+          class="ControlMobile__articleTable--item"
         >
-          {{ tArticle.title || '-' }}
+          <div class="ControlMobile__table-position">
+            {{ tArticle.address || '-' }}
+          </div>
+          <div
+            class="ControlMobile__table-title"
+            @click="clickTitle(tArticle.url)"
+          >
+            {{ tArticle.title || '-' }}
+          </div>
         </div>
       </div>
-      <div class="ControlMobile__divider" />
       <div class="ControlMobile__paging">
         <div class="ControlMobile__prev-next" @click="clickPrev">
           <img style="width: 4px" src="../assets/leftArrow.svg" />
@@ -408,20 +408,19 @@ const clickDong = (idx) => {
     }
   }
 
-  &__divider {
-    border: 0;
-    height: 1.5px;
-    background: #00ffc2;
-    margin-top: 20px;
-  }
+  &__articleTable {
+    border-top: 1px solid #00ffc2;
+    border-bottom: 1px solid #00ffc2;
 
-  &__article-table {
-    display: grid;
-    grid-template-columns: 97px 1fr;
-    grid-auto-rows: 27px;
-    align-items: center;
-    border-top: #00ffc2 0.5px solid;
-    border-bottom: #00ffc2 0.5px solid;
+    &--item {
+      display: grid;
+      grid-template-columns: 97px 1fr;
+      grid-auto-rows: 27px;
+      align-items: center;
+      & + & {
+        border-top: 1px solid #00ffc2;
+      }
+    }
   }
 
   &__table-position {
