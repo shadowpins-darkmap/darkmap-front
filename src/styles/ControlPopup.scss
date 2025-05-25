@@ -52,7 +52,7 @@
   width: 436px;
   border-radius: 20px;
   border: #f1cfc8 2px solid;
-  background-color: #6D54CE;
+  background-color: #6d54ce;
   padding: 26px 31px;
   z-index: 2;
   box-sizing: border-box;
@@ -60,7 +60,6 @@
 
 .body_title {
   width: 66px;
-  height: 12px;
   padding: 10px 8px;
   margin-bottom: 16px;
   text-align: center;
@@ -71,7 +70,6 @@
   border-radius: 12px;
   background-color: #ffefeb;
   z-index: 3;
-  
 }
 
 .select_all {
@@ -174,14 +172,14 @@
   text-align: center;
   &:hover {
     cursor: pointer;
-    background-image: url("../assets/hoverPage.svg");
+    background-image: url('../assets/hoverPage.svg');
     background-size: cover;
     color: #4b7de2;
   }
 }
 
 .selected_page {
-  background-image: url("../assets/selectedPage.svg");
+  background-image: url('../assets/selectedPage.svg');
   background-size: cover;
 }
 
