@@ -7,7 +7,7 @@
       </div>
     </div>
     <div class="ControlMobile__banner">
-      지도는 가로 834px이상에서만 볼 수 있어요
+      지도는 PC/데스크탑에서만 볼 수 있습니다
     </div>
     <div class="ControlMobile__body">
       <div class="ControlMobile__section">
@@ -366,6 +366,8 @@ const clickDong = (idx) => {
     font-size: 14px;
     font-weight: 600;
     padding: 14px;
+    white-space: nowrap;
+    overflow: hidden;
   }
 
   &__body {
