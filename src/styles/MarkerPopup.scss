@@ -130,7 +130,7 @@
   &__pagination {
     margin-top: 24px;
     display: flex;
-    gap: 12px;
+    gap: 4px;
     justify-content: center;
   }
 
@@ -138,11 +138,21 @@
     color: #dae6fe;
     width: 30px;
     height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 14px;
     cursor: pointer;
     background: none;
     border-radius: 50%;
     border: 0;
+    min-width: 30px;
+    padding: 0;
+
+    img {
+      width: 6px;
+      height: 11px;
+    }
 
     &.active {
       border: 1px solid #4b7de2;
