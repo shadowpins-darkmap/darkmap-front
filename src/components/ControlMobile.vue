@@ -1,12 +1,14 @@
 <template>
   <div class="ControlMobile">
     <div class="ControlMobile__header">
-      <img width="60" height="60" src="../assets/logo.svg" />
+      <img width="60" height="60" src="../assets/mobile-logo.png" />
       <div class="ControlMobile__guide">
         테마와 지역을 선택 후 어떤 길거리 괴롭힘이 일어나고 있는지 살펴보세요
       </div>
     </div>
-    <div class="ControlMobile__banner">모바일 지도는 준비중입니다</div>
+    <div class="ControlMobile__banner">
+      지도는 가로 834px이상에서만 볼 수 있어요
+    </div>
     <div class="ControlMobile__body">
       <div class="ControlMobile__section">
         <div class="ControlMobile__body-title">테마 투어</div>
@@ -333,12 +335,28 @@ const clickDong = (idx) => {
     display: flex;
     gap: 10px;
     align-items: center;
-    font-size: 10px;
+    font-size: 12px;
+    font-weight: 500;
   }
 
   &__guide {
+    margin-left: 10px;
     padding: 20px;
     background-color: #00ffc2;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      border-right: 10px solid #00ffc2;
+    }
   }
 
   &__banner {
