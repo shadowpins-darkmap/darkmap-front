@@ -5,21 +5,15 @@
       class="MarkerPopup__close"
       src="../assets/closePopup.svg"
     />
-    <div class="MarkerPopup__header">
+    <div v-if="isCluster" class="MarkerPopup__header">
       <h1>
-        {{
-          isCluster
-            ? `${article[0].sido}`
-            : `${article.sido} ${article.sigungu}`
-        }}
+        {{ article[0].sido }}
       </h1>
     </div>
     <div class="MarkerPopup__content">
-      <div class="MarkerPopup__location">
+      <div v-if="isCluster" class="MarkerPopup__location">
         <span class="MarkerPopup__locationTitle">상세주소</span>
-        <span class="MarkerPopup__locationAddress">{{
-          isCluster ? '' : article.address
-        }}</span>
+        <span class="MarkerPopup__locationAddress">{{ article.address }}</span>
       </div>
       <div class="MarkerPopup__incident">
         <p>
