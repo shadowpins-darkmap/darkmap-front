@@ -18,6 +18,7 @@ const clickGu = (lv1) => {
   selectedGu.value = lv1;
   openDropdown.value = false;
   emit('change', lv1);
+	console.log('Gu !') 
 };
 </script>
 
