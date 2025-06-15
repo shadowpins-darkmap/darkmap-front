@@ -1,8 +1,6 @@
 <template>
   <div class="BaseCommunity">
-    <section class="BaseCommunity__popup">
-			
-		</section>
+    <section class="BaseCommunity__popup"></section>
     <section class="BaseCommunity__popup"></section>
   </div>
 </template>
@@ -23,6 +21,7 @@
   display: flex;
   flex-direction: column;
   gap: 40px;
+  z-index: 9;
 
   &__popup {
     width: 436px;
