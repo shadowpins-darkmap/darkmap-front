@@ -47,10 +47,10 @@
     </div>
     <div class="checkboxes">
       <div class="checkbox" v-for="(c, idx) in crimeTypes" v-bind:key="idx">
-        <div @click="clickCrimeType(idx)">
+        <span class="checkbox_wrap" @click="clickCrimeType(idx)">
           <img v-if="c.checked" class="check" src="../assets/checkbox.svg" />
           <img v-if="!c.checked" class="check" src="../assets/unchecked.svg" />
-        </div>
+        </span>
         <div class="checkbox_text">{{ c.crimeType }}</div>
       </div>
     </div>

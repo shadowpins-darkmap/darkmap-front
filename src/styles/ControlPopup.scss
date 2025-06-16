@@ -49,6 +49,9 @@
   top: 205px;
   left: 71px;
   height: auto;
+  max-height: 600px;
+  overflow-y: auto;
+  // overflow: hidden;
   width: 436px;
   border-radius: 20px;
   border: #f1cfc8 2px solid;
@@ -79,33 +82,39 @@
 
 .select_all {
   display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
 }
 
 .checkbox_text {
+  display: flex;
+  align-items: center;
   margin-left: 6px;
-  line-height: 18px;
   color: #ffffff;
   font-size: 12px;
-  font-weight: medium;
+  line-height: 14px;
+  padding-top: 2px;
+  font-weight: 500;
   word-break: keep-all;
   text-align: left;
 }
 
 .checkboxes {
   display: grid;
-  margin-top: 15px;
-  grid-template-columns: 78px 78px 78px 78px 78px;
-  grid-auto-rows: 18px;
-  row-gap: 12px;
+  row-gap: 15px;
 }
 
 .checkbox {
   display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+.checkbox_wrap {
+  display: inline-flex;
 }
 
 .check {
   width: 18px;
-  height: 18px;
 }
 
 .check:hover {
