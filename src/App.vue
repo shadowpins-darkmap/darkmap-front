@@ -29,6 +29,11 @@ body,
   padding: 0;
   box-sizing: border-box;
 }
+button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
 a,
 img,
 fieldset {

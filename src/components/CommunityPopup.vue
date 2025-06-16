@@ -116,7 +116,7 @@ const isTourOpen = ref(true);
   height: calc(100% - 80px);
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 30px;
   z-index: 9;
 
   &__popup {

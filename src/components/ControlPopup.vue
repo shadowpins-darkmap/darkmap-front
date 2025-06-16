@@ -1,115 +1,161 @@
 <template>
-  <div class="logo">
-    <img width="198px" height="198px" src="../assets/logo.svg" />
-  </div>
-  <div class="head_panel">
-    <div style="display: flex">
-      <div class="crime_logo" style="background: #ffa8a8">
-        <img src="../assets/flasherLogo.svg" />
-      </div>
-      <div class="header_text">바바리맨</div>
+  <div class="popup_wrap">
+    <!-- 로고 영역 -->
+    <div class="logo">
+      <img
+        width="150px"
+        height="150px"
+        alt="다크맵 투어 로고"
+        src="../assets/logo.svg"
+      />
     </div>
-    <div style="display: flex">
-      <div class="crime_logo" style="background: #1cd6ff">
-        <img src="../assets/huntingLogo2.svg" />
-      </div>
-      <div class="header_text">헌팅</div>
-    </div>
-    <div style="display: flex">
-      <div class="crime_logo" style="background: #b56bff">
-        <img src="../assets/chasingLogo2.svg" />
-      </div>
-      <div class="header_text">미행</div>
-    </div>
-    <div style="display: flex">
-      <div class="crime_logo" style="background: #ffed89">
-        <img src="../assets/assaultLogo.svg" />
-      </div>
-      <div class="header_text">폭행</div>
-    </div>
-  </div>
-  <div class="body_panel">
-    <strong class="body_title"><span>테마 투어</span></strong>
-    <div class="select_all">
-      <div @click="clickAllCrime">
+
+    <!-- 검색 영역  -->
+    <div class="search_wrap">
+      <button class="report_button">
         <img
-          v-if="allCrimeChecked"
-          class="check"
-          src="../assets/checkbox.svg"
+          width="80px"
+          height="80px"
+          alt="신고 버튼 아이콘"
+          src="../assets/reportButton.svg"
         />
+      </button>
+      <button class="search_button">
         <img
-          v-if="!allCrimeChecked"
-          class="check"
-          src="../assets/unchecked.svg"
+          width="24px"
+          height="24px"
+          alt="검색 아이콘"
+          src="../assets/mainSearchIcon.svg"
         />
-      </div>
-      <div class="checkbox_text">길거리 괴롭힘 전체</div>
-    </div>
-    <div class="checkboxes">
-      <div class="checkbox" v-for="(c, idx) in crimeTypes" v-bind:key="idx">
-        <span class="checkbox_wrap" @click="clickCrimeType(idx)">
-          <img v-if="c.checked" class="check" src="../assets/checkbox.svg" />
-          <img v-if="!c.checked" class="check" src="../assets/unchecked.svg" />
-        </span>
-        <div class="checkbox_text">{{ c.crimeType }}</div>
-      </div>
-    </div>
-    <div style="display: flex; margin-top: 32px">
-      <strong class="body_title"><span>지역 투어</span></strong>
-      <AddressFilter :addressData="addressData" @change="changeGu" />
-    </div>
-    <div class="select_all">
-      <div @click="clickAllDong">
-        <img v-if="allDongChecked" class="check" src="../assets/checkbox.svg" />
-        <img
-          v-if="!allDongChecked"
-          class="check"
-          src="../assets/unchecked.svg"
-        />
-      </div>
-      <div class="checkbox_text">{{ selectGu }} 전체</div>
-    </div>
-    <div class="checkboxes">
-      <div class="checkbox" v-for="(d, idx) in dongList" v-bind:key="idx">
-        <div @click="clickDong(idx)">
-          <img v-if="d.checked" class="check" src="../assets/checkbox.svg" />
-          <img v-if="!d.checked" class="check" src="../assets/unchecked.svg" />
-        </div>
-        <div class="checkbox_text">{{ d.name }}</div>
-      </div>
-    </div>
-    <strong class="body_title" style="margin-top: 32px"
-      ><span>뉴스 투어</span></strong
-    >
-    <div
-      style="border: 0; height: 1.5px; background: #00ffc2; margin-top: 20px"
-    ></div>
-    <div v-for="(tArticle, i) in tableArticles" :key="i" class="article_table">
-      <div class="table_position">
-        {{ tArticle.address || '-' }}
-      </div>
-      <div class="table_title" @click="clickTitle(tArticle.url)">
-        {{ tArticle.title || '-' }}
-      </div>
-    </div>
-    <div style="border: 0; height: 1.5px; background: #00ffc2" />
-    <div class="paging">
-      <div class="prev_next" @click="clickPrev">
-        <img style="width: 4px" src="../assets/leftArrow.svg" />
-      </div>
-      <div class="paging_numbers" style="margin: 0 30px">
-        <div
-          v-for="page in pageNumbers"
-          :key="page"
-          @click="pageChange(page)"
-          :class="{ selected_page: page === currentPage }"
-          class="paging_number"
+        <span class="search_button_text"
+          >내가 사는 동네에서 일어난 괴롭힘 사건을 한 번 알아보세요.</span
         >
-          {{ page }}
+      </button>
+    </div>
+    <!-- 컨텐츠 솔팅  -->
+    <div class="head_panel">
+      <div class="panel_item">
+        <div class="crime_logo" style="background: #ffa8a8">
+          <img src="../assets/flasherLogo.svg" />
+        </div>
+        <div class="panel_item_text">바바리맨</div>
+      </div>
+      <div class="panel_item">
+        <div class="crime_logo" style="background: #1cd6ff">
+          <img src="../assets/huntingLogo2.svg" />
+        </div>
+        <div class="panel_item_text">헌팅</div>
+      </div>
+      <div class="panel_item">
+        <div class="crime_logo" style="background: #b56bff">
+          <img src="../assets/chasingLogo2.svg" />
+        </div>
+        <div class="panel_item_text">미행</div>
+      </div>
+      <div class="panel_item">
+        <div class="crime_logo" style="background: #ffed89">
+          <img src="../assets/assaultLogo.svg" />
+        </div>
+        <div class="panel_item_text">폭행</div>
+      </div>
+    </div>
+    <div class="body_panel">
+      <strong class="body_title"><span>테마 투어</span></strong>
+      <div class="select_all">
+        <div @click="clickAllCrime">
+          <img
+            v-if="allCrimeChecked"
+            class="check"
+            src="../assets/checkbox.svg"
+          />
+          <img
+            v-if="!allCrimeChecked"
+            class="check"
+            src="../assets/unchecked.svg"
+          />
+        </div>
+        <div class="checkbox_text">길거리 괴롭힘 전체</div>
+      </div>
+      <div class="checkboxes">
+        <div class="checkbox" v-for="(c, idx) in crimeTypes" v-bind:key="idx">
+          <span class="checkbox_wrap" @click="clickCrimeType(idx)">
+            <img v-if="c.checked" class="check" src="../assets/checkbox.svg" />
+            <img
+              v-if="!c.checked"
+              class="check"
+              src="../assets/unchecked.svg"
+            />
+          </span>
+          <div class="checkbox_text">{{ c.crimeType }}</div>
         </div>
       </div>
-      <div class="prev_next" @click="clickNext">
-        <img style="width: 4px" src="../assets/rightArrow.svg" />
+      <div class="body_title_wrap">
+        <strong class="body_title"><span>지역 투어</span></strong>
+        <AddressFilter :addressData="addressData" @change="changeGu" />
+      </div>
+      <div class="select_all">
+        <div @click="clickAllDong">
+          <img
+            v-if="allDongChecked"
+            class="check"
+            src="../assets/checkbox.svg"
+          />
+          <img
+            v-if="!allDongChecked"
+            class="check"
+            src="../assets/unchecked.svg"
+          />
+        </div>
+        <div class="checkbox_text">{{ selectGu }} 전체</div>
+      </div>
+      <div class="checkboxes">
+        <div class="checkbox" v-for="(d, idx) in dongList" v-bind:key="idx">
+          <div @click="clickDong(idx)">
+            <img v-if="d.checked" class="check" src="../assets/checkbox.svg" />
+            <img
+              v-if="!d.checked"
+              class="check"
+              src="../assets/unchecked.svg"
+            />
+          </div>
+          <div class="checkbox_text">{{ d.name }}</div>
+        </div>
+      </div>
+      <div class="body_title_wrap">
+        <strong class="body_title"><span>뉴스 투어</span></strong>
+      </div>
+      <div style="border: 0; height: 1.5px; background: #00ffc2"></div>
+      <div
+        v-for="(tArticle, i) in tableArticles"
+        :key="i"
+        class="article_table"
+      >
+        <div class="table_position">
+          {{ tArticle.address || '-' }}
+        </div>
+        <div class="table_title" @click="clickTitle(tArticle.url)">
+          {{ tArticle.title || '-' }}
+        </div>
+      </div>
+      <div style="border: 0; height: 1.5px; background: #00ffc2" />
+      <div class="paging">
+        <button class="prev_next" @click="clickPrev">
+          <img style="width: 10px" src="../assets/leftArrow.svg" />
+        </button>
+        <div class="paging_numbers">
+          <span
+            v-for="page in pageNumbers"
+            :key="page"
+            @click="pageChange(page)"
+            :class="{ selected_page: page === currentPage }"
+            class="paging_number"
+          >
+            {{ page }}
+          </span>
+        </div>
+        <button class="prev_next" @click="clickNext">
+          <img style="width: 10px" src="../assets/rightArrow.svg" />
+        </button>
       </div>
     </div>
   </div>
