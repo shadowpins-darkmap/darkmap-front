@@ -29,7 +29,7 @@
     </div>
   </div>
   <div class="body_panel">
-    <div class="body_title">테마 투어</div>
+    <strong class="body_title"><span>테마 투어</span></strong>
     <div class="select_all">
       <div @click="clickAllCrime">
         <img
@@ -55,7 +55,7 @@
       </div>
     </div>
     <div style="display: flex; margin-top: 32px">
-      <div class="body_title">지역 투어</div>
+      <strong class="body_title"><span>지역 투어</span></strong>
       <AddressFilter :addressData="addressData" @change="changeGu" />
     </div>
     <div class="select_all">
@@ -78,7 +78,9 @@
         <div class="checkbox_text">{{ d.name }}</div>
       </div>
     </div>
-    <div class="body_title" style="margin-top: 32px">뉴스 투어</div>
+    <strong class="body_title" style="margin-top: 32px"
+      ><span>뉴스 투어</span></strong
+    >
     <div
       style="border: 0; height: 1.5px; background: #00ffc2; margin-top: 20px"
     ></div>

@@ -59,17 +59,22 @@
 }
 
 .body_title {
-  width: 66px;
-  padding: 10px 8px;
+  display: inline-flex;
+  width: fit-content;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 34px;
   margin-bottom: 16px;
-  text-align: center;
-  line-height: 14px;
   font-size: 14px;
   font-weight: 600;
   color: #000000;
-  border-radius: 12px;
   background-color: #ffefeb;
   z-index: 3;
+}
+.body_title > span {
+  padding: 8px 12px;
+  flex: 0 0 auto;
 }
 
 .select_all {
