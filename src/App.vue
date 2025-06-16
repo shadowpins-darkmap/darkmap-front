@@ -25,4 +25,26 @@ body {
   height: 100%;
   box-sizing: border-box;
 }
+/* reset css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+a,
+img,
+fieldset {
+  text-decoration: none;
+  vertical-align: top;
+  outline: 1;
+  border: none;
+}
+ul,
+ol,
+li {
+  list-style: none;
+}
+textarea {
+  resize: none;
+}
 </style>
