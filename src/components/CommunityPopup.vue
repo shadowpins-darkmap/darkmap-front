@@ -1,7 +1,18 @@
 <template>
   <div class="BaseCommunity">
     <section class="BaseCommunity__popup">
-      <!-- 상단 인삿말 -->
+      <!-- 아코디언 타이틀 클릭시 토글 -->
+      <div class="accordion__header" @click="isMyPageOpen = !isMyPageOpen">
+        <img
+          src="@/assets/arrowCirlcleButton.svg"
+          class="accordion__toggle"
+          :class="{ open: isMyPageOpen }"
+          alt="toggle"
+          width="36"
+          height="36"
+        />
+      </div>
+      <!-- 상단 고정 말풍선 인삿말 -->
       <div class="BaseCommunity__greeting">
         <!-- <img
           class="BaseCommunity__avatar"
@@ -20,35 +31,45 @@
         </p>
       </div>
 
-      <!-- 로그인 상태일 때 -->
-      <div class="BaseCommunity__contents" v-if="isLoggedIn">
-        <span class="BaseCommunity__hot">🔥 지금 가장 뜨거운 글이에요!</span>
-        <button class="BaseCommunity__more">전체보기</button>
-        <!-- 게시글 카드 -->
-        <div class="BaseCommunity__card"></div>
-      </div>
-      <!-- 로그인 전 상태일 때-->
-      <div v-else></div>
+      <!-- 아코디언 본문 -->
+      <div class="tour__content" v-show="isMyPageOpen">
+        <!-- 로그인 상태일 때 -->
+        <div class="BaseCommunity__contents" v-if="isLoggedIn">
+          <span class="BaseCommunity__hot">지금 가장 뜨거운 글이에요!</span>
 
-      <!-- 로그인 유도 영역 -->
-      <div class="BaseCommunity__bottom">
-        <p>
-          오늘 처음 방문하셨나요? 가입 이후에<br />광장의 모든 글을 보실 수
-          있어요.
-        </p>
-        <button class="BaseCommunity__join">회원가입</button>
-        <button class="BaseCommunity__login">기존 회원 로그인</button>
+          <!-- 게시글 카드 -->
+          <div class="BaseCommunity__card"></div>
+        </div>
+        <!-- 로그인 전 상태일 때-->
+        <div v-else>
+          <span class="BaseCommunity__hot">🔥 지금 가장 뜨거운 글이에요!</span>
+          <button class="BaseCommunity__more">전체보기</button>
+          <!-- 게시글 카드 -->
+          <div class="BaseCommunity__card">
+            <CarouselWrap />
+          </div>
+        </div>
+
+        <!-- 로그인 유도 영역 -->
+        <div class="BaseCommunity__bottom">
+          <p>
+            오늘 처음 방문하셨나요? 가입 이후에<br />광장의 모든 글을 보실 수
+            있어요.
+          </p>
+          <button class="BaseCommunity__join">회원가입</button>
+          <button class="BaseCommunity__login">기존 회원 로그인</button>
+        </div>
       </div>
     </section>
 
     <!-- 다크맵 투어 일지 (고정) -->
     <section class="BaseCommunity__popup">
       <!-- 아코디언 타이틀 클릭시 토글 -->
-      <div class="tour__header" @click="isTourOpen = !isTourOpen">
-        <strong class="tour__title">K-다크맵 투어 일지</strong>
+      <div class="accordion__header" @click="isTourOpen = !isTourOpen">
+        <strong class="accordion__title">K-다크맵 투어 일지</strong>
         <img
           src="@/assets/arrowCirlcleButton.svg"
-          class="tour__toggle"
+          class="accordion__toggle"
           :class="{ open: isTourOpen }"
           alt="toggle"
           width="36"
@@ -101,11 +122,13 @@
 
 <script setup>
 import { ref } from 'vue';
+import CarouselWrap from './carousel/CarouselWrap.vue';
 // import { useDevice } from '@/composables/useDevice';
 
 // const { isMobile } = useDevice();
-const isLoggedIn = ref(true);
+const isLoggedIn = ref(false);
 const isTourOpen = ref(true);
+const isMyPageOpen = ref(true);
 </script>
 
 <style scoped lang="scss">
@@ -128,18 +151,23 @@ const isTourOpen = ref(true);
   }
 
   // --------- 다크맵 투어 일지 ------------
-  .tour__header {
+  .accordion__header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     cursor: pointer;
+    position: relative;
+    min-height: 36px;
   }
-  .tour__title {
+  .accordion__title {
     font-size: 20px;
     font-weight: 700;
     color: #ffffff;
   }
-  .tour__toggle {
+  .accordion__toggle {
+    position: absolute;
+    right: 0;
+    top: 0;
     transition: transform 0.3s ease;
     &.open {
       transform: rotate(180deg);
