@@ -22,12 +22,12 @@
             src="@/assets/eyesOn.svg"
             alt="avatar eyes"
           />
-          <!-- <img
+          <img
             v-show="currentBubbleIndex === 1"
-            class="BaseCommunity__avatar_eyes"
+            class="BaseCommunity__avatar_eyes off"
             src="@/assets/eyesOff.svg"
             alt="avatar eyes"
-          /> -->
+          />
         </div>
         <p class="BaseCommunity__bubble">
           <span class="BaseCommunity__bubble_text">
@@ -119,7 +119,7 @@
               height="12"
             />
           </button>
-          <button class="tour_link_button">
+          <button class="tour_link_button" @click="isPanelOpen = true">
             <span>길거리 괴롭힘이란게 뭔가요? </span>
             <img
               src="@/assets/arrowCirlcleButtonRight.svg"
@@ -132,18 +132,43 @@
         </div>
       </div>
     </section>
+
+    <!--  길거리 괴롭힘이란게 뭔가요? SlidePanel 컴포넌트 추가 -->
+    <SlidePanel :visible="isPanelOpen" @close="isPanelOpen = false">
+      <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 12px">
+        길거리 괴롭힘 제보 안내
+      </h2>
+      <button class="close_btn" @click="isPanelOpen = false">닫기</button>
+      <p style="margin-bottom: 20px; font-size: 14px; line-height: 1.6">
+        당신의 경험은 누군가에게 큰 도움이 됩니다. 아래 버튼을 눌러 제보를
+        시작해보세요.
+      </p>
+      <button
+        style="
+          background: #00ffc2;
+          color: #000;
+          padding: 10px 20px;
+          border-radius: 8px;
+          font-weight: bold;
+        "
+      >
+        제보하러 가기
+      </button>
+    </SlidePanel>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import CarouselWrap from './carousel/CarouselWrap.vue';
+import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
 // import { useDevice } from '@/composables/useDevice';
 
 // const { isMobile } = useDevice();
 const isLoggedIn = ref(false);
 const isTourOpen = ref(true);
 const isMyPageOpen = ref(true);
+const isPanelOpen = ref(false);
 
 // greeting 애니메이션
 const currentBubbleIndex = ref(0);
@@ -186,6 +211,9 @@ onMounted(() => {
     position: absolute;
     left: -24px;
     top: 28px;
+  }
+  &__avatar_eyes.off {
+    transform: translateY(1px);
   }
   &__bubble {
     width: 256px;
