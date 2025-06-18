@@ -14,25 +14,43 @@
       </div>
       <!-- 상단 고정 말풍선 인삿말 -->
       <div class="BaseCommunity__greeting">
-        <!-- <img
-          class="BaseCommunity__avatar"
-          src="@/assets/community-avatar.png"
-          alt="avatar"
-        /> -->
+        <div class="BaseCommunity__avatar">
+          <img src="@/assets/eyesBody.svg" alt="avatar body" />
+          <img
+            v-show="currentBubbleIndex === 0"
+            class="BaseCommunity__avatar_eyes"
+            src="@/assets/eyesOn.svg"
+            alt="avatar eyes"
+          />
+          <!-- <img
+            v-show="currentBubbleIndex === 1"
+            class="BaseCommunity__avatar_eyes"
+            src="@/assets/eyesOff.svg"
+            alt="avatar eyes"
+          /> -->
+        </div>
         <p class="BaseCommunity__bubble">
-          <span v-if="isLoggedIn"
-            >{{ userName }}님 안녕하세요!<br />
-            오늘 하루 길거리에서 무슨 일 없으셨나요?
-          </span>
-          <span v-else>
-            안녕하세요!<br />
-            오늘 하루 길거리에서 무슨 일 없으셨나요?
+          <span class="BaseCommunity__bubble_text">
+            <span v-show="currentBubbleIndex === 0">
+              <span v-if="isLoggedIn">{{ userName }}님 </span>
+              안녕하세요!<br />
+              오늘 하루 길거리에서 무슨 일 없으셨나요?
+            </span>
+            <span v-show="currentBubbleIndex === 1" class="next_bubble_text">
+              잠깐! 모두가 지켜야할 커뮤니티 가이드를 읽으셨나요?
+              <a
+                href="https://TODO_link.com"
+                target="_blank"
+                class="next_bubble_text link"
+                >전문 보러가기</a
+              >
+            </span>
           </span>
         </p>
       </div>
 
       <!-- 아코디언 본문 -->
-      <div class="tour__content" v-show="isMyPageOpen">
+      <div class="content_text" v-show="isMyPageOpen">
         <!-- 로그인 상태일 때 -->
         <div class="BaseCommunity__contents" v-if="isLoggedIn"></div>
         <!-- 로그인 전 상태일 때-->
@@ -73,14 +91,15 @@
         />
       </div>
       <!-- 아코디언 본문 -->
-      <div class="tour__content" v-show="isTourOpen">
-        <p>
-          현재까지 <span class="highlight">123</span>명의 회원이 자신의 길거리
-          괴롭힘 경험담을 <span class="highlight">12344</span>개 지역 항목에
-          공유해주셨습니다. 기억에 감사드립니다.
+      <div class="content_text" v-show="isTourOpen">
+        <p class="content_text_title">
+          현재까지 <span class="highlight">123</span> 명의 회원이 자신의 길거리
+          괴롭힘 경험담을 <br />
+          <span class="highlight">12344</span> 개 지역 항목에 공유해주셨습니다.
+          기억에 감사드립니다.
         </p>
         <div class="tour__links">
-          <p>
+          <button class="tour_link_button">
             <span>저도 길거리 괴롭힘을 당한 적이 있는 것 같아요 </span>
             <img
               src="@/assets/arrowCirlcleButtonRight.svg"
@@ -89,8 +108,8 @@
               width="12"
               height="12"
             />
-          </p>
-          <p>
+          </button>
+          <button class="tour_link_button">
             <span>다른 사람들의 괴롭힘 경험담 이야기를 듣고 싶어요</span>
             <img
               src="@/assets/arrowCirlcleButtonRight.svg"
@@ -99,8 +118,8 @@
               width="12"
               height="12"
             />
-          </p>
-          <p>
+          </button>
+          <button class="tour_link_button">
             <span>길거리 괴롭힘이란게 뭔가요? </span>
             <img
               src="@/assets/arrowCirlcleButtonRight.svg"
@@ -109,7 +128,7 @@
               width="12"
               height="12"
             />
-          </p>
+          </button>
         </div>
       </div>
     </section>
@@ -117,7 +136,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import CarouselWrap from './carousel/CarouselWrap.vue';
 // import { useDevice } from '@/composables/useDevice';
 
@@ -125,6 +144,15 @@ import CarouselWrap from './carousel/CarouselWrap.vue';
 const isLoggedIn = ref(false);
 const isTourOpen = ref(true);
 const isMyPageOpen = ref(true);
+
+// greeting 애니메이션
+const currentBubbleIndex = ref(0);
+
+onMounted(() => {
+  setInterval(() => {
+    currentBubbleIndex.value = (currentBubbleIndex.value + 1) % 2;
+  }, 3000);
+});
 </script>
 
 <style scoped lang="scss">
@@ -135,7 +163,6 @@ const isMyPageOpen = ref(true);
   height: calc(100% - 80px);
   display: flex;
   flex-direction: column;
-  gap: 30px;
   z-index: 9;
 
   &__popup {
@@ -144,6 +171,75 @@ const isMyPageOpen = ref(true);
     border: solid 2px #f1cfc8;
     background-color: #6d54ce;
     border-radius: 20px;
+    margin-bottom: 30px;
+  }
+  &__greeting {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 10px;
+  }
+  &__avatar {
+    position: relative;
+    margin-left: 10px;
+  }
+  &__avatar_eyes {
+    position: absolute;
+    left: -24px;
+    top: 28px;
+  }
+  &__bubble {
+    width: 256px;
+    height: 64px;
+    background-color: #fff;
+    padding: 12px 15px;
+    border-radius: 12px 12px 12px 0;
+    position: relative;
+  }
+  &__bubble::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    top: 32px;
+    left: 6px;
+    bottom: 0;
+    height: 0;
+    transform: rotate(180deg) skewY(-40deg) scale(1.4, 2.005) translate(0, -50%);
+    background-color: inherit;
+    width: 30px;
+    height: 15px;
+    border-top-right-radius: 20%;
+  }
+
+  &__bubble_text {
+    display: inline-block;
+    color: #6d54ce;
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 1.6;
+    position: relative;
+    z-index: 2;
+  }
+  &__bubble_text > span {
+    display: inline-block;
+    transition: all 1s ease-in-out;
+  }
+  &__bubble_text > span[v-show='false'] {
+    opacity: 0;
+    position: absolute;
+    pointer-events: none;
+  }
+  .next_bubble_text {
+    color: #6d54ce;
+    font-weight: 400;
+    font-size: 12px;
+    word-break: keep-all;
+    position: relative;
+  }
+  .next_bubble_text.link {
+    position: absolute;
+    right: 0;
+    bottom: -5px;
+    text-decoration: underline;
   }
 
   &__hot_title {
@@ -197,6 +293,7 @@ const isMyPageOpen = ref(true);
     border: 2px solid #f1cfc8;
   }
   &__login_button {
+    display: inline-block;
     color: #fff;
     font-weight: 600;
     font-size: 14px;
@@ -221,7 +318,7 @@ const isMyPageOpen = ref(true);
   }
   .accordion__toggle {
     position: absolute;
-    right: 0;
+    right: -4px;
     top: 0;
     transition: transform 0.3s ease;
     &.open {
@@ -229,26 +326,48 @@ const isMyPageOpen = ref(true);
     }
   }
 
-  .tour__content {
+  .content_text {
     margin-top: 16px;
     color: white;
     font-size: 14px;
     line-height: 2;
     font-weight: 500;
+  }
+  .content_text_title {
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 28px;
+  }
 
-    .highlight {
-      color: #00ffc2;
-      font-weight: bold;
-      text-decoration: underline;
-    }
+  .highlight {
+    color: #00ffc2;
+    font-weight: 700;
+    position: relative;
+  }
+  .highlight::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    display: inline-block;
+    height: 6px;
+    width: 100%;
+    background-color: #00ffc2;
+  }
 
-    .tour__links {
-      margin-top: 16px;
-      p {
-        margin-bottom: 6px;
-        cursor: pointer;
-      }
-    }
+  .tour__links {
+    margin-top: 20px;
+  }
+  .tour_link_button {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+    font-weight: 400;
+    font-size: 13px;
+    color: #fff;
+  }
+  .tour__right__button {
+    margin: 2px 4px;
   }
 }
 </style>
