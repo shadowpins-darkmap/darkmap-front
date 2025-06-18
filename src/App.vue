@@ -50,4 +50,23 @@ li {
 textarea {
   resize: none;
 }
+
+/* 전역 공통 클래스 */
+/* 한 줄 생략 (...) */
+.ellipsis__1 {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 1; /* 줄 수를 여기서 조절 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 여러 줄 생략 (...) — 기본 두 줄 */
+.ellipsis__2 {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2; /* 줄 수를 여기서 조절 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 </style>

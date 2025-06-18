@@ -7,7 +7,7 @@
           src="@/assets/arrowCirlcleButton.svg"
           class="accordion__toggle"
           :class="{ open: isMyPageOpen }"
-          alt="toggle"
+          alt="accordion toggle icon"
           width="36"
           height="36"
         />
@@ -71,7 +71,7 @@
           src="@/assets/arrowCirlcleButton.svg"
           class="accordion__toggle"
           :class="{ open: isTourOpen }"
-          alt="toggle"
+          alt="accordion toggle icon"
           width="36"
           height="36"
         />
