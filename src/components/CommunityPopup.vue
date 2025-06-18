@@ -34,16 +34,13 @@
       <!-- 아코디언 본문 -->
       <div class="tour__content" v-show="isMyPageOpen">
         <!-- 로그인 상태일 때 -->
-        <div class="BaseCommunity__contents" v-if="isLoggedIn">
-          <span class="BaseCommunity__hot">지금 가장 뜨거운 글이에요!</span>
-
-          <!-- 게시글 카드 -->
-          <div class="BaseCommunity__card"></div>
-        </div>
+        <div class="BaseCommunity__contents" v-if="isLoggedIn"></div>
         <!-- 로그인 전 상태일 때-->
         <div v-else>
-          <span class="BaseCommunity__hot">🔥 지금 가장 뜨거운 글이에요!</span>
-          <button class="BaseCommunity__more">전체보기</button>
+          <p class="BaseCommunity__hot_title">
+            🔥 지금 가장 뜨거운 글이에요!
+            <button class="BaseCommunity__more">전체보기</button>
+          </p>
           <!-- 게시글 카드 -->
           <div class="BaseCommunity__card">
             <CarouselWrap />
@@ -51,13 +48,12 @@
         </div>
 
         <!-- 로그인 유도 영역 -->
-        <div class="BaseCommunity__bottom">
-          <p>
-            오늘 처음 방문하셨나요? 가입 이후에<br />광장의 모든 글을 보실 수
-            있어요.
+        <div class="BaseCommunity__bottom_box">
+          <p class="BaseCommunity__title">
+            오늘 처음 방문하셨나요? 가입 이후에 광장의 모든 글을 보실 수 있어요.
           </p>
-          <button class="BaseCommunity__join">회원가입</button>
-          <button class="BaseCommunity__login">기존 회원 로그인</button>
+          <button class="BaseCommunity__join_button">회원가입</button>
+          <button class="BaseCommunity__login_button">기존 회원 로그인</button>
         </div>
       </div>
     </section>
@@ -148,6 +144,65 @@ const isMyPageOpen = ref(true);
     border: solid 2px #f1cfc8;
     background-color: #6d54ce;
     border-radius: 20px;
+  }
+
+  &__hot_title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 700;
+    font-size: 24px;
+    letter-spacing: -0.5px;
+    vertical-align: middle;
+    color: #fff;
+  }
+
+  &__more {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 18px;
+    text-decoration: underline;
+    color: #fff;
+    padding-top: 5px;
+  }
+  &__bottom_box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+  }
+  &__title {
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 140%;
+    letter-spacing: -0.5px;
+    text-align: center;
+    vertical-align: middle;
+    word-break: keep-all;
+    padding: 10px 30px;
+  }
+  &__join_button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 30px;
+    background-color: #000;
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    height: 40px;
+    min-width: 170px;
+    border-radius: 40px;
+    border: 2px solid #f1cfc8;
+  }
+  &__login_button {
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+    vertical-align: middle;
+    text-decoration: underline;
   }
 
   // --------- 다크맵 투어 일지 ------------
