@@ -134,26 +134,105 @@
     </section>
 
     <!--  길거리 괴롭힘이란게 뭔가요? SlidePanel 컴포넌트 추가 -->
-    <SlidePanel :visible="isPanelOpen" @close="isPanelOpen = false">
-      <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 12px">
-        길거리 괴롭힘 제보 안내
-      </h2>
-      <button class="close_btn" @click="isPanelOpen = false">닫기</button>
-      <p style="margin-bottom: 20px; font-size: 14px; line-height: 1.6">
-        당신의 경험은 누군가에게 큰 도움이 됩니다. 아래 버튼을 눌러 제보를
-        시작해보세요.
-      </p>
-      <button
-        style="
-          background: #00ffc2;
-          color: #000;
-          padding: 10px 20px;
-          border-radius: 8px;
-          font-weight: bold;
-        "
-      >
-        제보하러 가기
-      </button>
+    <SlidePanel
+      :width="'510px'"
+      :visible="isPanelOpen"
+      @close="isPanelOpen = false"
+    >
+      <div class="slider_wrap">
+        <button class="slider_colse_button" @click="handlePanelClose">
+          <img
+            src="@/assets/sliderCloseIcon.svg"
+            alt="slider close icon"
+            width="36"
+            height="36"
+          />
+        </button>
+        <strong class="slider_title">길거리 괴롭힘이란게 뭔가요?</strong>
+
+        <p class="slider_contents">
+          용어로도 출판이나 연출을 지칭하는 입숨을 표준 이런 들어가는 디자인
+          결과물에 시각적 입숨은 그래픽 텍스트로, 텍스트로, 입숨은 분야에서
+          실제적인 보여줄 무언가를 표준 로렘 무언가를 때로 입숨은 채우기 입숨은
+          사용할 시각 이용된다.
+        </p>
+        <p class="slider_contents">
+          프로젝트 채우기 사용하는 차지하는 프로젝트 보여줄 내용이 입숨을
+          타이포그래피, 지칭하는 프로젝트 사용할 프로젝트 출판이나 채워지기
+          디자인 보여줄 프로젝트 내용이 차지하는 시각적 사용할 연출을
+          타이포그래피, 때
+        </p>
+
+        <strong class="slider_title_sub">길거리 괴롭힘의 유형</strong>
+        <ol class="slider_list">
+          <li>
+            <button class="slider_list_button" @click="isPanel2depsOpen = true">
+              <span> 1. 바바리맨 </span>
+              <img
+                src="@/assets/sliderGoDetailIcon.svg"
+                class="slider_list_icon"
+                alt="slider arrow icon"
+                width="16"
+                height="16"
+              />
+            </button>
+          </li>
+          <li>
+            <button class="slider_list_button">
+              <span> 2. 헌팅 </span>
+              <img
+                src="@/assets/sliderGoDetailIcon.svg"
+                class="slider_list_icon"
+                alt="slider arrow icon"
+                width="16"
+                height="16"
+              />
+            </button>
+          </li>
+          <li>
+            <button class="slider_list_button">
+              <span> 3. 미행 </span>
+              <img
+                src="@/assets/sliderGoDetailIcon.svg"
+                class="slider_list_icon"
+                alt="slider arrow icon"
+                width="16"
+                height="16"
+              />
+            </button>
+          </li>
+          <li>
+            <button class="slider_list_button">
+              <span> 4. 폭행 </span>
+              <img
+                src="@/assets/sliderGoDetailIcon.svg"
+                class="slider_list_icon"
+                alt="slider arrow icon"
+                width="16"
+                height="16"
+              />
+            </button>
+          </li>
+        </ol>
+      </div>
+    </SlidePanel>
+
+    <SlidePanel
+      :width="'510px'"
+      :visible="isPanel2depsOpen"
+      :right="'510px'"
+      @close="isPanel2depsOpen = false"
+    >
+      <div class="slider_wrap slider_2deps">
+        <button class="slider_colse_button" @click="isPanel2depsOpen = false">
+          <img
+            src="@/assets/slider2depsCloseIcon.svg"
+            alt="slider 2deps close icon"
+            width="36"
+            height="36"
+          />
+        </button>
+      </div>
     </SlidePanel>
   </div>
 </template>
@@ -169,6 +248,12 @@ const isLoggedIn = ref(false);
 const isTourOpen = ref(true);
 const isMyPageOpen = ref(true);
 const isPanelOpen = ref(false);
+const isPanel2depsOpen = ref(false);
+
+const handlePanelClose = () => {
+  isPanelOpen.value = false;
+  isPanel2depsOpen.value = false;
+};
 
 // greeting 애니메이션
 const currentBubbleIndex = ref(0);
@@ -396,6 +481,62 @@ onMounted(() => {
   }
   .tour__right__button {
     margin: 2px 4px;
+  }
+
+  /* 사이드 슬라이더 */
+  .slider_wrap {
+    background-color: #000;
+    padding: 40px 25px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .slider_2deps {
+    background-color: #404040;
+  }
+  .slider_colse_button {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .slider_title {
+    color: #8270cb;
+    font-weight: bold;
+    font-size: 32px;
+    display: flex;
+    padding-top: 40px;
+    padding-bottom: 60px;
+  }
+  .slider_contents {
+    padding-bottom: 25px;
+    font-size: 16px;
+    color: #fff;
+    font-weight: normal;
+  }
+  .slider_title_sub {
+    color: #fff;
+    font-size: 22px;
+    font-weight: bold;
+    padding-bottom: 20px;
+  }
+  .slider_list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .slider_list_button {
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .slider_list_button > span {
+    padding-top: 4px;
+  }
+  .slider_list_icon {
+    margin-left: 5px;
   }
 }
 </style>
