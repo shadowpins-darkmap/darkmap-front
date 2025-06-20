@@ -46,11 +46,15 @@ const carouselConfig = {
           <span class="slide_card_tag">{{ card.tag }}</span>
           <span class="slide_card_arrow">
             <img
-              src="@/assets/slideCardArrow.svg"
+              :src="
+                props.green
+                  ? require('@/assets/slideCardArrowGreen.svg')
+                  : require('@/assets/slideCardArrow.svg')
+              "
               class="card_arrow_icon"
               alt="card arrow icon"
-              width="16"
-              height="16"
+              width="18"
+              height="18"
             />
           </span>
         </div>
@@ -70,7 +74,11 @@ const carouselConfig = {
           <button class="card_bottom_button card_bottom_text">
             <span> {{ card.likes }}</span>
             <img
-              src="@/assets/heartButtonIcon.svg"
+              :src="
+                props.green
+                  ? require('@/assets/heartButtonIconGreen.svg')
+                  : require('@/assets/heartButtonIcon.svg')
+              "
               class="like__toggle"
               alt="like toggle icon"
               width="16"
@@ -111,6 +119,7 @@ const carouselConfig = {
   justify-content: center;
   padding: 4px 8px;
   height: 20px;
+  line-height: 20px;
   border: 1px solid #f1cfc8;
   border-radius: 20px;
   color: #f1cfc8;
@@ -202,5 +211,17 @@ const carouselConfig = {
 
 .slide_wrap.green {
   background-color: #01523e;
+  border: 1px solid #00ffc2;
+}
+.slide_wrap.green .card_bottom_text {
+  color: #00ffc2;
+}
+.slide_wrap.green .slide_card_tag {
+  border: 1px solid #00ffc2;
+  color: #00ffc2;
+}
+
+.slide_wrap.green .slide_card.lines::after {
+  background-color: #00ffc2;
 }
 </style>
