@@ -1,8 +1,9 @@
 <script setup>
+import { defineProps } from 'vue';
 import 'vue3-carousel/carousel.css';
 import { Carousel, Slide } from 'vue3-carousel';
 
-// 이미지 데이터
+// 이미지 데이터 TODO
 const cards = Array.from({ length: 10 }, (_, index) => ({
   id: index + 1,
   url: `https://picsum.photos/seed/${Math.random()}/500/500`,
@@ -17,20 +18,30 @@ const cards = Array.from({ length: 10 }, (_, index) => ({
   likes: 999,
 }));
 
+const props = defineProps({
+  itemsToShow: { type: Number, default: 1.2 },
+  gap: { type: Number, default: 5 },
+  autoplay: { type: Number, default: 3000 },
+  wrapAround: { type: Boolean, default: true },
+  pauseAutoplayOnHover: { type: Boolean, default: true },
+  height: { type: [String, Number], default: 200 },
+  green: { type: Boolean, default: false },
+});
+
 const carouselConfig = {
-  height: 200,
-  itemsToShow: 1.2,
-  gap: 5,
-  autoplay: 3000,
-  wrapAround: true,
-  pauseAutoplayOnHover: true,
+  height: props.height,
+  itemsToShow: props.itemsToShow,
+  gap: props.gap,
+  autoplay: props.autoplay,
+  wrapAround: props.wrapAround,
+  pauseAutoplayOnHover: props.pauseAutoplayOnHover,
 };
 </script>
 
 <template>
   <Carousel v-bind="carouselConfig">
     <Slide v-for="card in cards" :key="card.id">
-      <div class="slide_wrap">
+      <div class="slide_wrap" :class="{ green: props.green }">
         <div class="slide_card">
           <span class="slide_card_tag">{{ card.tag }}</span>
           <span class="slide_card_arrow">
@@ -79,7 +90,7 @@ const carouselConfig = {
 
 .slide_wrap {
   width: 330px;
-  height: 169px;
+  height: 172px;
   border: 1px solid #f1cfc8;
   overflow: hidden;
   border-radius: 8px;
@@ -187,5 +198,9 @@ const carouselConfig = {
   flex: auto 0 0;
   width: 68px;
   padding: 4px;
+}
+
+.slide_wrap.green {
+  background-color: #01523e;
 }
 </style>
