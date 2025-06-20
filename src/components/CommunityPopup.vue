@@ -88,6 +88,7 @@
               계정설정
             </button>
           </strong>
+          <!-- 내 활동 내역 -->
           <ul class="icon_list_wrap">
             <li class="icon_list">
               <img
@@ -123,6 +124,97 @@
               <span class="point_color">{{ auth.user?.commentCount }}</span>
             </li>
           </ul>
+          <!-- 알림 메인 -->
+          <button class="BaseCommunity__more_alarm">전체보기</button>
+          <ul class="alarm_list_wrap">
+            <li class="alarm_list">
+              <button class="alarm_list_button">
+                <span class="alarm_list_icon">
+                  <img
+                    src="@/assets/alarmComment.svg"
+                    alt="alarm list icon"
+                    width="24"
+                    height="24"
+                  />
+                  <!-- <img
+                    src="@/assets/alarmLike.svg"
+                    alt="alarm list icon"
+                    width="24"
+                    height="24"
+                  /> -->
+                  <!-- <img
+                    src="@/assets/alarmMarker.svg"
+                    alt="alarm list icon"
+                    width="24"
+                    height="24"
+                  /> -->
+                </span>
+                <span class="ellipsis__2 alarm_contents">
+                  {{
+                    `두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 `
+                  }}
+                </span>
+              </button>
+            </li>
+            <li class="alarm_list">
+              <button class="alarm_list_button">
+                <span class="alarm_list_icon">
+                  <!-- <img
+                    src="@/assets/alarmComment.svg"
+                    alt="alarm list icon"
+                    width="24"
+                    height="24"
+                  /> -->
+                  <img
+                    src="@/assets/alarmLike.svg"
+                    alt="alarm list icon"
+                    width="24"
+                    height="24"
+                  />
+                  <!-- <img
+                    src="@/assets/alarmMarker.svg"
+                    alt="alarm list icon"
+                    width="24"
+                    height="24"
+                  /> -->
+                </span>
+                <span class="ellipsis__2 alarm_contents">
+                  {{
+                    `두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 `
+                  }}
+                </span>
+              </button>
+            </li>
+            <li class="alarm_list">
+              <button class="alarm_list_button">
+                <span class="alarm_list_icon">
+                  <!-- <img
+                    src="@/assets/alarmComment.svg"
+                    alt="alarm list icon"
+                    width="24"
+                    height="24"
+                  /> -->
+                  <!-- <img
+                    src="@/assets/alarmLike.svg"
+                    alt="alarm list icon"
+                    width="24"
+                    height="24"
+                  /> -->
+                  <img
+                    src="@/assets/alarmMarker.svg"
+                    alt="alarm list icon"
+                    width="24"
+                    height="24"
+                  />
+                </span>
+                <span class="ellipsis__2 alarm_contents">
+                  {{
+                    `두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 `
+                  }}
+                </span>
+              </button>
+            </li>
+          </ul>
         </div>
         <!-- 로그인 전 상태일 때-->
         <div v-else>
@@ -130,7 +222,7 @@
             🔥 지금 가장 뜨거운 글이에요!
             <button class="BaseCommunity__more">전체보기</button>
           </p>
-          <!-- 게시글 카드 -->
+          <!-- 게시글 슬라이더 -->
           <div class="BaseCommunity__card">
             <CarouselWrap />
           </div>
@@ -494,6 +586,7 @@ onMounted(() => {
     color: #fff;
     padding-top: 5px;
   }
+
   &__card {
     width: calc(100% + 30px);
     transform: translateX(-6px);
@@ -566,6 +659,62 @@ onMounted(() => {
     color: #00ffc2;
   }
 
+  &__more_alarm {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 18px;
+    color: #fff;
+    display: flex;
+    width: 100%;
+    flex-direction: row-reverse;
+    margin-top: 15px;
+    margin-bottom: 5px;
+  }
+  .alarm_list_wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .alarm_list_button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    border-radius: 6px;
+    background-color: #4c3d86;
+  }
+  // 알람의 첫번째, 두번째, 세번째 스타일
+  .alarm_list:nth-of-type(1) > .alarm_list_button {
+    background-color: #9886dc;
+    /* border: 1px solid #fff; */
+  }
+  .alarm_list:nth-of-type(2) > .alarm_list_button {
+    background-color: #8975d7;
+    /* border: 1px solid #fff; */
+  }
+  .alarm_list:nth-of-type(3) > .alarm_list_button {
+    background-color: #7e68d4;
+    /* border: 1px solid #fff; */
+  }
+
+  .alarm_list_icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 40px;
+    background-color: #d2cbf0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .alarm_contents {
+    display: flex;
+    width: calc(100% - 50px);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+  }
   &__login_button {
     display: inline-block;
     color: #fff;
