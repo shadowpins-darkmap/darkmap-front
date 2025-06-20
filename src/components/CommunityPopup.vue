@@ -32,7 +32,7 @@
         <p class="BaseCommunity__bubble">
           <span class="BaseCommunity__bubble_text">
             <span v-show="currentBubbleIndex === 0">
-              <span v-if="isLoggedIn">{{ userName }}님 </span>
+              <span v-if="auth.isLoggedIn">{{ auth.user?.nickname }}님 </span>
               안녕하세요!<br />
               오늘 하루 길거리에서 무슨 일 없으셨나요?
             </span>
@@ -52,7 +52,78 @@
       <!-- 아코디언 본문 -->
       <div class="content_text" v-show="isMyPageOpen">
         <!-- 로그인 상태일 때 -->
-        <div class="BaseCommunity__contents" v-if="isLoggedIn"></div>
+        <div class="BaseCommunity__contents" v-if="auth.isLoggedIn">
+          <div class="BaseCommunity__button_box">
+            <button class="BaseCommunity__black_button width_fix">
+              광장에 얘기하러 가기
+              <img
+                src="@/assets/slideCardArrow.svg"
+                class="button_arrow_icon"
+                alt="button arrow icon"
+                width="14"
+                height="14"
+              />
+            </button>
+            <button class="BaseCommunity__black_button width_fix">
+              길거리 괴롭힘 제보하러가기
+              <img
+                src="@/assets/slideCardArrow.svg"
+                class="button_arrow_icon"
+                alt="button arrow icon"
+                width="14"
+                height="14"
+              />
+            </button>
+          </div>
+          <strong class="BaseCommunity__hot_title margin_15">
+            ⚡️ {{ auth.user?.nickname }}님을 위한 브리핑
+            <button class="BaseCommunity__setting">
+              <img
+                src="@/assets/settingButtonIcon.svg"
+                class="my_list_icon"
+                alt="setting icon"
+                width="20"
+                height="20"
+              />
+              계정설정
+            </button>
+          </strong>
+          <ul class="icon_list_wrap">
+            <li class="icon_list">
+              <img
+                src="@/assets/iconListComment.svg"
+                class="my_list_icon"
+                alt="my list icon"
+                width="16"
+                height="16"
+              />
+              <span>새 댓글</span>
+              <span class="point_color">{{ auth.user?.commentCount }}</span>
+            </li>
+            <li class="icon_list">
+              <img
+                src="@/assets/iconListLike.svg"
+                class="my_list_icon"
+                alt="my list icon"
+                width="16"
+                height="16"
+              />
+              <span>새 좋아요</span>
+              <span class="point_color">{{ auth.user?.commentCount }}</span>
+            </li>
+            <li class="icon_list">
+              <img
+                src="@/assets/iconListMarker.svg"
+                class="my_list_icon"
+                alt="my list icon"
+                width="16"
+                height="16"
+              />
+              <span>다크플레이스 등록</span>
+              <span class="point_color">{{ auth.user?.commentCount }}</span>
+            </li>
+          </ul>
+        </div>
         <!-- 로그인 전 상태일 때-->
         <div v-else>
           <p class="BaseCommunity__hot_title">
@@ -63,15 +134,21 @@
           <div class="BaseCommunity__card">
             <CarouselWrap />
           </div>
-        </div>
 
-        <!-- 로그인 유도 영역 -->
-        <div class="BaseCommunity__bottom_box">
-          <p class="BaseCommunity__title">
-            오늘 처음 방문하셨나요? 가입 이후에 광장의 모든 글을 보실 수 있어요.
-          </p>
-          <button class="BaseCommunity__join_button">회원가입</button>
-          <button class="BaseCommunity__login_button">기존 회원 로그인</button>
+          <!-- 로그인 유도 영역 -->
+          <div class="BaseCommunity__button_box">
+            <p class="BaseCommunity__title">
+              오늘 처음 방문하셨나요? 가입 이후에 광장의 모든 글을 보실 수
+              있어요.
+            </p>
+            <button class="BaseCommunity__black_button">회원가입</button>
+            <button
+              class="BaseCommunity__login_button"
+              @click="handleTestLogin"
+            >
+              기존 회원 로그인
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -272,10 +349,22 @@
 import { ref, onMounted } from 'vue';
 import CarouselWrap from './carousel/CarouselWrap.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
+import { useAuthStore } from '@/store/useAuthStore';
 // import { useDevice } from '@/composables/useDevice';
 
+const auth = useAuthStore();
+
+//auth.login()
+//auth.logout()
+// TODO :테스트용 임시 로그인 함수
+const handleTestLogin = () => {
+  auth.login({
+    nickname: 'namoo',
+    email: 'namoo@email.com',
+  });
+};
+
 // const { isMobile } = useDevice();
-const isLoggedIn = ref(false);
 const isTourOpen = ref(true);
 const isMyPageOpen = ref(true);
 const isPanelOpen = ref(false);
@@ -405,7 +494,18 @@ onMounted(() => {
     color: #fff;
     padding-top: 5px;
   }
-  &__bottom_box {
+  &__card {
+    width: calc(100% + 30px);
+    transform: translateX(-6px);
+  }
+  &__setting {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 18px;
+    color: #fff;
+    padding-top: 5px;
+  }
+  &__button_box {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -422,7 +522,7 @@ onMounted(() => {
     word-break: keep-all;
     padding: 10px 30px;
   }
-  &__join_button {
+  &__black_button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -436,6 +536,36 @@ onMounted(() => {
     border-radius: 40px;
     border: 2px solid #f1cfc8;
   }
+  .width_fix {
+    padding: 12px;
+    width: 214px;
+  }
+  .button_arrow_icon {
+    margin-left: 2px;
+  }
+  .margin_15 {
+    margin: 15px 0;
+  }
+
+  .icon_list_wrap {
+    display: flex;
+    padding: 15px 0;
+    justify-content: space-between;
+    border-bottom: 1px solid #9886dc;
+  }
+  .icon_list {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .icon_list > span {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .point_color {
+    color: #00ffc2;
+  }
+
   &__login_button {
     display: inline-block;
     color: #fff;

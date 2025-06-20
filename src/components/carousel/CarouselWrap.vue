@@ -20,8 +20,8 @@ const cards = Array.from({ length: 10 }, (_, index) => ({
 const carouselConfig = {
   height: 200,
   itemsToShow: 1.2,
-  gap: 20,
-  // autoplay: 2000,
+  gap: 5,
+  autoplay: 3000,
   wrapAround: true,
   pauseAutoplayOnHover: true,
 };
@@ -74,11 +74,11 @@ const carouselConfig = {
 <style scoped lang="scss">
 /* .carousel {} */
 .carousel__slide {
-  transform: translateX(-20px);
+  transform: translateX(-25px);
 }
 
 .slide_wrap {
-  width: 328px;
+  width: 330px;
   height: 169px;
   border: 1px solid #f1cfc8;
   overflow: hidden;
