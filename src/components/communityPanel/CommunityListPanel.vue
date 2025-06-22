@@ -117,10 +117,10 @@ const selectedCategory = ref('전체');
 const currentPage = ref(1);
 const itemsPerPage = 6;
 
-// 더미 데이터
-const postList = Array.from({ length: 40 }, (_, i) => ({
+// 더미 데이터 TODO
+const postList = Array.from({ length: 140 }, (_, i) => ({
   id: i + 1,
-  nickname: `검은${i + 1}`,
+  nickname: `검은 태양의 핀 ${i + 1}`,
   tag: '기억',
   title: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 게시글`,
   comments: Math.floor(Math.random() * 200),
@@ -251,14 +251,14 @@ const clickNext = () => {
 .community_list::after {
   content: '';
   position: absolute;
-  top: 0;
+  bottom: 0;
   background-color: #00ffc2;
   height: 1px;
   width: 100%;
 }
-.community_list:first-child::after {
+/* .community_list:first-child::after {
   display: none;
-}
+} */
 .community_list_button {
   display: flex;
   align-items: center;

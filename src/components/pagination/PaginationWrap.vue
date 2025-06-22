@@ -37,7 +37,7 @@ defineProps({
 .pagination_number_button {
   padding: 5px 10px;
   color: #fff;
-  width: 30px;
+  min-width: 30px;
   height: 30px;
   border-radius: 30px;
 }
