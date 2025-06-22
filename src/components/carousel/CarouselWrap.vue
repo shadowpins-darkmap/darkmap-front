@@ -173,7 +173,7 @@ const carouselConfig = {
 }
 .card_bottom_text {
   color: #f1cfc8;
-  font-family: Roboto;
+  font-family: 'Roboto';
   font-weight: 400;
   font-size: 12px;
   letter-spacing: -0.5px;
