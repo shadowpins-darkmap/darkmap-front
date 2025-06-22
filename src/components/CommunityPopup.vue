@@ -373,8 +373,10 @@ const isMyPageOpen = ref(true);
 const isPanelOpen = ref(false);
 const isPanel2depsOpen = ref(false);
 
-const isListPanelOpen = ref(false);
-const isListPanel2depsOpen = ref(false);
+// const isListPanelOpen = ref(false);
+// const isListPanel2depsOpen = ref(false);
+const isListPanelOpen = ref(true);
+const isListPanel2depsOpen = ref(true);
 
 const handlePanelClose = () => {
   isPanelOpen.value = false;
