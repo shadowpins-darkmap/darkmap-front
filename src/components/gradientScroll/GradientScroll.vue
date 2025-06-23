@@ -81,9 +81,7 @@ onBeforeUnmount(() => {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-.scroll_area::-webkit-scrollbar {
-  display: none;
-}
+
 .scroll_gradient {
   position: absolute;
   top: 0;
@@ -97,5 +95,9 @@ onBeforeUnmount(() => {
 }
 .scroll_gradient.right {
   right: 0;
+}
+/* scroll reset */
+.scroll_area::-webkit-scrollbar {
+  display: none;
 }
 </style>

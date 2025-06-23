@@ -69,4 +69,30 @@ textarea {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* scroll reset */
+.scroll_area::-webkit-scrollbar-thumb {
+  background-color: #babac0;
+  border-radius: 16px;
+}
+/* 스크롤바 막대 설정*/
+.scroll_area::-webkit-scrollbar-thumb {
+  background-color: #babac0;
+  border-radius: 16px;
+}
+.scroll_area::-webkit-scrollbar-thumb:hover {
+  background-color: #a0a0a5;
+}
+
+/* 스크롤바 뒷 배경 설정*/
+.scroll_area::-webkit-scrollbar-track {
+  border-radius: 10px;
+  background-color: transparent;
+}
+.scroll_area::-webkit-scrollbar-track:hover {
+  background-color: transparent;
+}
+.scroll_area::-webkit-scrollbar-button {
+  display: none;
+}
 </style>

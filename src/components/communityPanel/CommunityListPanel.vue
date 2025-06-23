@@ -37,7 +37,7 @@
     </GradientScroll>
 
     <!-- 광장 게시글 리스트 -->
-    <ul class="community_list_wrap">
+    <ul class="community_list_wrap scroll_area">
       <li class="community_list" v-for="item in currentItems" :key="item.id">
         <button class="community_list_button">
           <span class="community_list_profile">
@@ -279,7 +279,6 @@ const clickNext = () => {
 .community_list_contents {
   display: flex;
   flex-direction: column;
-  width: 294px;
   text-align: left;
   gap: 2px;
 }

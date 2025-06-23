@@ -11,7 +11,7 @@
     <strong class="slider_title ponit_color"
       >길거리 괴롭힘이란게 뭔가요?</strong
     >
-    <div class="slider_contents_wrap">
+    <div class="slider_contents_wrap scroll_area">
       <p class="slider_contents">
         용어로도 출판이나 연출을 지칭하는 입숨을 표준 이런 들어가는 디자인
         결과물에 시각적 입숨은 그래픽 텍스트로, 텍스트로, 입숨은 분야에서

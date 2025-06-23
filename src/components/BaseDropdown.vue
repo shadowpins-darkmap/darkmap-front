@@ -7,7 +7,7 @@
       <button class="BaseDropdown__selected" @click="toggleDropdown">
         {{ selectedLabel }}
       </button>
-      <ul class="BaseDropdown__menuList">
+      <ul class="BaseDropdown__menuList scroll_area">
         <li v-for="(item, index) in list" :key="index">
           <button class="BaseDropdown__menuItem" @click="handleSelect(item)">
             {{ item }}
