@@ -64,7 +64,6 @@
 .body_title {
   display: inline-flex;
   width: fit-content;
-  height: 34px;
   align-items: center;
   justify-content: center;
   border-radius: 34px;
@@ -73,9 +72,10 @@
   font-weight: 600;
   color: #000000;
   background-color: #ffefeb;
+  margin-right: 10px;
 }
 .body_title > span {
-  padding: 8px 12px;
+  padding: 5px 12px;
   flex: 0 0 auto;
 }
 

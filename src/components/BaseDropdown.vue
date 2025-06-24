@@ -79,19 +79,17 @@ onUnmounted(() => window.removeEventListener('mousedown', onClickOutside));
 
   &__toggle {
     min-width: 80px;
-    padding: 8px 8px 8px 10px;
+    padding: 4px 8px;
     text-align: left;
-    line-height: 1;
     font-size: 14px;
     font-weight: 600;
     border: 2px solid #ffefeb;
-    border-radius: 16px;
-    margin-left: 8px;
+    border-radius: 30px;
     background: transparent;
     color: #ffefeb;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     cursor: pointer;
 
     &::after {
@@ -107,13 +105,13 @@ onUnmounted(() => window.removeEventListener('mousedown', onClickOutside));
 
   &__menu {
     position: absolute;
-    top: 0;
-    left: 8px;
+    top: 30px;
+    left: 0px;
     background: #5966d8;
     padding: 7px 10px;
     border: 2px solid #ffefeb;
     border-radius: 16px;
-    width: 146px;
+    min-width: 146px;
     height: auto;
     max-height: 185px;
     z-index: 10;

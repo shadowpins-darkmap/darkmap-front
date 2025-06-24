@@ -81,7 +81,7 @@
   </div>
   <!-- 글등록 버튼  -->
   <div class="write_button_wrap">
-    <button class="write_button">
+    <button class="write_button" @click="isPopupOpen = true">
       광장에 글쓰기
       <img
         src="@/assets/slideCardArrow.svg"
@@ -102,6 +102,10 @@
       />
     </button>
   </div>
+  <!-- 팝업  -->
+  <CommonPopup :visible="isPopupOpen" @close="isPopupOpen = false">
+    <CommunityWriteForm />
+  </CommonPopup>
 </template>
 
 <script setup>
@@ -110,12 +114,17 @@ import { ref, computed } from 'vue';
 import CarouselWrap from '@/components/carousel/CarouselWrap.vue';
 import GradientScroll from '@/components/gradientScroll/GradientScroll.vue';
 import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
+import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
+import CommunityWriteForm from '@/components/communityPopup/CommunityWriteForm.vue';
 
 const categories = ['전체', '공지', '제보', '기억', '고민', '질문', '미분류'];
 const selectedCategory = ref('전체');
 //  페이지네이션 상태
 const currentPage = ref(1);
 const itemsPerPage = 6;
+
+// 글쓰기 팝업
+const isPopupOpen = ref(false);
 
 // 더미 데이터 TODO
 const postList = Array.from({ length: 140 }, (_, i) => ({

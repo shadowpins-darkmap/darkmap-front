@@ -11,7 +11,7 @@
     </div>
     <div class="ControlMobile__body">
       <div class="ControlMobile__section">
-        <div class="ControlMobile__body-title">테마 투어</div>
+        <strong class="body_title"><span>테마 투어</span></strong>
       </div>
       <div class="ControlMobile__select-all">
         <div @click="clickAllCrime">
@@ -50,7 +50,7 @@
         </div>
       </div>
       <div class="ControlMobile__section">
-        <div class="ControlMobile__body-title">지역 투어</div>
+        <strong class="body_title"><span>지역 투어</span></strong>
         <address-filter
           :address-data="addressData"
           @change="changeGu"
@@ -92,8 +92,8 @@
           <div class="ControlMobile__checkbox-text">{{ d.name }}</div>
         </div>
       </div>
-      <div class="ControlMobile__body-title ControlMobile__section">
-        뉴스 투어
+      <div class="body_title_wrap">
+        <strong class="body_title"><span>뉴스 투어</span></strong>
       </div>
       <div class="ControlMobile__articleTable">
         <div
@@ -376,7 +376,6 @@ const clickDong = (idx) => {
 
   &__body-title {
     width: 66px;
-    height: 12px;
     padding: 10px 8px;
     text-align: center;
     line-height: 14px;
