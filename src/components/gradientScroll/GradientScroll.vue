@@ -1,27 +1,41 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount, defineProps } from 'vue';
+import { ref, onMounted, onBeforeUnmount, defineProps, computed } from 'vue';
 
 const props = defineProps({
   width: { type: String, default: '100%' },
   height: { type: String, default: 'auto' },
   gradientColor: { type: String, default: 'rgba(0, 0, 0, 0.6)' },
+  direction: { type: String, default: 'horizontal' },
 });
 
 const scrollArea = ref(null);
-const showLeft = ref(false);
-const showRight = ref(true);
+const showStart = ref(false);
+const showEnd = ref(true);
+const isHorizontal = computed(() => props.direction === 'horizontal');
 
 const updateGradient = () => {
   const el = scrollArea.value;
   if (!el) return;
-  showLeft.value = el.scrollLeft > 0;
-  showRight.value = el.scrollWidth - el.clientWidth - el.scrollLeft > 5;
+  if (isHorizontal.value) {
+    showStart.value = el.scrollLeft > 0;
+    showEnd.value = el.scrollWidth - el.clientWidth - el.scrollLeft > 5;
+  } else {
+    showStart.value = el.scrollTop > 0;
+    showEnd.value = el.scrollHeight - el.clientHeight - el.scrollTop > 5;
+  }
 };
 
 const handleWheel = (e) => {
-  if (!scrollArea.value) return;
+  const el = scrollArea.value;
+  if (!el) return;
   e.preventDefault();
-  scrollArea.value.scrollLeft += e.deltaY;
+
+  if (isHorizontal.value) {
+    el.scrollLeft += e.deltaY;
+  } else {
+    el.scrollTop += e.deltaY;
+  }
+
   updateGradient();
 };
 
@@ -44,26 +58,36 @@ onBeforeUnmount(() => {
     class="gradient_scroll_container"
     :style="{ width: props.width, height: props.height }"
   >
-    <!-- Left Gradient -->
+    <!-- Start Gradient (Left or Top) -->
     <div
-      v-if="showLeft"
-      class="scroll_gradient left"
+      v-if="showStart"
+      class="scroll_gradient"
+      :class="isHorizontal ? 'left' : 'top'"
       :style="{
-        background: `linear-gradient(to right, ${props.gradientColor}, transparent)`,
+        background: isHorizontal
+          ? `linear-gradient(to right, ${props.gradientColor}, transparent)`
+          : `linear-gradient(to bottom, ${props.gradientColor}, transparent)`,
       }"
     ></div>
 
-    <!-- Scrollable Content -->
-    <div class="scroll_area" ref="scrollArea">
+    <!-- Scrollable Slot Content -->
+    <div
+      class="scroll_area"
+      ref="scrollArea"
+      :class="isHorizontal ? 'horizontal' : 'vertical'"
+    >
       <slot></slot>
     </div>
 
-    <!-- Right Gradient -->
+    <!-- End Gradient (Right or Bottom) -->
     <div
-      v-if="showRight"
-      class="scroll_gradient right"
+      v-if="showEnd"
+      class="scroll_gradient"
+      :class="isHorizontal ? 'right' : 'bottom'"
       :style="{
-        background: `linear-gradient(to left, ${props.gradientColor}, transparent)`,
+        background: isHorizontal
+          ? `linear-gradient(to left, ${props.gradientColor}, transparent)`
+          : `linear-gradient(to top, ${props.gradientColor}, transparent)`,
       }"
     ></div>
   </div>
@@ -75,27 +99,52 @@ onBeforeUnmount(() => {
   overflow: hidden;
 }
 .scroll_area {
-  overflow-x: auto;
-  overflow-y: hidden;
   white-space: nowrap;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  &.horizontal {
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+  }
+
+  &.vertical {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
 }
 
 .scroll_gradient {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 30px;
   pointer-events: none;
   z-index: 1;
+
+  &.left {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 30px;
+  }
+  &.right {
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 30px;
+  }
+  &.top {
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 100px;
+  }
+  &.bottom {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100px;
+  }
 }
-.scroll_gradient.left {
-  left: 0;
-}
-.scroll_gradient.right {
-  right: 0;
-}
+
 /* scroll reset */
 .scroll_area::-webkit-scrollbar {
   display: none;

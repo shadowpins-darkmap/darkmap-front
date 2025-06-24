@@ -1,29 +1,32 @@
 <template>
-  <div>
-    <h3>글쓰기</h3>
+  <div class="form_wrap">
     <BaseDropdown
       :list="categories"
       :selected="selectedCategory"
       :onSelect="handleCategorySelect"
     />
-    <input
-      type="text"
-      placeholder="제목을 입력하세요"
-      class="input_title"
+    <BaseInput
       v-model="title"
+      :id="write_title"
+      label="제목"
+      placeholder="제목을 입력하세요"
     />
-    <textarea
-      placeholder="내용을 입력하세요"
-      class="input_content"
+    <BaseTextarea
       v-model="content"
-    ></textarea>
-    <button class="submit_button" @click="submitPost">올리기</button>
+      label="내용"
+      placeholder="내용을 입력하세요"
+      :id="write_contents"
+      :height="'300px'"
+    />
+    <button class="submit_button" @click="submitPost">글쓰기</button>
   </div>
 </template>
 
 <script setup>
 import { ref, defineEmits } from 'vue';
 import BaseDropdown from '@/components/BaseDropdown.vue';
+import BaseInput from '@/components/communityPopup/BaseInput.vue';
+import BaseTextarea from '@/components/communityPopup/BaseTextarea.vue';
 
 const categories = ['제보', '기억', '고민', '질문', '미분류'];
 const selectedCategory = ref(categories[0]);
@@ -44,6 +47,14 @@ const submitPost = () => {
 </script>
 
 <style scoped>
+.form_wrap {
+  padding-top: 40px;
+  display: flex;
+  flex-direction: column;
+}
+.form_wrap > *:first-child {
+  margin-bottom: 16px;
+}
 .input_title,
 .input_content {
   width: 100%;
@@ -58,13 +69,14 @@ const submitPost = () => {
   resize: none;
 }
 .submit_button {
-  margin-top: 16px;
   background: black;
   color: white;
+  font-size: 14px;
+  font-weight: bold;
   padding: 10px;
-  width: 100%;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+  width: 136px;
+  border: 2px solid #f1cfc8;
+  border-radius: 42px;
+  align-self: self-end;
 }
 </style>
