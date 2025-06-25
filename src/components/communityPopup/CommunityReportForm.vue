@@ -38,6 +38,16 @@
     />
     <button class="submit_button" @click="submitPost">제보</button>
   </div>
+
+  <BaseAlertPopup
+    v-if="showPopup"
+    title="제보를 완료했습니다."
+    @confirm="showPopup = false"
+  >
+    <p>
+      사이트 운영진의 검토후 장소가 등록되면<br />등록하신 이메일로 알려드려요
+    </p>
+  </BaseAlertPopup>
 </template>
 
 <script setup>
@@ -45,11 +55,16 @@ import { ref, defineEmits } from 'vue';
 import BaseDropdown from '@/components/BaseDropdown.vue';
 import BaseInput from '@/components/communityPopup/BaseInput.vue';
 import BaseTextarea from '@/components/communityPopup/BaseTextarea.vue';
+import BaseAlertPopup from '@/components/BaseAlert.vue';
 
 const categories = ['제보'];
 const selectedCategory = ref(categories[0]);
 const title = ref('');
+const location = ref('');
 const content = ref('');
+const image = ref('');
+const url = ref('');
+const showPopup = ref(false);
 
 const handleCategorySelect = (item) => {
   selectedCategory.value = item;
@@ -61,6 +76,7 @@ const submitPost = () => {
     title: title.value,
     content: content.value,
   });
+  showPopup.value = true;
 };
 </script>
 

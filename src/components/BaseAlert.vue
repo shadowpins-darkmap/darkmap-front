@@ -1,74 +1,66 @@
 <template>
-  <div class="BaseAlert">
-    <div class="BaseAlert__overlay"></div>
-    <div class="BaseAlert__content">
-      <div class="BaseAlert__message">{{ message }}</div>
-      <button @click="handleConfirm" class="BaseAlert__confirm">확인</button>
+  <div class="base_alert_backdrop">
+    <div class="base_alert_popup">
+      <p class="popup_title">{{ title }}</p>
+      <p class="popup_description"><slot></slot></p>
+      <button class="confirm_button" @click="$emit('confirm')">확인</button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
-import '@/styles/BaseAlert.scss'
-
+import { defineProps, defineEmits } from 'vue';
 defineProps({
-  message: {
+  title: {
     type: String,
     required: true,
   },
-})
-
-const emit = defineEmits(['confirm'])
-
-const handleConfirm = () => {
-  emit('confirm')
-}
+});
+defineEmits(['confirm']);
 </script>
 
-<style scoped lang="scss">
-.BaseAlert {
+<style scoped>
+.base_alert_backdrop {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   z-index: 9999;
+}
 
-  &__overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-  }
+.base_alert_popup {
+  background: #6d54ce;
+  border-radius: 16px;
+  border: 2px solid #f1cfc8;
+  padding: 30px;
+  text-align: center;
+  color: #fff;
+  min-width: 300px;
+}
 
-  &__content {
-    position: relative;
-    background: #6d54ce;
-    margin: 0 30px;
-    padding: 20px;
-    border-radius: 20px;
-    border: 1px solid #ffefeb;
-  }
+.popup_title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
 
-  &__message {
-    color: #ffffff;
-    font-size: 14px;
-    line-height: 22px;
-    font-weight: 400;
-    text-align: center;
-  }
+.popup_description {
+  font-size: 14px;
+  line-height: 1.2;
+  margin-bottom: 24px;
+}
 
-  &__confirm {
-    margin-top: 24px;
-    padding: 10px 46px;
-    background: #ffefeb;
-    color: #6d54ce;
-    border: none;
-    border-radius: 16px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-  }
+.confirm_button {
+  background: #000;
+  color: #fff;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 8px;
+  min-width: 120px;
+  border: none;
+  cursor: pointer;
 }
 </style>
