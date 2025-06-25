@@ -81,7 +81,7 @@
   </div>
   <!-- 글등록 버튼  -->
   <div class="write_button_wrap">
-    <button class="write_button" @click="isPopupOpen = true">
+    <button class="write_button" @click="isWritePopupOpen = true">
       광장에 글쓰기
       <img
         src="@/assets/slideCardArrow.svg"
@@ -91,7 +91,7 @@
         height="14"
       />
     </button>
-    <button class="write_button">
+    <button class="write_button" @click="isReportPopupOpen = true">
       길거리 괴롭힘 제보하기
       <img
         src="@/assets/slideCardArrow.svg"
@@ -103,8 +103,11 @@
     </button>
   </div>
   <!-- 팝업  -->
-  <CommonPopup :visible="isPopupOpen" @close="isPopupOpen = false">
+  <CommonPopup :visible="isWritePopupOpen" @close="isWritePopupOpen = false">
     <CommunityWriteForm />
+  </CommonPopup>
+  <CommonPopup :visible="isReportPopupOpen" @close="isReportPopupOpen = false">
+    <CommunityReportForm />
   </CommonPopup>
 </template>
 
@@ -116,6 +119,7 @@ import GradientScroll from '@/components/gradientScroll/GradientScroll.vue';
 import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
 import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
 import CommunityWriteForm from '@/components/communityPopup/CommunityWriteForm.vue';
+import CommunityReportForm from '@/components/communityPopup/CommunityReportForm.vue';
 
 const categories = ['전체', '공지', '제보', '기억', '고민', '질문', '미분류'];
 const selectedCategory = ref('전체');
@@ -124,7 +128,8 @@ const currentPage = ref(1);
 const itemsPerPage = 6;
 
 // 글쓰기 팝업
-const isPopupOpen = ref(false);
+const isWritePopupOpen = ref(false);
+const isReportPopupOpen = ref(false);
 
 // 더미 데이터 TODO
 const postList = Array.from({ length: 140 }, (_, i) => ({

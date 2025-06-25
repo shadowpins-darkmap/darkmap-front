@@ -8,17 +8,35 @@
     <BaseInput
       v-model="title"
       :id="write_title"
-      label="제목"
-      placeholder="제목을 입력하세요"
+      label="유형 (필수)"
+      placeholder="길거리 괴롭힘의 유형을 알려주세요."
+    />
+    <BaseInput
+      v-model="location"
+      :id="write_location"
+      label="위치 (필수)"
+      placeholder="구체적인 장소를 알 수 없다면 ‘구', ‘동’ 까지만 적으셔도 됩니다."
     />
     <BaseTextarea
       v-model="content"
-      label="내용"
-      placeholder="내용을 입력하세요"
+      label="내용 (필수)"
+      placeholder="자신이 알고있거나 직간접적으로 경험한 사건의 경위 내용을 간략히 설명해주세요."
       :id="write_contents"
-      :height="'300px'"
+      :height="'100px'"
     />
-    <button class="submit_button" @click="submitPost">글쓰기</button>
+    <BaseInput
+      v-model="image"
+      :id="write_image"
+      label="이미지"
+      placeholder="10mb 이하의 png, jpeg, gif 만  첨부 가능합니다."
+    />
+    <BaseInput
+      v-model="url"
+      :id="write_url"
+      label="뉴스기사 URL"
+      placeholder="언론에 다뤄진 적이 있다면 뉴스기사 링크를 첨부해주세요. "
+    />
+    <button class="submit_button" @click="submitPost">제보</button>
   </div>
 </template>
 
@@ -28,7 +46,7 @@ import BaseDropdown from '@/components/BaseDropdown.vue';
 import BaseInput from '@/components/communityPopup/BaseInput.vue';
 import BaseTextarea from '@/components/communityPopup/BaseTextarea.vue';
 
-const categories = ['기억', '고민', '질문', '미분류'];
+const categories = ['제보'];
 const selectedCategory = ref(categories[0]);
 const title = ref('');
 const content = ref('');
