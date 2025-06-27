@@ -99,7 +99,6 @@ onBeforeUnmount(() => {
   overflow: hidden;
 }
 .scroll_area {
-  white-space: nowrap;
   scrollbar-width: none;
   -ms-overflow-style: none;
   &.horizontal {
@@ -111,6 +110,9 @@ onBeforeUnmount(() => {
   &.vertical {
     overflow-y: auto;
     overflow-x: hidden;
+    white-space: pre-wrap;
+    word-break: keep-all;
+    height: 100%;
   }
 }
 

@@ -39,7 +39,7 @@
     <!-- 광장 게시글 리스트 -->
     <ul class="community_list_wrap scroll_area">
       <li class="community_list" v-for="item in currentItems" :key="item.id">
-        <button class="community_list_button">
+        <button class="community_list_button" @click="openDetail(item)">
           <span class="community_list_profile">
             <img
               src="@/assets/profileDefault.svg"
@@ -102,6 +102,7 @@
       />
     </button>
   </div>
+
   <!-- 팝업  -->
   <CommonPopup :visible="isWritePopupOpen" @close="isWritePopupOpen = false">
     <CommunityWriteForm />
@@ -109,6 +110,19 @@
   <CommonPopup :visible="isReportPopupOpen" @close="isReportPopupOpen = false">
     <CommunityReportForm />
   </CommonPopup>
+
+  <!-- SlidePanel s -->
+  <SlidePanel
+    :width="'510px'"
+    :visible="isPanel2depsOpen"
+    :right="'510px'"
+    @close="isPanel2depsOpen = false"
+  >
+    <CommunityListDetailPanel
+      :post="selectedPost"
+      @close="isPanel2depsOpen = false"
+    />
+  </SlidePanel>
 </template>
 
 <script setup>
@@ -120,16 +134,28 @@ import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
 import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
 import CommunityWriteForm from '@/components/communityPopup/CommunityWriteForm.vue';
 import CommunityReportForm from '@/components/communityPopup/CommunityReportForm.vue';
+import CommunityListDetailPanel from '@/components/communityPanel/CommunityListDetailPanel.vue';
+
+import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
 
 const categories = ['전체', '공지', '제보', '기억', '고민', '질문', '미분류'];
 const selectedCategory = ref('전체');
+const selectedPost = ref(null);
+
 //  페이지네이션 상태
 const currentPage = ref(1);
 const itemsPerPage = 6;
+// 상세 페이지 슬라이드
+const isPanel2depsOpen = ref(false);
 
 // 글쓰기 팝업
 const isWritePopupOpen = ref(false);
 const isReportPopupOpen = ref(false);
+
+const openDetail = (item) => {
+  selectedPost.value = item;
+  isPanel2depsOpen.value = true;
+};
 
 // 더미 데이터 TODO
 const postList = Array.from({ length: 140 }, (_, i) => ({
