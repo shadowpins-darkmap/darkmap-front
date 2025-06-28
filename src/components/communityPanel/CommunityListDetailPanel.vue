@@ -21,62 +21,100 @@
         />
       </div>
 
-      <div class="detail_content_area">
-        <div class="detail_top_profile">
-          <span class="detail_nickname">{{ post.nickname }} </span>
-          <span class="detail_count_wrap">
-            <span class="detail_count">
-              <span class="detail_comment">댓글 {{ post.comments }}</span>
-              <span class="detail_likes">좋아요 {{ post.likes }}</span>
-              <span class="detail_view">조회수 {{ post.views }}</span>
-            </span>
-            <span class="detail_count">
-              <span> 2025-05-05 </span>
-              <span>PM 8:00</span>
-            </span>
+      <div class="detail_top_profile">
+        <span class="detail_nickname">{{ post.nickname }} </span>
+        <span class="detail_count_wrap">
+          <span class="detail_count">
+            <span class="detail_comment">댓글 {{ post.comments }}</span>
+            <span class="detail_likes">좋아요 {{ post.likes }}</span>
+            <span class="detail_view">조회수 {{ post.views }}</span>
           </span>
-        </div>
-        <!-- 본문 스크롤 영역 -->
-        <GradientScroll
-          :width="'336px'"
-          :height="'400px'"
-          direction="vertical"
-          gradient-color="rgba(64,64,64,1.5)"
-        >
-          <p class="detail_content">
-            `안녕하세요.동네에 살면서 이런 글을 쓰게 될 줄은 몰랐는데, 요즘 너무
-            불안해서 용기 내어 남깁니다. 저는 ○○아파트 사는 30대 직장인
-            여성입니다.며칠 전 밤 11시쯤, 집 앞 쓰레기장에 음식물 쓰레기 버리러
-            나갔는데같은 단지에 사는 이웃 아저씨 한 분이 계속
-            따라오시더라고요.처음엔 우연인가 싶었는데, 제가 집으로 다시 들어갈
-            때까지 10미터쯤 떨어져서 따라오셨고엘리베이터 앞에서도 말을 걸며
-            번호를 묻는 등 불쾌한 행동을 하셨어요. 그날 이후로 밤에 쓰레기
-            버리는 것도 무서워졌고, 몇 번 더 마주쳤는데 계속 힐끔거리며
-            쳐다보셔서혹시 저만 겪은 게 아닌가 싶어 이렇게 글 올립니다. 이런
-            경우 관리사무소에 먼저 이야기해야 할까요? 아니면 바로 경찰에 말해야
-            할지 고민 중이에요.혹시 비슷한 경험 있으시거나 조언 주실 수 있는 분
-            계시면 댓글 부탁드립니다.같은 동네에 사는 여성분들 특히 조심하시길
-            바라요. 이야기해야 할까요? 아니면 바로 경찰에 말해야 할지 고민
-            중이에요.혹시 비슷한 경험 있으시거나 조언 주실 수 있는 분 계시면
-            댓글 부탁드립니다.같은 동네에 사는 여성분들 특히 조심하시길 바라요.
-            이야기해야 할까요? 아니면 바로 경찰에 말해야 할지 고민 중이에요.혹시
-            비슷한 경험 있으시거나 조언 주실 수 있는 분 계시면 댓글
-            부탁드립니다.같은 동네에 사는 여성분들 특히 조심하시길 바라요.
-            이야기해야 할까요? 아니면 바로 경찰에 말해야 할지 고민 중이에요.혹시
-            비슷한 경험 있으시거나 조언 주실 수 있는 분 계시면 댓글
-            부탁드립니다.같은 동네에 사는 여성분들 특히 조심하시길 바라요.
-            이야기해야 할까요? 아니면 바로 경찰에 말해야 할지 고민 중이에요.혹시
-            비슷한 경험 있으시거나 조언 주실 수 있는 분 계시면 댓글
-            부탁드립니다.같은 동네에 사는 여성분들 특히 조심하시길 바라요.
-            이야기해야 할까요? 아니면 바로 경찰에 말해야 할지 고민 중이에요.혹시
-            비슷한 경험 있으시거나 조언 주실 수 있는 분 계시면 댓글
-            부탁드립니다.같은 동네에 사는 여성분들 특히 조심하시길 바라요. `
-          </p>
-        </GradientScroll>
+          <span class="detail_count">
+            <span>PM 8:00</span>
+            <span> 2025-05-05 </span>
+          </span>
+        </span>
       </div>
     </div>
-
-    <!-- 댓글 영역 -->
+    <!-- 본문 스크롤 영역 -->
+    <GradientScroll
+      :width="'100%'"
+      :height="'400px'"
+      direction="vertical"
+      gradient-color="rgba(64,64,64,1.5)"
+    >
+      <!-- 본문 내용 -->
+      <div class="detail_content_wrap">
+        <p class="detail_content">
+          `안녕하세요.동네에 살면서 이런 글을 쓰게 될 줄은 몰랐는데`
+        </p>
+        <div class="detail_icon_wrap">
+          <!-- 좋아요 아이콘 -->
+          <button class="detail_icon_button" aria-label="좋아요">
+            <img src="@/assets/commentHeartIcon.svg" alt="like" />
+            <span class="detail_icon_text"> 이 글을 추천해요 </span>
+          </button>
+          <!-- 신고 아이콘 -->
+          <button class="detail_icon_button" aria-label="신고">
+            <img src="@/assets/commentReportIcon.svg" alt="report" />
+            <span class="detail_icon_text"> 이 글을 신고하고 싶어요 </span>
+          </button>
+        </div>
+      </div>
+      <!-- 댓글 게시 영역 -->
+      <div class="comments_list_wrap">
+        <ul>
+          <li
+            v-for="comment in comments"
+            :key="comment.id"
+            class="comments_item"
+          >
+            <div class="comment_profile">
+              <img
+                src="@/assets/profileDefault.svg"
+                alt="profile"
+                width="40"
+                height="40"
+              />
+              <span class="comment_nickname">{{ comment.nickname }}</span>
+            </div>
+            <!-- 댓글 내용 영역 -->
+            <div class="comment_bubble_wrap">
+              <span class="comment_data_wrap">
+                <span class="comment_data">{{ comment.updateDate }}</span>
+                <span class="comment_data">{{ comment.updateTime }}</span>
+                <span class="comment_data"
+                  >추천 {{ comment.recommendCount }}</span
+                >
+              </span>
+              <span class="comment_bubble">
+                <p class="comment_content">{{ comment.content }}</p>
+              </span>
+              <span class="comment_icons">
+                <!-- 댓글 좋아요 아이콘 -->
+                <button class="icon_button" aria-label="좋아요">
+                  <img src="@/assets/commentHeartIcon.svg" alt="like" />
+                </button>
+                <!-- 댓글 신고 아이콘 -->
+                <button class="icon_button" aria-label="신고">
+                  <img src="@/assets/commentReportIcon.svg" alt="report" />
+                </button>
+                <!-- 내가 쓴 댓글이면 삭제 아이콘 표시 -->
+                <button
+                  v-if="comment.nickname === myNickname"
+                  class="icon_button"
+                  aria-label="삭제"
+                  @click="deleteComment(comment.id)"
+                >
+                  <img src="@/assets/commentDeleteIcon.svg" alt="delete" />
+                </button>
+              </span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </GradientScroll>
+    <!-- 댓글 등록 영역 -->
     <div class="comment_footer">
       <div class="comment_input_wrap">
         <textarea
@@ -86,6 +124,7 @@
           maxlength="490"
           id="comment_text"
           @input="updateLength"
+          @keydown.enter.prevent="handleEnter"
         ></textarea>
         <span class="char_count">{{ comment.length }}/490</span>
       </div>
@@ -127,7 +166,7 @@
 
 <script setup>
 // emits: close, openDetail
-import { ref, defineProps } from 'vue';
+import { ref, defineProps, nextTick } from 'vue';
 import GradientScroll from '@/components/gradientScroll/GradientScroll.vue';
 
 defineProps({
@@ -150,6 +189,65 @@ const submitComment = () => {
   // TODO: API 호출 또는 emit
   console.log('댓글 등록:', comment.value);
   comment.value = '';
+};
+
+const handleEnter = (e) => {
+  if (e.shiftKey) {
+    // 쉬프트 + 엔터: 줄바꿈
+    const pos = e.target.selectionStart;
+    comment.value =
+      comment.value.slice(0, pos) + '\n' + comment.value.slice(pos);
+    nextTick(() => {
+      e.target.selectionStart = e.target.selectionEnd = pos + 1;
+    });
+  } else {
+    submitComment();
+  }
+};
+
+// 댓슬 리스트
+// 더미 데이터 TODO
+const myNickname = '붉은핀';
+
+const comments = ref([
+  {
+    id: 1,
+    nickname: '정말 무서운 경험이셨겠어요0',
+    content: '미친... 저도 비슷한 일 있어서 쓰레기 버릴때마다 긴장해요.',
+    updateDate: '2025-05-05',
+    updateTime: 'PM 8:00',
+    recommendCount: 999,
+  },
+  {
+    id: 2,
+    nickname: '붉은핀',
+    content: '댓글 테스트',
+    updateDate: '2025-05-05',
+    updateTime: 'PM 8:00',
+    recommendCount: 0,
+  },
+  {
+    id: 3,
+    nickname: '붉은핀',
+    content:
+      '저도 비슷한 경험이 있어서 너무 공감이 됩니다. 밤늦게 집에 들어갈 때마다 괜히 뒤를 한 번 더 돌아보게 되고, 누가 따라오는 건 아닌지 긴장하게 돼요. 그럴 때마다 괜히 핸드폰을 귀에 대고 통화하는 척하거나, 이어폰을 빼고 주변 소리에 더 집중하게 되더라고요. 사실 이런 불안감은 겪어본 사람만 알 수 있는 감정인데, 이렇게 공유해주셔서 감사해요. 저는 한번은 집 앞에서 모르는 사람이 갑자기 말을 걸어서 너무 놀란 적도 있어요. 그런 경험이 쌓이다 보니 외출 자체가 두려워졌고, 밤에는 될 수 있으면 외출을 피하게 되었어요. 혼자 사는 여성분들 정말 조심하셔야 하고, 이런 일은 그냥 넘기지 말고 주변에 알리는 게 중요한 것 같아요. 저도 다음부터는 바로 신고하거나 관리사무소에 알려보려고요. 부디 더 이상 불쾌한 일이 없길 바랍니다.',
+    updateDate: '2025-05-05',
+    updateTime: 'PM 8:00',
+    recommendCount: 9,
+  },
+  {
+    id: 4,
+    nickname: '이런 일은 다시 없길 바라요2',
+    content:
+      '저도 비슷한 경험이 있어서 너무 공감이 됩니다. 밤늦게 집에 들어갈 때마다 괜히 뒤를 한 번 더 돌아보게 되고, 누가 따라오는 건 아닌지 긴장하게 돼요. 그럴 때마다 괜히 핸드폰을 귀에 대고 통화하는 척하거나, 이어폰을 빼고 주변 소리에 더 집중하게 되더라고요. 사실 이런 불안감은 겪어본 사람만 알 수 있는 감정인데, 이렇게 공유해주셔서 감사해요. 저는 한번은 집 앞에서 모르는 사람이 갑자기 말을 걸어서 너무 놀란 적도 있어요. 그런 경험이 쌓이다 보니 외출 자체가 두려워졌고, 밤에는 될 수 있으면 외출을 피하게 되었어요. 혼자 사는 여성분들 정말 조심하셔야 하고, 이런 일은 그냥 넘기지 말고 주변에 알리는 게 중요한 것 같아요. 저도 다음부터는 바로 신고하거나 관리사무소에 알려보려고요. 부디 더 이상 불쾌한 일이 없길 바랍니다.',
+    updateDate: '2025-05-05',
+    updateTime: 'PM 8:00',
+    recommendCount: 9,
+  },
+]);
+// 내 댓글 지우기
+const deleteComment = (id) => {
+  comments.value = comments.value.filter((c) => c.id !== id);
 };
 </script>
 
@@ -178,6 +276,7 @@ const submitComment = () => {
 .profile_img_wrap {
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
   padding-top: 20px;
 }
 .profile_detail_img_box {
@@ -188,10 +287,10 @@ const submitComment = () => {
 
 .detail_top_profile {
   display: flex;
+  width: 100%;
   justify-content: space-between;
   margin-bottom: 20px;
 }
-
 .detail_nickname {
   font-size: 24px;
   font-weight: bold;
@@ -200,6 +299,9 @@ const submitComment = () => {
   align-items: center;
   line-height: 1.5;
   max-width: 196px;
+}
+.detail_content_wrap {
+  padding-left: 95px;
 }
 .detail_count_wrap {
   padding-top: 10px;
@@ -211,6 +313,7 @@ const submitComment = () => {
 }
 .detail_count {
   display: flex;
+  flex-direction: row-reverse;
   gap: 5px;
 }
 .detail_content {
@@ -218,18 +321,100 @@ const submitComment = () => {
   word-break: keep-all;
   line-height: 1.6;
 }
+.detail_icon_wrap {
+  padding: 30px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+.detail_icon_button {
+}
+.detail_icon_text {
+  font-size: 10px;
+  color: #00ffc2;
+}
 
-// 댓글 영역
-.comment_input_wrap {
-  background-color: #f1cfc8;
+/* 댓글 게시 영역 */
+.comments_list_wrap {
+  border-top: 1px solid #fff;
+  padding: 20px 0;
+}
+.comments_list_wrap ul {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.comments_item {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 15px;
+  position: relative;
+}
+.comment_profile {
+  display: flex;
+  width: 100px;
+  flex-wrap: nowrap;
+}
+.comment_nickname {
+  font-size: 12px;
+  color: #bdb2e9;
+  word-break: break-word;
+  margin-left: 8px;
+}
+.comment_bubble_wrap {
+  width: calc(100% - 110px);
+  display: flex;
+  flex-direction: column;
+}
+.comment_data_wrap {
+  display: flex;
+  align-self: flex-end;
+  gap: 5px;
+  position: absolute;
+  right: 3px;
+  top: -5px;
+}
+.comment_data {
+  color: #9886dc;
+  font-size: 12px;
+}
+
+.comment_bubble {
+  background-color: #292929;
+  border-radius: 6px;
   padding: 20px;
+}
+.comment_content {
+  line-height: 1.4;
+  font-size: 14px;
+}
+.comment_icons {
+  display: flex;
+  align-self: flex-end;
+  gap: 10px;
+  padding-top: 10px;
+}
+.icon_button {
+}
+
+/* 댓글 등록 영역  */
+.comment_input_wrap {
+  background-color: #cfc3d9;
+  padding: 15px;
   border-radius: 12px;
   height: 80px;
+  border: 2px solid #f1cfc8;
+  display: flex;
+  flex-direction: column;
 }
 .comment_textarea {
-  background-color: #f1cfc8;
+  background-color: #cfc3d9;
   border: none;
   width: 100%;
+}
+.comment_textarea::placeholder {
+  color: #735bcf;
 }
 .comment_footer {
   display: flex;
@@ -240,7 +425,7 @@ const submitComment = () => {
 }
 .char_count {
   font-size: 14px;
-  color: #000;
+  color: #735bcf;
   display: flex;
   align-items: center;
   justify-content: flex-end;
