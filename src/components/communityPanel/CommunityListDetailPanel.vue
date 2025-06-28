@@ -162,12 +162,16 @@
   </div>
 
   <!-- 팝업  -->
+  <BaseAlertPopup v-if="showPopup" @confirm="showPopup = false">
+    <p>댓글이 삭제되었습니다.</p>
+  </BaseAlertPopup>
 </template>
 
 <script setup>
 // emits: close, openDetail
 import { ref, defineProps, nextTick } from 'vue';
 import GradientScroll from '@/components/gradientScroll/GradientScroll.vue';
+import BaseAlertPopup from '@/components/BaseAlert.vue';
 
 defineProps({
   post: {
@@ -177,6 +181,7 @@ defineProps({
 });
 
 const comment = ref('');
+const showPopup = ref(false);
 
 const updateLength = () => {
   if (comment.value.length > 490) {
@@ -248,6 +253,7 @@ const comments = ref([
 // 내 댓글 지우기
 const deleteComment = (id) => {
   comments.value = comments.value.filter((c) => c.id !== id);
+  showPopup.value = true;
 };
 </script>
 
