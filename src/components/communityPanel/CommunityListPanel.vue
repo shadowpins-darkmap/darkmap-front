@@ -166,6 +166,8 @@ const postList = Array.from({ length: 140 }, (_, i) => ({
   comments: Math.floor(Math.random() * 200),
   likes: Math.floor(Math.random() * 20),
   views: Math.floor(Math.random() * 1000),
+  userLiked: false,
+  userReport: false,
 }));
 
 const totalPages = computed(() => Math.ceil(postList.length / itemsPerPage));

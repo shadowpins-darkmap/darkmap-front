@@ -18,6 +18,12 @@
       :id="write_contents"
       :height="'300px'"
     />
+    <BaseInput
+      v-model="image"
+      :id="write_image"
+      label="이미지"
+      placeholder="10mb 이하의 png, jpeg, gif 만  첨부 가능합니다."
+    />
     <button class="submit_button" @click="submitPost">글쓰기</button>
   </div>
 </template>
@@ -32,6 +38,7 @@ const categories = ['기억', '고민', '질문', '미분류'];
 const selectedCategory = ref(categories[0]);
 const title = ref('');
 const content = ref('');
+const image = ref('');
 
 const handleCategorySelect = (item) => {
   selectedCategory.value = item;

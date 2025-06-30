@@ -9,7 +9,7 @@
       />
     </button>
 
-    <strong class="detail_title">{{ post.title }}</strong>
+    <strong class="detail_title">{{ props.post.title }}</strong>
 
     <div class="profile_img_wrap">
       <div class="profile_detail_img_box">
@@ -22,12 +22,12 @@
       </div>
 
       <div class="detail_top_profile">
-        <span class="detail_nickname">{{ post.nickname }} </span>
+        <span class="detail_nickname">{{ props.post.nickname }} </span>
         <span class="detail_count_wrap">
           <span class="detail_count">
-            <span class="detail_comment">댓글 {{ post.comments }}</span>
-            <span class="detail_likes">좋아요 {{ post.likes }}</span>
-            <span class="detail_view">조회수 {{ post.views }}</span>
+            <span class="detail_comment">댓글 {{ props.post.comments }}</span>
+            <span class="detail_likes">좋아요 {{ props.post.likes }}</span>
+            <span class="detail_view">조회수 {{ props.post.views }}</span>
           </span>
           <span class="detail_count">
             <span>PM 8:00</span>
@@ -50,13 +50,35 @@
         </p>
         <div class="detail_icon_wrap">
           <!-- 좋아요 아이콘 -->
-          <button class="detail_icon_button" aria-label="좋아요">
-            <img src="@/assets/commentHeartIcon.svg" alt="like" />
+          <button
+            class="detail_icon_button"
+            aria-label="좋아요"
+            @click="togglePostLike"
+          >
+            <img
+              :src="
+                isPostLiked
+                  ? require('@/assets/commentHeartIconOn.svg')
+                  : require('@/assets/commentHeartIconOff.svg')
+              "
+              alt="like"
+            />
             <span class="detail_icon_text"> 이 글을 추천해요 </span>
           </button>
           <!-- 신고 아이콘 -->
-          <button class="detail_icon_button" aria-label="신고">
-            <img src="@/assets/commentReportIcon.svg" alt="report" />
+          <button
+            class="detail_icon_button"
+            aria-label="신고"
+            @click="openReportPopup('post', props.post.id)"
+          >
+            <img
+              :src="
+                isPostReport
+                  ? require('@/assets/commentReportIconOn.svg')
+                  : require('@/assets/commentReportIconOff.svg')
+              "
+              alt="report"
+            />
             <span class="detail_icon_text"> 이 글을 신고하고 싶어요 </span>
           </button>
         </div>
@@ -92,12 +114,34 @@
               </span>
               <span class="comment_icons">
                 <!-- 댓글 좋아요 아이콘 -->
-                <button class="icon_button" aria-label="좋아요">
-                  <img src="@/assets/commentHeartIcon.svg" alt="like" />
+                <button
+                  class="icon_button"
+                  aria-label="좋아요"
+                  @click="toggleLike(comment.id)"
+                >
+                  <img
+                    :src="
+                      likedComments.has(comment.id)
+                        ? require('@/assets/commentHeartIconOn.svg')
+                        : require('@/assets/commentHeartIconOff.svg')
+                    "
+                    alt="like"
+                  />
                 </button>
                 <!-- 댓글 신고 아이콘 -->
-                <button class="icon_button" aria-label="신고">
-                  <img src="@/assets/commentReportIcon.svg" alt="report" />
+                <button
+                  class="icon_button"
+                  aria-label="신고"
+                  @click="openReportPopup('comment', comment.id)"
+                >
+                  <img
+                    :src="
+                      likedComments.has(comment.id)
+                        ? require('@/assets/commentReportIconOn.svg')
+                        : require('@/assets/commentReportIconOff.svg')
+                    "
+                    alt="report"
+                  />
                 </button>
                 <!-- 내가 쓴 댓글이면 삭제 아이콘 표시 -->
                 <button
@@ -162,9 +206,32 @@
   </div>
 
   <!-- 팝업  -->
-  <BaseAlertPopup v-if="showPopup" @confirm="showPopup = false">
+  <BaseAlertPopup v-if="showDeletePopup" @confirm="showDeletePopup = false">
     <p>댓글이 삭제되었습니다.</p>
   </BaseAlertPopup>
+  <BaseAlertPopup v-if="showLikePopup" @confirm="showLikePopup = false">
+    <p>{{ `snrn` }}님의 댓글을 추천했습니다!</p>
+  </BaseAlertPopup>
+  <BaseAlertPopup v-if="showCommentPopup" @confirm="showCommentPopup = false">
+    <p>댓글이 등록되었습니다.</p>
+  </BaseAlertPopup>
+  <BaseAlertPopup
+    v-if="showReportSuccesePopup"
+    title="신고를 완료했습니다."
+    @confirm="showReportSuccesePopup = false"
+  >
+    <p>
+      사이트 운영진의 검토가 끝나면<br />등록하신 이메일로 관련 조치를
+      알려드려요<br />해당 안내는 3~14일정도 소요될 수 있습니다.
+    </p>
+  </BaseAlertPopup>
+  <CommonPopup :visible="showReportPopup" @close="showReportPopup = false">
+    <CommunityPostReportForm
+      :type="reportTarget.type"
+      :id="reportTarget.id"
+      @report-complete="onReportComplete"
+    />
+  </CommonPopup>
 </template>
 
 <script setup>
@@ -172,8 +239,10 @@
 import { ref, defineProps, nextTick } from 'vue';
 import GradientScroll from '@/components/gradientScroll/GradientScroll.vue';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
+import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
+import CommunityPostReportForm from '@/components/communityPopup/CommunityPostReportForm.vue';
 
-defineProps({
+const props = defineProps({
   post: {
     type: Object,
     required: true,
@@ -181,7 +250,49 @@ defineProps({
 });
 
 const comment = ref('');
-const showPopup = ref(false);
+const showDeletePopup = ref(false);
+const showLikePopup = ref(false);
+const showCommentPopup = ref(false);
+const showReportSuccesePopup = ref(false);
+
+const showReportPopup = ref(false);
+const reportTarget = ref({ type: '', id: null });
+// 게시글 신고
+const isPostReport = ref(props.post.userReport ?? false);
+const reportedComments = ref(new Set());
+
+const openReportPopup = (type, id) => {
+  // type : "post" || "comment"
+  reportTarget.value = { type, id };
+  showReportPopup.value = true;
+};
+const onReportComplete = (type, id) => {
+  showReportPopup.value = false;
+  showReportSuccesePopup.value = true;
+
+  if (type === 'post') {
+    isPostReport.value = true;
+  } else if (type === 'comment') {
+    reportedComments.value.add(id);
+  }
+};
+
+// 게시글 좋아요
+const isPostLiked = ref(props.post.userLiked ?? false);
+
+const togglePostLike = () => {
+  isPostLiked.value = !isPostLiked.value;
+
+  // TODO: 서버에 좋아요/취소 요청 보내기
+  // 예시:
+  // if (isPostLiked.value) {
+  //   await api.likePost(post.id);
+  // } else {
+  //   await api.unlikePost(post.id);
+  // }
+
+  showLikePopup.value = true;
+};
 
 const updateLength = () => {
   if (comment.value.length > 490) {
@@ -253,7 +364,21 @@ const comments = ref([
 // 내 댓글 지우기
 const deleteComment = (id) => {
   comments.value = comments.value.filter((c) => c.id !== id);
-  showPopup.value = true;
+  showDeletePopup.value = true;
+};
+
+// 각 댓글의 좋아요 상태를 저장할 Map
+const likedComments = ref(new Set());
+const toggleLike = (commentId) => {
+  if (likedComments.value.has(commentId)) {
+    // 좋아요 취소 요청 (선택사항)
+    likedComments.value.delete(commentId);
+    // TODO: 서버에 좋아요 취소 요청 API 호출
+  } else {
+    likedComments.value.add(commentId);
+    // TODO: 서버에 좋아요 등록 요청 API 호출
+    showLikePopup.value = true;
+  }
 };
 </script>
 
