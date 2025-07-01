@@ -7,13 +7,13 @@
     />
     <BaseInput
       v-model="title"
-      :id="write_title"
+      :id="'write_title'"
       label="유형 (필수)"
       placeholder="길거리 괴롭힘의 유형을 알려주세요."
     />
     <BaseInput
       v-model="location"
-      :id="write_location"
+      :id="'write_location'"
       label="위치 (필수)"
       placeholder="구체적인 장소를 알 수 없다면 ‘구', ‘동’ 까지만 적으셔도 됩니다."
     />
@@ -21,18 +21,20 @@
       v-model="content"
       label="내용 (필수)"
       placeholder="자신이 알고있거나 직간접적으로 경험한 사건의 경위 내용을 간략히 설명해주세요."
-      :id="write_contents"
+      :id="'write_detail'"
       :height="'100px'"
     />
     <BaseInput
       v-model="image"
-      :id="write_image"
+      type="file"
       label="이미지"
-      placeholder="10mb 이하의 png, jpeg, gif 만  첨부 가능합니다."
+      :id="'write_image'"
+      :accept="'image/png, image/jpeg, image/gif'"
+      :onChange="handleImage"
     />
     <BaseInput
       v-model="url"
-      :id="write_url"
+      :id="'write_url'"
       label="뉴스기사 URL"
       placeholder="언론에 다뤄진 적이 있다면 뉴스기사 링크를 첨부해주세요. "
     />
@@ -62,9 +64,20 @@ const selectedCategory = ref(categories[0]);
 const title = ref('');
 const location = ref('');
 const content = ref('');
-const image = ref('');
+const imageFile = ref(null);
+const previewUrl = ref('');
 const url = ref('');
 const showPopup = ref(false);
+
+const handleImage = (event) => {
+  const file = event.target.files[0];
+  if (file && file.size < 10 * 1024 * 1024) {
+    imageFile.value = file;
+    previewUrl.value = URL.createObjectURL(file);
+  } else {
+    alert('10mb 이하의 이미지만 첨부할 수 있습니다.');
+  }
+};
 
 const handleCategorySelect = (item) => {
   selectedCategory.value = item;

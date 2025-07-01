@@ -136,7 +136,7 @@
                 >
                   <img
                     :src="
-                      likedComments.has(comment.id)
+                      reportedComments.has(comment.id)
                         ? require('@/assets/commentReportIconOn.svg')
                         : require('@/assets/commentReportIconOff.svg')
                     "

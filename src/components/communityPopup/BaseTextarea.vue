@@ -26,6 +26,10 @@ import { defineProps, defineModel } from 'vue';
 // import GradientScroll from '@/components/gradientScroll/GradientScroll.vue';
 
 defineProps({
+  id: {
+    type: String,
+    required: true,
+  },
   label: String,
   placeholder: String,
   height: String,

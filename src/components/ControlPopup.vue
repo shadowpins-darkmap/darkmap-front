@@ -12,7 +12,7 @@
 
     <!-- 검색 영역  -->
     <div class="search_wrap">
-      <button class="report_button">
+      <button class="report_guide_button" @click="showReportGuide = true">
         <img
           width="80px"
           height="80px"
@@ -159,6 +159,9 @@
       </div>
     </div>
   </div>
+
+  <!-- 팝업 -->
+  <ReportGuidePopup v-if="showReportGuide" @close="showReportGuide = false" />
 </template>
 
 <script setup>
@@ -168,6 +171,10 @@ import AddressFilter from './AddressFilter.vue';
 import addressData from '@/constant/addresses.json';
 import '@/styles/ControlPopup.scss';
 import { ref, computed, defineEmits, watch } from 'vue';
+import ReportGuidePopup from '@/components/searchArea/ReportGuidePopup.vue';
+
+// const showReportGuide = ref(false);
+const showReportGuide = ref(true);
 
 const emits = defineEmits(['changeFilter']);
 

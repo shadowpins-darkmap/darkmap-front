@@ -25,7 +25,7 @@
       <BaseTextarea
         v-model="description"
         placeholder="자신이 알고있거나 직간접적으로 경험한 사건의 경위 내용을 간략히 설명해주세요."
-        :id="write_contents"
+        :id="'write_contents'"
         :height="'300px'"
       />
       <BaseInput
@@ -72,10 +72,21 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, defineProps, defineEmits } from 'vue';
 import BaseInput from '@/components/communityPopup/BaseInput.vue';
 import BaseTextarea from '@/components/communityPopup/BaseTextarea.vue';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
+
+const props = defineProps({
+  type: {
+    type: String, // 'post' | 'comment'
+    required: true,
+  },
+  id: {
+    type: [Number, String],
+    required: true,
+  },
+});
 
 const step = ref(1);
 const selectedType = ref('');
@@ -125,11 +136,14 @@ const handleImage = (event) => {
   }
 };
 
+const emit = defineEmits(['report-complete']);
+
 const submitReport = () => {
   // TODO: 서버로 신고 데이터 전송
   console.log('신고유형:', selectedType.value);
   console.log('내용:', description.value);
   console.log('이미지파일:', imageFile.value);
+  emit('report-complete', props.type, props.id);
 };
 </script>
 
