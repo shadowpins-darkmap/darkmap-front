@@ -1,13 +1,5 @@
 <template>
-  <div
-    class="report_guide_popup_wrap"
-    @click.self="
-      () => {
-        $emit('close');
-        selected.value = null;
-      }
-    "
-  >
+  <div class="report_guide_popup_wrap" @click.self="handleBackgroundClick">
     <!-- 기본 리스트 화면 -->
     <div class="report_guide_popup" v-if="selected === null">
       <button class="popup_close" @click="$emit('close')">
@@ -147,7 +139,7 @@
           height="154"
           class="top_img_tel1366"
         />
-
+        <button class="guide_top_button">바로 전화 하기</button>
         <p class="guide_info_text">
           지방자치단체 직영 또는 비영리법인·민간단체 등에 위탁 운영되는
           <br />
@@ -175,7 +167,7 @@
             height="24"
           />
           <strong> 소개 페이지 가기 </strong>
-          <span> 서울 안심이에 대해 더 궁금하다면? </span>
+          <span> 1366에 대해 더 궁금하다면? </span>
         </button>
       </div>
     </div>
@@ -191,6 +183,43 @@
           />
           뒤로 가기
         </button>
+        <img
+          src="@/assets/tel13881.svg"
+          alt="popup tel1388 img"
+          width="277"
+          height="183"
+          class="top_img_tel1388"
+        />
+        <button class="guide_top_button">바로 전화 하기</button>
+        <p class="guide_info_text">
+          한국청소년상담복지개발원 청소년사이버상담센터에서 운영하는
+          <br />
+          청소년 인권 보호 긴급 24시간 핫라인
+        </p>
+        <strong class="guide_info_title">서비스 이용대상</strong>
+        <p class="guide_info_text">
+          청소년기본법에 따른 만 9~24세 청소년과 부모 및 보호자
+        </p>
+        <strong class="guide_info_title">상담 내용</strong>
+        <p class="guide_info_text">
+          청소년기에 나타날 수 있는 다양한 고민(학업 및 진로, 친구관계,
+          가족문제, 학교폭력, 성폭력 및 성매매 등의 문제, 가출 고민 등) 등에
+          대해 청소년이 직접 전문상담자와 심리상담을 나눌 수 있음청소년기 자녀를
+          둔 부모 및 보호자가 직접 청소년의 건강한 심리적 지도, 지원에 필요한
+          내용을 전문상담자와 상담할 수 있음
+        </p>
+
+        <button class="popup_go_to_button">
+          <img
+            src="@/assets/reportGuideBackArrow.svg"
+            alt="popup go to icon"
+            class="popup_go_to_icon"
+            width="24"
+            height="24"
+          />
+          <strong> 소개 페이지 가기 </strong>
+          <span> 1388에 대해 더 궁금하다면?</span>
+        </button>
       </div>
     </div>
     <!-- 여성단체 상담·의료·법률 지원처 주소록 -->
@@ -205,6 +234,25 @@
           />
           뒤로 가기
         </button>
+        <img
+          src="@/assets/supportMap.svg"
+          alt="popup tel1388 img"
+          width="160"
+          height="160"
+          class="top_img_tel1388"
+        />
+        <button class="guide_top_goto_button">주소록 링크 가기</button>
+        <p class="guide_info_text">
+          페미니즘 활동 그룹 셰도우 핀즈가 수집하고 업데이트하는 여성 폭력
+          지원처 주소록.
+        </p>
+        <strong class="guide_info_title mt_20">포함 범위</strong>
+        <p class="guide_info_text">
+          여성 / 청소년 긴급전화, 정부 운영기관, 전국 단위 여성단체/민간단체
+          상담 지원처, 수사기관, 법조계
+        </p>
+        <strong class="guide_info_title">최종 업데이트 일</strong>
+        <p class="guide_info_text">2023.10.??</p>
       </div>
     </div>
     <!-- 서울경찰청 여성청소년범죄신고 (온라인)-->
@@ -219,6 +267,27 @@
           />
           뒤로 가기
         </button>
+        <img
+          src="@/assets/onlinePolice.svg"
+          alt="popup onlinePolice img"
+          width="172"
+          height="172"
+          class="top_img_onlinePolice"
+        />
+        <button class="guide_top_goto_button">전자 민원 넣기</button>
+        <p class="guide_info_text">
+          서울 경찰청 홈페이지에서 여성청소년범죄 관련 전자 민원을 넣을 수 있는
+          창구
+        </p>
+        <strong class="guide_info_title mt_20">청소년범죄 해당 범죄</strong>
+        <p class="guide_info_text">가정폭력·성폭력·성추행 등</p>
+        <strong class="guide_info_title">해당 부서 연락처</strong>
+        <p class="guide_info_text">
+          생활안전부 여성청소년과 여성보호계 부서 번호 02-700-2981
+          <br />
+          *위 부서 담당업무: 성·가정폭력 예방 및 피해자 보호대책 수립,
+          해바라기센터 운영, 학대전담경찰관(APO) 운영
+        </p>
       </div>
     </div>
   </div>
@@ -226,10 +295,13 @@
 
 <script setup>
 import { ref, defineEmits } from 'vue';
+const emit = defineEmits(['close', 'select']);
 
-const selected = ref('tel1366');
-
-defineEmits(['close', 'select']);
+const selected = ref(null);
+const handleBackgroundClick = () => {
+  emit('close');
+  selected.value = null;
+};
 </script>
 
 <style scoped lang="scss">
@@ -283,6 +355,37 @@ defineEmits(['close', 'select']);
 }
 .top_img_safetyApp1 {
   margin: 10px 0;
+}
+.guide_top_button {
+  width: 256px;
+  height: 30px;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #7aa6ff;
+  color: #fff;
+  border-radius: 4px;
+  margin-top: 20px;
+}
+.guide_top_goto_button {
+  width: 256px;
+  height: 30px;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #004de8;
+  color: #fff;
+  border-radius: 4px;
+  margin-top: 20px;
+  border: 1px solid #d3d3d3;
+  margin-bottom: 20px;
+}
+.mt_20 {
+  margin-top: 20px;
 }
 .guide_info_text {
   color: #ffefeb;
