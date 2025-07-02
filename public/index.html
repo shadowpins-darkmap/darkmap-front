@@ -1,17 +1,60 @@
 <!DOCTYPE html>
 <html lang="">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="icon" href="<%= BASE_URL %>darkmap.ico">
-    <title><%= htmlWebpackPlugin.options.title %></title>
-  </head>
-  <body>
-    <noscript>
-      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-    </noscript>
-    <div id="app"></div>
-    <!-- built files will be auto injected -->
-  </body>
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+	<link rel="icon" href="<%= BASE_URL %>darkmap.ico">
+	<title>
+		<%= htmlWebpackPlugin.options.title %>
+	</title>
+
+	<!-- ✅ OG 태그 -->
+	<meta property="og:title" content="K-다크맵 투어" />
+	<meta property="og:description"
+		content="약 11년간동안 한국에서 일어난 길거리 괴롭힘 사건 지도입니다. 바바리맨, 폭행, 미행, 헌팅 사건이 일어난 장소와 지역별로 발생한 사건의 수, 관련 인터넷 뉴스기사의 리스트를 볼 수 있어요." />
+	<meta property="og:image" content="https://kdarkmaptour.speedgabia.com/OpenGraph/K-DarkMap_OG_IMG.png" />
+	<meta property="og:url" content="https://kdark.weareshadowpins.com/" />
+	<meta property="og:type" content="website" />
+
+	<!-- Google Tag Manager -->
+	<script>(function (w, d, s, l, i) {
+			w[l] = w[l] || []; w[l].push({
+				'gtm.start':
+					new Date().getTime(), event: 'gtm.js'
+			}); var f = d.getElementsByTagName(s)[0],
+				j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+					'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+		})(window, document, 'script', 'dataLayer', 'GTM-K8V8HCJN');</script>
+	<!-- End Google Tag Manager -->
+
+</head>
+
+<body>
+	<!-- 뷰저블  -->
+	<script type="text/javascript">
+		(function (w, d, a) {
+			w.beusablerumclient = {
+				load: function (src) {
+					var b = d.createElement("script");
+					b.src = src; b.async = true; b.type = "text/javascript";
+					d.getElementsByTagName("head")[0].appendChild(b);
+				}
+			}; w.beusablerumclient.load(a + "?url=" + encodeURIComponent(d.URL));
+		})(window, document, "//rum.beusable.net/load/b250626e202757u692");
+	</script>
+	<noscript>
+		<strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled.
+				Please enable it to continue.</strong>
+	</noscript>
+	<div id="app"></div>
+	<!-- built files will be auto injected -->
+	<!-- Google Tag Manager (noscript) -->
+	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K8V8HCJN" height="0" width="0"
+			style="display:none;visibility:hidden"></iframe></noscript>
+	<!-- End Google Tag Manager (noscript) -->
+
+</body>
+
 </html>
