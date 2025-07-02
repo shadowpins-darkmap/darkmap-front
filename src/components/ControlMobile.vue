@@ -133,6 +133,7 @@
           <img style="width: 4px" src="../assets/rightArrow.svg" />
         </div>
       </div>
+      <BaseFooter />
     </div>
   </div>
 </template>
@@ -140,23 +141,23 @@
 <script setup>
 import { useNewsListStore } from '@/store/newsListStore';
 import { storeToRefs } from 'pinia';
-import AddressFilter from './AddressFilter.vue';
+import AddressFilter from '@/components/AddressFilter.vue';
+import BaseFooter from '@/components/BaseFooter.vue';
 import addressData from '@/constant/addresses.json';
-import { ref, computed, defineEmits, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 
-const emits = defineEmits(['changeFilter']);
 const { loadArticles } = useNewsListStore();
+const { articles, filteredArticles } = storeToRefs(useNewsListStore());
 
 onMounted(async () => {
   await loadArticles();
+  filteredArticles.value = [...articles.value];
   initPage();
 });
 
 const clickTitle = (url) => {
   window.open(url, '_blank');
 };
-
-const { filteredArticles } = storeToRefs(useNewsListStore());
 
 const tableArticles = ref([
   { title: '', address: '', url: '' },
@@ -269,14 +270,14 @@ const clickAllCrime = () => {
     });
   }
   // 필터링 로직 넣기
-  emits('changeFilter', crimeTypes.value, selectGu.value, dongList.value);
+  changeFilter();
 };
 
 const clickCrimeType = (idx) => {
   // 체크 박스 연동
   crimeTypes.value[idx].checked = !crimeTypes.value[idx].checked;
   // 필터링 로직 넣기
-  emits('changeFilter', crimeTypes.value, selectGu.value, dongList.value);
+  changeFilter();
 };
 
 // Address handling
@@ -301,7 +302,7 @@ const changeGu = (newGu) => {
   // Changed to receive single parameter
   selectGu.value = newGu;
   initializeDongList(newGu);
-  emits('changeFilter', crimeTypes.value, selectGu.value, dongList.value);
+  changeFilter();
 };
 
 const allDongChecked = computed(() => {
@@ -314,12 +315,42 @@ const clickAllDong = () => {
     dong.checked = newCheckedState;
   });
   // 필터링 로직 넣기
-  emits('changeFilter', crimeTypes.value, selectGu.value, dongList.value);
+  changeFilter();
 };
 
 const clickDong = (idx) => {
   dongList.value[idx].checked = !dongList.value[idx].checked;
-  emits('changeFilter', crimeTypes.value, selectGu.value, dongList.value);
+  changeFilter();
+};
+
+const changeFilter = () => {
+  filteredArticles.value = [];
+  const filterSido = selectGu.value;
+  const filterSigungu = dongList.value
+    .filter(({ checked }) => checked)
+    .map(({ name }) => name);
+  const filterCrime = crimeTypes.value
+    .filter(({ checked }) => checked)
+    .map(({ crimeType }) => crimeType);
+  if (filterCrime.length === crimeTypes.value.length) {
+    filterCrime.push('기타');
+  }
+  filteredArticles.value = articles.value.filter((article) => {
+    // crimeType이 포함되지 않으면 filter에서 거른다.
+    if (!filterCrime.includes(article.category)) {
+      return false;
+    }
+
+    // 전체 구 선택인 경우 sido만 확인인
+    if (filterSigungu.length === dongList.value.length) {
+      return article.sido === filterSido;
+    }
+
+    // 그 외
+    return (
+      article.sido === filterSido && filterSigungu.includes(article.sigungu)
+    );
+  });
 };
 </script>
 

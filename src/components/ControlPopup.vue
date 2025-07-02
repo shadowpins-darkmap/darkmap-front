@@ -157,6 +157,9 @@
           <img style="width: 10px" src="../assets/rightArrow.svg" />
         </button>
       </div>
+      <div class="footer">
+        <BaseFooter />
+      </div>
     </div>
   </div>
 
@@ -171,10 +174,10 @@ import AddressFilter from './AddressFilter.vue';
 import addressData from '@/constant/addresses.json';
 import '@/styles/ControlPopup.scss';
 import { ref, computed, defineEmits, watch } from 'vue';
+import BaseFooter from '@/components/BaseFooter.vue';
 import ReportGuidePopup from '@/components/searchArea/ReportGuidePopup.vue';
 
-// const showReportGuide = ref(false);
-const showReportGuide = ref(true);
+const showReportGuide = ref(false);
 
 const emits = defineEmits(['changeFilter']);
 
