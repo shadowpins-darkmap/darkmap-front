@@ -1,9 +1,6 @@
 <template>
   <div class="BaseCommunity">
-    <section
-      class="BaseCommunity__popup base"
-      v-show="showSection === 'mypage'"
-    >
+    <section class="BaseCommunity__popup base">
       <!-- 아코디언 타이틀 클릭시 토글 -->
       <button class="accordion__header" @click="toggleSection('mypage')">
         <img
@@ -51,7 +48,7 @@
           </span>
         </p>
       </div>
-cxi
+
       <!-- 아코디언 본문 -->
       <div class="content_text" v-show="openSection === 'mypage'">
         <!-- 로그인 상태일 때 -->
@@ -136,10 +133,7 @@ cxi
           <!-- 알림 메인 -->
           <button
             class="BaseCommunity__more_alarm"
-            @click="
-              showSection = 'alarm';
-              toggleSection('alarm');
-            "
+            @click="showAlarmPopup = true"
           >
             전체보기
           </button>
@@ -262,46 +256,6 @@ cxi
       </div>
     </section>
 
-    <!-- 알람 리스트 영역 -->
-    <section
-      class="BaseCommunity__popup alarm"
-      v-show="showSection === 'alarm'"
-    >
-      <button @click="showSection = 'mypage'" class="alarm_popup_back_button">
-        <img
-          src="@/assets/alarmPopupBack.svg"
-          alt="alarm popup back"
-          width="36"
-          height="36"
-        />
-      </button>
-
-      <ul class="alarm_list_wrap">
-        <li class="alarm_list" v-for="item in currentItems" :key="item.id">
-          <button class="alarm_list_button">
-            <span class="alarm_list_icon">
-              <img
-                :src="getIconSrc(item.tag)"
-                alt="alarm list icon"
-                width="24"
-                height="24"
-              />
-            </span>
-            <span class="ellipsis__2 alarm_contents">
-              {{ item.title }}
-            </span>
-          </button>
-        </li>
-      </ul>
-      <PaginationWrap
-        :currentPage="currentPage"
-        :pageNumbers="pageNumbers"
-        @page-change="pageChange"
-        @prev="clickPrev"
-        @next="clickNext"
-      />
-    </section>
-
     <!-- 다크맵 투어 일지 (고정) -->
     <section class="BaseCommunity__popup">
       <!-- 아코디언 타이틀 클릭시 토글 -->
@@ -393,6 +347,24 @@ cxi
       />
     </SlidePanel>
   </div>
+  <!-- 팝업  -->
+  <CommonPopup :visible="showAlarmPopup" @close="showAlarmPopup = false">
+    <!-- 알람 리스트 영역 -->
+    <section class="alarm">
+      <AlarmListBase
+        :items="currentItems"
+        :currentPage="currentPage"
+        :itemsPerPage="itemsPerPage"
+      />
+      <PaginationWrap
+        :currentPage="currentPage"
+        :pageNumbers="pageNumbers"
+        @page-change="pageChange"
+        @prev="clickPrev"
+        @next="clickNext"
+      />
+    </section>
+  </CommonPopup>
 </template>
 
 <script setup>
@@ -403,11 +375,10 @@ import CommunityInfoPanel from '@/components/communityPanel/CommunityInfoPanel.v
 import CommunityInfo2depsPanel from '@/components/communityPanel/CommunityInfo2depsPanel.vue';
 import CommunityListPanel from '@/components/communityPanel/CommunityListPanel.vue';
 import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
+import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
 import { useAuthStore } from '@/store/useAuthStore';
 // import { useDevice } from '@/composables/useDevice';
-import iconComment from '@/assets/alarmComment.svg';
-import iconLike from '@/assets/alarmLike.svg';
-import iconMarker from '@/assets/alarmMarker.svg';
+import AlarmListBase from '@/components/communityPopup/AlarmListBase.vue';
 
 const auth = useAuthStore();
 
@@ -439,7 +410,7 @@ const handleListPanelClose = () => {
   isListPanel2depsOpen.value = false;
 };
 
-const showSection = ref('mypage'); // 'mypage' or 'alarm'
+const showAlarmPopup = ref(false); // 'mypage' or 'alarm'
 const openSection = ref(null);
 // 아코디언이 하나만 열려있도록
 const toggleSection = (section) => {
@@ -462,16 +433,6 @@ const alarmList = Array.from({ length: 140 }, (_, i) => ({
   tag: '댓글',
   title: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 게시글`,
 }));
-const getIconSrc = (tag) => {
-  switch (tag) {
-    case '댓글':
-      return iconComment;
-    case '좋아요':
-      return iconLike;
-    case '등록':
-      return iconMarker;
-  }
-};
 
 //  페이지네이션 상태
 const currentPage = ref(1);
@@ -702,9 +663,18 @@ const clickNext = () => {
     margin-bottom: 5px;
   }
 
-  .alarm_popup_back_button {
-    margin-bottom: 20px;
+  &__login_button {
+    display: inline-block;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+    vertical-align: middle;
+    text-decoration: underline;
   }
+
+  // ------- alarm list
+
   .alarm_list_wrap {
     display: flex;
     flex-direction: column;
@@ -750,16 +720,6 @@ const clickNext = () => {
     font-size: 14px;
     font-weight: 600;
   }
-  &__login_button {
-    display: inline-block;
-    color: #fff;
-    font-weight: 600;
-    font-size: 14px;
-    text-align: center;
-    vertical-align: middle;
-    text-decoration: underline;
-  }
-
   // --------- 다크맵 투어 일지 ------------
   .accordion__header {
     display: flex;
