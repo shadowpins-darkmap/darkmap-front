@@ -1,17 +1,20 @@
 <template>
   <div class="BaseCommunity">
-    <section class="BaseCommunity__popup">
+    <section
+      class="BaseCommunity__popup base"
+      v-show="showSection === 'mypage'"
+    >
       <!-- 아코디언 타이틀 클릭시 토글 -->
-      <div class="accordion__header" @click="isMyPageOpen = !isMyPageOpen">
+      <button class="accordion__header" @click="toggleSection('mypage')">
         <img
           src="@/assets/arrowCirlcleButton.svg"
           class="accordion__toggle"
-          :class="{ open: isMyPageOpen }"
+          :class="{ open: openSection === 'mypage' }"
           alt="accordion toggle icon"
           width="36"
           height="36"
         />
-      </div>
+      </button>
       <!-- 상단 고정 말풍선 인삿말 -->
       <div class="BaseCommunity__greeting">
         <div class="BaseCommunity__avatar">
@@ -48,9 +51,9 @@
           </span>
         </p>
       </div>
-
+cxi
       <!-- 아코디언 본문 -->
-      <div class="content_text" v-show="isMyPageOpen">
+      <div class="content_text" v-show="openSection === 'mypage'">
         <!-- 로그인 상태일 때 -->
         <div class="BaseCommunity__contents" v-if="auth.isLoggedIn">
           <div class="BaseCommunity__button_box">
@@ -131,7 +134,15 @@
             </li>
           </ul>
           <!-- 알림 메인 -->
-          <button class="BaseCommunity__more_alarm">전체보기</button>
+          <button
+            class="BaseCommunity__more_alarm"
+            @click="
+              showSection = 'alarm';
+              toggleSection('alarm');
+            "
+          >
+            전체보기
+          </button>
           <ul class="alarm_list_wrap">
             <li class="alarm_list">
               <button class="alarm_list_button">
@@ -251,22 +262,62 @@
       </div>
     </section>
 
+    <!-- 알람 리스트 영역 -->
+    <section
+      class="BaseCommunity__popup alarm"
+      v-show="showSection === 'alarm'"
+    >
+      <button @click="showSection = 'mypage'" class="alarm_popup_back_button">
+        <img
+          src="@/assets/alarmPopupBack.svg"
+          alt="alarm popup back"
+          width="36"
+          height="36"
+        />
+      </button>
+
+      <ul class="alarm_list_wrap">
+        <li class="alarm_list" v-for="item in currentItems" :key="item.id">
+          <button class="alarm_list_button">
+            <span class="alarm_list_icon">
+              <img
+                :src="getIconSrc(item.tag)"
+                alt="alarm list icon"
+                width="24"
+                height="24"
+              />
+            </span>
+            <span class="ellipsis__2 alarm_contents">
+              {{ item.title }}
+            </span>
+          </button>
+        </li>
+      </ul>
+      <PaginationWrap
+        :currentPage="currentPage"
+        :pageNumbers="pageNumbers"
+        @page-change="pageChange"
+        @prev="clickPrev"
+        @next="clickNext"
+      />
+    </section>
+
     <!-- 다크맵 투어 일지 (고정) -->
     <section class="BaseCommunity__popup">
       <!-- 아코디언 타이틀 클릭시 토글 -->
-      <div class="accordion__header" @click="isTourOpen = !isTourOpen">
+      <button class="accordion__header" @click="toggleSection('tour')">
         <strong class="accordion__title">K-다크맵 투어 일지</strong>
         <img
           src="@/assets/arrowCirlcleButton.svg"
           class="accordion__toggle"
-          :class="{ open: isTourOpen }"
+          :class="{ open: openSection === 'tour' }"
           alt="accordion toggle icon"
           width="36"
           height="36"
         />
-      </div>
+      </button>
       <!-- 아코디언 본문 -->
-      <div class="content_text" v-show="isTourOpen">
+      <div class="content_text" v-show="openSection === 'tour'">
         <p class="content_text_title">
           현재까지 <span class="highlight">123</span> 명의 회원이 자신의 길거리
           괴롭힘 경험담을 <br />
@@ -345,14 +396,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import CarouselWrap from '@/components/carousel/CarouselWrap.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
 import CommunityInfoPanel from '@/components/communityPanel/CommunityInfoPanel.vue';
 import CommunityInfo2depsPanel from '@/components/communityPanel/CommunityInfo2depsPanel.vue';
 import CommunityListPanel from '@/components/communityPanel/CommunityListPanel.vue';
+import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
 import { useAuthStore } from '@/store/useAuthStore';
 // import { useDevice } from '@/composables/useDevice';
+import iconComment from '@/assets/alarmComment.svg';
+import iconLike from '@/assets/alarmLike.svg';
+import iconMarker from '@/assets/alarmMarker.svg';
 
 const auth = useAuthStore();
 
@@ -367,16 +422,12 @@ const handleTestLogin = () => {
 };
 
 // const { isMobile } = useDevice();
-const isTourOpen = ref(true);
-const isMyPageOpen = ref(true);
 
 const isPanelOpen = ref(false);
 const isPanel2depsOpen = ref(false);
 
 const isListPanelOpen = ref(false);
 const isListPanel2depsOpen = ref(false);
-// const isListPanelOpen = ref(true);
-// const isListPanel2depsOpen = ref(true);
 
 const handlePanelClose = () => {
   isPanelOpen.value = false;
@@ -388,6 +439,13 @@ const handleListPanelClose = () => {
   isListPanel2depsOpen.value = false;
 };
 
+const showSection = ref('mypage'); // 'mypage' or 'alarm'
+const openSection = ref(null);
+// 아코디언이 하나만 열려있도록
+const toggleSection = (section) => {
+  openSection.value = openSection.value === section ? null : section;
+};
+
 // greeting 애니메이션
 const currentBubbleIndex = ref(0);
 
@@ -396,6 +454,55 @@ onMounted(() => {
     currentBubbleIndex.value = (currentBubbleIndex.value + 1) % 2;
   }, 3000);
 });
+
+// 더미 데이터 TODO
+const alarmList = Array.from({ length: 140 }, (_, i) => ({
+  id: i + 1,
+  nickname: `검은 태양의 핀 ${i + 1}`,
+  tag: '댓글',
+  title: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 게시글`,
+}));
+const getIconSrc = (tag) => {
+  switch (tag) {
+    case '댓글':
+      return iconComment;
+    case '좋아요':
+      return iconLike;
+    case '등록':
+      return iconMarker;
+  }
+};
+
+//  페이지네이션 상태
+const currentPage = ref(1);
+const itemsPerPage = 6;
+const totalPages = computed(() => Math.ceil(alarmList.length / itemsPerPage));
+
+const pageNumbers = computed(() => {
+  const max = 5;
+  const start = Math.floor((currentPage.value - 1) / max) * max + 1;
+  return Array.from(
+    { length: Math.min(max, totalPages.value - start + 1) },
+    (_, i) => start + i,
+  );
+});
+
+const currentItems = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return alarmList.slice(start, start + itemsPerPage);
+});
+
+const pageChange = (page) => {
+  currentPage.value = page;
+};
+
+const clickPrev = () => {
+  if (currentPage.value > 1) currentPage.value--;
+};
+
+const clickNext = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++;
+};
 </script>
 
 <style scoped lang="scss">
@@ -416,6 +523,9 @@ onMounted(() => {
     border-radius: 20px;
     margin-bottom: 30px;
   }
+
+  // 알람
+
   &__greeting {
     display: flex;
     justify-content: space-between;
@@ -591,6 +701,10 @@ onMounted(() => {
     margin-top: 15px;
     margin-bottom: 5px;
   }
+
+  .alarm_popup_back_button {
+    margin-bottom: 20px;
+  }
   .alarm_list_wrap {
     display: flex;
     flex-direction: column;
@@ -654,6 +768,7 @@ onMounted(() => {
     cursor: pointer;
     position: relative;
     min-height: 36px;
+    width: 100%;
   }
   .accordion__title {
     font-size: 20px;
