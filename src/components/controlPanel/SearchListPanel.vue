@@ -51,10 +51,24 @@
     <strong class="search_title">총 {nn}건의 검색결과가 있습니다. </strong>
 
     <!-- 광장 게시글 리스트 -->
-    <ul class="community_list_wrap scroll_area">
-      <li class="community_list" v-for="item in currentItems" :key="item.id">
-        <button class="community_list_button" @click="openDetail(item)">
-          <span class="community_list_contents">
+    <ul class="search_list_wrap scroll_area">
+      <li class="search_list" v-for="item in currentItems" :key="item.id">
+        <button class="search_list_button" @click="openDetail(item)">
+          <span class="search_list_contents">
+            <span class="tag_button_wrap">
+              <span class="search_list_tag">
+                {{ item.tag }}
+              </span>
+              <span class="search_list_arrow">
+                <img
+                  src="@/assets/slideCardArrowGreen.svg"
+                  class="search_list_arrow_icon"
+                  alt="search list arrow icon"
+                  width="18"
+                  height="18"
+                />
+              </span>
+            </span>
             <span class="ellipsis__2 list_contents_title">
               {{ item.title }}
             </span>
@@ -262,19 +276,47 @@ const clickNext = () => {
   color: #000;
 }
 // 광장 게시글 리스트
-.community_list_wrap {
-  border-top: 2px solid #00ffc2;
-  border-bottom: 2px solid #00ffc2;
+.search_list_wrap {
   height: calc(100% - 300px);
   overflow-y: scroll;
-}
-.community_list {
-}
-.community_list_button {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.search_list {
+  display: flex;
+  width: 100%;
+}
+.tag_button_wrap {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 8px;
+}
+
+.search_list_tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #00ffc2;
+  border: 1px solid #00ffc2;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: bold;
+  height: 22px;
+  border-radius: 22px;
+}
+.search_list_button {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  padding: 15px;
+  background-color: #017357;
+  border: 1px solid #00ffc2;
   color: #fff;
+  height: 118px;
+  border-radius: 8px;
+  flex-wrap: wrap;
+  text-align: left;
 }
 
 .list_contents_tag {
