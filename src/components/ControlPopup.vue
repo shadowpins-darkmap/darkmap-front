@@ -20,7 +20,7 @@
           src="../assets/reportButton.svg"
         />
       </button>
-      <button class="search_button">
+      <button class="search_button" @click="isListPanelOpen = true">
         <img
           width="24px"
           height="24px"
@@ -162,7 +162,15 @@
       </div>
     </div>
   </div>
-
+  <!-- 검색창 SlidePanel -->
+  <SlidePanel
+    :width="'510px'"
+    :visible="isListPanelOpen"
+    @close="isListPanelOpen = false"
+    :right="true"
+  >
+    <SearchListPanel @close="handleListPanelClose" />
+  </SlidePanel>
   <!-- 팝업 -->
   <ReportGuidePopup v-if="showReportGuide" @close="showReportGuide = false" />
 </template>
@@ -176,8 +184,15 @@ import '@/styles/ControlPopup.scss';
 import { ref, computed, defineEmits, watch } from 'vue';
 import BaseFooter from '@/components/BaseFooter.vue';
 import ReportGuidePopup from '@/components/searchArea/ReportGuidePopup.vue';
+import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
+import SearchListPanel from '@/components/controlPanel/SearchListPanel.vue';
 
 const showReportGuide = ref(false);
+const isListPanelOpen = ref(false);
+
+const handleListPanelClose = () => {
+  isListPanelOpen.value = false;
+};
 
 const emits = defineEmits(['changeFilter']);
 

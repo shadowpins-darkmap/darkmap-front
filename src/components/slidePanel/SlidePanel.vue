@@ -1,7 +1,7 @@
 <script setup>
 import { defineEmits, defineProps } from 'vue';
 
-const props = defineProps(['visible', 'width', 'right']);
+const props = defineProps(['visible', 'width', 'right', 'left']);
 const emit = defineEmits(['close']);
 
 const close = () => emit('close');
@@ -13,7 +13,11 @@ const close = () => emit('close');
       v-if="props.visible"
       class="slide_panel"
       @click.self="close"
-      :style="{ right: props.right || '0px', width: props.width }"
+      :style="{
+        right: props.right || '0px',
+        left: props.left || 'auto',
+        width: props.width,
+      }"
     >
       <slot></slot>
     </div>
