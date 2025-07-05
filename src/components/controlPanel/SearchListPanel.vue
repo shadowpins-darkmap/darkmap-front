@@ -8,8 +8,27 @@
         height="36"
       />
     </button>
-    <strong class="community__hot_title">🔥 지금 가장 뜨거운 글이에요!</strong>
-
+    <!-- 검색 인풋 -->
+    <div class="search_top_input_wrap">
+      <input
+        v-model="keyword"
+        type="text"
+        placeholder="내가 사는 지역의 이름을 한 번 검색해보세요."
+        class="search_top_input"
+        @keyup.enter="handleSearch"
+      />
+      <button class="search_top_button" @click="handleSearch">
+        <img
+          src="@/assets/iconSearch.svg"
+          alt="search"
+          width="24"
+          height="24"
+        />
+      </button>
+      <p class="search_guide">
+        띄어쓰기 공백을 포함해서 정확한 키워드를 입력해주세요!
+      </p>
+    </div>
     <!-- 리스트 솔팅 탭 -->
     <GradientScroll
       :width="'350px'"
@@ -29,37 +48,15 @@
         </li>
       </ul>
     </GradientScroll>
+    <strong class="search_title">총 {nn}건의 검색결과가 있습니다. </strong>
 
     <!-- 광장 게시글 리스트 -->
     <ul class="community_list_wrap scroll_area">
       <li class="community_list" v-for="item in currentItems" :key="item.id">
         <button class="community_list_button" @click="openDetail(item)">
-          <span class="community_list_profile">
-            <img
-              src="@/assets/profileDefault.svg"
-              alt="profile default image"
-              width="40"
-              height="40"
-            />
-          </span>
-          <strong class="community_list_nickname">{{ item.nickname }}</strong>
           <span class="community_list_contents">
-            <span class="list_contents_tag">
-              <img
-                src="@/assets/tagBulletIcon.svg"
-                alt="tag bullet icon"
-                width="8"
-                height="8"
-              />
-              {{ item.tag }}
-            </span>
             <span class="ellipsis__2 list_contents_title">
               {{ item.title }}
-            </span>
-            <span class="list_contents_conut_wrap">
-              <span class="comment_count">댓글 {{ item.comments }}</span>
-              <span class="like_count">좋아요 {{ item.likes }}</span>
-              <span class="views_count">조회 {{ item.views }}</span>
             </span>
           </span>
         </button>
@@ -101,6 +98,14 @@ import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
 const categories = ['전체', '뉴스', '커뮤니티'];
 const selectedCategory = ref('전체');
 const selectedPost = ref(null);
+const keyword = ref('');
+
+const handleSearch = () => {
+  if (keyword.value.trim()) {
+    // 검색 실행 로직 (emit 또는 라우팅 등)
+    console.log('검색:', keyword.value);
+  }
+};
 
 //  페이지네이션 상태
 const currentPage = ref(1);
@@ -176,33 +181,56 @@ const clickNext = () => {
   padding-top: 40px;
   padding-bottom: 60px;
 }
+/* 검색 인풋 */
+.search_top_input_wrap {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: center;
+  margin-top: 40px;
+}
 
-.community__hot_title {
+.search_top_input {
+  width: 100%;
+  padding: 14px 50px 14px 20px;
+  border-radius: 50px;
+  border: 2px solid #f1cfc8;
+  background-color: #d1caef;
+  font-size: 16px;
+  font-weight: bold;
+  color: #000;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.search_top_input::placeholder {
+  color: #000;
+  opacity: 0.3;
+}
+
+.search_top_button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.search_guide {
+  padding: 5px 20px;
+  font-size: 14px;
+  color: #fff;
+  text-align: left;
+}
+
+.search_title {
   font-size: 24px;
   font-weight: bold;
-  color: #a190df;
+  color: #00ffc2;
   display: flex;
-  padding-top: 20px;
-}
-.community__card_wrap {
-  display: flex;
-  transform: translateX(8px);
-  position: relative;
-}
-.community__card_wrap::before {
-  content: '';
-  display: flex;
-  width: 25px;
-  height: 172px;
-  background-color: #000;
-  position: absolute;
-  left: -40px;
-  top: 14px;
-  z-index: 1;
-}
-.community__card {
-  width: calc(100% + 120px);
-  transform: translateX(-99px);
+  padding: 20px 0;
 }
 
 // 리스트 솔팅 탭
@@ -237,89 +265,19 @@ const clickNext = () => {
 .community_list_wrap {
   border-top: 2px solid #00ffc2;
   border-bottom: 2px solid #00ffc2;
-  height: 420px;
+  height: calc(100% - 300px);
   overflow-y: scroll;
 }
 .community_list {
-  height: 94px;
-  padding: 15px 0;
-  display: flex;
-  position: relative;
 }
-.community_list::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  background-color: #00ffc2;
-  height: 1px;
-  width: 100%;
-}
-/* .community_list:first-child::after {
-  display: none;
-} */
 .community_list_button {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-.community_list_profile {
-  flex: 0 0 auto;
-}
-.community_list_nickname {
-  font-size: 12px;
-  font-weight: 600;
-  color: #a190df;
-  display: flex;
-  width: 100px;
-  flex: 0 0 auto;
-  text-align: left;
-}
-.community_list_contents {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-  gap: 2px;
+  color: #fff;
 }
 
 .list_contents_tag {
   color: #00ffc2;
-}
-.list_contents_title {
-  color: #fff;
-  font-size: 12px;
-  font-weight: bold;
-  min-height: 30px;
-}
-.list_contents_conut_wrap {
-  color: #fff;
-  display: flex;
-  flex-direction: row-reverse;
-  gap: 6px;
-}
-.list_contents_conut_wrap > span {
-  font-size: 12px;
-  font-weight: normal;
-}
-
-// 글등록 버튼
-.write_button_wrap {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #00ffc2;
-  padding: 25px 30px;
-}
-.write_button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 30px;
-  background-color: #000;
-  color: #fff;
-  font-weight: 700;
-  font-size: 14px;
-  height: 40px;
-  min-width: 214px;
-  border-radius: 40px;
 }
 </style>
