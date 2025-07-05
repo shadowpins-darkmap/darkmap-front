@@ -321,7 +321,6 @@ const changeFilter = (crimeTypes, selectedSido, dongList) => {
   z-index: 99;
   background-color: rgba(0, 0, 0, 0.6);
   padding: 20px;
-  border-radius: 8px;
 }
 
 div:deep(.marker) {

@@ -83,7 +83,10 @@
           </div>
           <strong class="BaseCommunity__hot_title margin_15">
             ⚡️ {{ auth.user?.nickname }}님을 위한 브리핑
-            <button class="BaseCommunity__setting">
+            <button
+              class="BaseCommunity__setting"
+              @click="showAccountPopup = true"
+            >
               <img
                 src="@/assets/settingButtonIcon.svg"
                 class="my_list_icon"
@@ -365,6 +368,9 @@
       />
     </section>
   </CommonPopup>
+  <CommonPopup :visible="showAccountPopup" @close="showAccountPopup = false">
+    <AccountBase />
+  </CommonPopup>
 </template>
 
 <script setup>
@@ -379,6 +385,7 @@ import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
 import { useAuthStore } from '@/store/useAuthStore';
 // import { useDevice } from '@/composables/useDevice';
 import AlarmListBase from '@/components/communityPopup/AlarmListBase.vue';
+import AccountBase from '@/components/communityPopup/AccountBase.vue';
 
 const auth = useAuthStore();
 
@@ -393,6 +400,8 @@ const handleTestLogin = () => {
 };
 
 // const { isMobile } = useDevice();
+const showAlarmPopup = ref(false);
+const showAccountPopup = ref(false);
 
 const isPanelOpen = ref(false);
 const isPanel2depsOpen = ref(false);
@@ -410,7 +419,6 @@ const handleListPanelClose = () => {
   isListPanel2depsOpen.value = false;
 };
 
-const showAlarmPopup = ref(false); // 'mypage' or 'alarm'
 const openSection = ref(null);
 // 아코디언이 하나만 열려있도록
 const toggleSection = (section) => {
