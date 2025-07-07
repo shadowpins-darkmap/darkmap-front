@@ -48,7 +48,7 @@
         </li>
       </ul>
     </GradientScroll>
-    <strong class="search_title">총 {{ nn }}건의 검색결과가 있습니다. </strong>
+    <strong class="search_title">총 {{ n }}건의 검색결과가 있습니다. </strong>
 
     <!-- 광장 게시글 리스트 -->
     <ul class="search_list_wrap scroll_area">
