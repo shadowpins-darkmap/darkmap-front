@@ -1,4 +1,6 @@
-# darkmap
+# darkmap-front
+
+K-dark map frontend
 
 ## Project setup
 
