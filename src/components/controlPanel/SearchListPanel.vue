@@ -85,7 +85,7 @@
     />
   </div>
 
-  <!-- SlidePanel s -->
+  <!-- SlidePanels -->
   <SlidePanel
     :width="'510px'"
     :visible="isPanel2depsOpen"
