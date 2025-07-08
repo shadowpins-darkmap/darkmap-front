@@ -97,7 +97,7 @@
               계정설정
             </button>
           </strong>
-          <!-- 내 활동 내역 -->
+          <!-- 내 활동 내역
           <ul class="icon_list_wrap">
             <li class="icon_list">
               <img
@@ -132,15 +132,17 @@
               <span>다크플레이스 등록</span>
               <span class="point_color">{{ auth.user?.commentCount }}</span>
             </li>
-          </ul>
-          <!-- 알림 메인 -->
+          </ul> -->
+
+          <TabButtons v-model="currentTab" :tabs="tabOptions" />
+          <!-- 알림 -->
           <button
             class="BaseCommunity__more_alarm"
             @click="showAlarmPopup = true"
           >
             전체보기
           </button>
-          <ul class="alarm_list_wrap">
+          <ul class="alarm_list_wrap" v-if="currentTab === '알림'">
             <li class="alarm_list">
               <button class="alarm_list_button">
                 <span class="alarm_list_icon">
@@ -216,6 +218,80 @@
                   /> -->
                   <img
                     src="@/assets/alarmMarker.svg"
+                    alt="alarm list icon"
+                    width="24"
+                    height="24"
+                  />
+                </span>
+                <span class="ellipsis__2 alarm_contents">
+                  {{
+                    `두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 `
+                  }}
+                </span>
+              </button>
+            </li>
+          </ul>
+          <!-- 내 게시글 -->
+          <ul class="alarm_list_wrap" v-if="currentTab === '내 게시글'">
+            <li class="alarm_list">
+              <button class="alarm_list_button">
+                <span class="alarm_list_icon">
+                  <img
+                    src="@/assets/alarmComment.svg"
+                    alt="alarm list icon"
+                    width="24"
+                    height="24"
+                  />
+                </span>
+                <span class="ellipsis__2 alarm_contents">
+                  {{
+                    `두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 `
+                  }}
+                </span>
+              </button>
+            </li>
+            <li class="alarm_list">
+              <button class="alarm_list_button">
+                <span class="alarm_list_icon">
+                  <img
+                    src="@/assets/alarmComment.svg"
+                    alt="alarm list icon"
+                    width="24"
+                    height="24"
+                  />
+                </span>
+                <span class="ellipsis__2 alarm_contents">
+                  {{
+                    `두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 `
+                  }}
+                </span>
+              </button>
+            </li>
+            <li class="alarm_list">
+              <button class="alarm_list_button">
+                <span class="alarm_list_icon">
+                  <img
+                    src="@/assets/alarmMarker.svg"
+                    alt="alarm list icon"
+                    width="24"
+                    height="24"
+                  />
+                </span>
+                <span class="ellipsis__2 alarm_contents">
+                  {{
+                    `두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 `
+                  }}
+                </span>
+              </button>
+            </li>
+          </ul>
+          <!-- 내 댓글 -->
+          <ul class="alarm_list_wrap" v-if="currentTab === '내 댓글'">
+            <li class="alarm_list">
+              <button class="alarm_list_button">
+                <span class="alarm_list_icon">
+                  <img
+                    src="@/assets/alarmComment.svg"
                     alt="alarm list icon"
                     width="24"
                     height="24"
@@ -316,7 +392,7 @@
       </div>
     </section>
 
-    <!-- SlidePanel s -->
+    <!-- SlidePanels -->
     <!--  길거리 괴롭힘이란게 뭔가요? SlidePanel -->
     <SlidePanel
       :width="'510px'"
@@ -386,8 +462,12 @@ import { useAuthStore } from '@/store/useAuthStore';
 // import { useDevice } from '@/composables/useDevice';
 import AlarmListBase from '@/components/communityPopup/AlarmListBase.vue';
 import AccountBase from '@/components/communityPopup/AccountBase.vue';
+import TabButtons from '@/components/tabButton/TabButtons.vue';
 
 const auth = useAuthStore();
+
+const tabOptions = ['알림', '내 게시글', '내 댓글'];
+const currentTab = ref('알림');
 
 //auth.login()
 //auth.logout()
@@ -419,7 +499,8 @@ const handleListPanelClose = () => {
   isListPanel2depsOpen.value = false;
 };
 
-const openSection = ref(null);
+// const openSection = ref(null);
+const openSection = ref('mypage');
 // 아코디언이 하나만 열려있도록
 const toggleSection = (section) => {
   openSection.value = openSection.value === section ? null : section;
