@@ -185,7 +185,7 @@ import { ref, computed, defineEmits, watch } from 'vue';
 import BaseFooter from '@/components/BaseFooter.vue';
 import ReportGuidePopup from '@/components/searchArea/ReportGuidePopup.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
-import SearchListPanel from '@/components/controlPanel/SearchListPanel.vue';
+import SearchListPanel from '@/components/searchArea/SearchListPanel.vue';
 
 const showReportGuide = ref(false);
 const isListPanelOpen = ref(false);

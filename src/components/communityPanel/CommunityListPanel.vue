@@ -334,6 +334,7 @@ const clickNext = () => {
   font-weight: bold;
   min-height: 30px;
 }
+
 .list_contents_conut_wrap {
   color: #fff;
   display: flex;

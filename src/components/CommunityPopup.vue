@@ -97,137 +97,92 @@
               계정설정
             </button>
           </strong>
-          <!-- 내 활동 내역 -->
-          <ul class="icon_list_wrap">
-            <li class="icon_list">
-              <img
-                src="@/assets/iconListComment.svg"
-                class="my_list_icon"
-                alt="my list icon"
-                width="16"
-                height="16"
-              />
-              <span>새 댓글</span>
-              <span class="point_color">{{ auth.user?.commentCount }}</span>
-            </li>
-            <li class="icon_list">
-              <img
-                src="@/assets/iconListLike.svg"
-                class="my_list_icon"
-                alt="my list icon"
-                width="16"
-                height="16"
-              />
-              <span>새 좋아요</span>
-              <span class="point_color">{{ auth.user?.commentCount }}</span>
-            </li>
-            <li class="icon_list">
-              <img
-                src="@/assets/iconListMarker.svg"
-                class="my_list_icon"
-                alt="my list icon"
-                width="16"
-                height="16"
-              />
-              <span>다크플레이스 등록</span>
-              <span class="point_color">{{ auth.user?.commentCount }}</span>
-            </li>
-          </ul>
-          <!-- 알림 메인 -->
+
+          <TabButtons v-model="currentTab" :tabs="tabOptions" />
+          <!-- 알림 -->
           <button
             class="BaseCommunity__more_alarm"
             @click="showAlarmPopup = true"
           >
             전체보기
           </button>
-          <ul class="alarm_list_wrap">
-            <li class="alarm_list">
-              <button class="alarm_list_button">
-                <span class="alarm_list_icon">
-                  <img
-                    src="@/assets/alarmComment.svg"
-                    alt="alarm list icon"
-                    width="24"
-                    height="24"
-                  />
-                  <!-- <img
-                    src="@/assets/alarmLike.svg"
-                    alt="alarm list icon"
-                    width="24"
-                    height="24"
-                  /> -->
-                  <!-- <img
-                    src="@/assets/alarmMarker.svg"
-                    alt="alarm list icon"
-                    width="24"
-                    height="24"
-                  /> -->
-                </span>
-                <span class="ellipsis__2 alarm_contents">
-                  {{
-                    `두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 `
-                  }}
-                </span>
-              </button>
-            </li>
-            <li class="alarm_list">
-              <button class="alarm_list_button">
-                <span class="alarm_list_icon">
-                  <!-- <img
-                    src="@/assets/alarmComment.svg"
-                    alt="alarm list icon"
-                    width="24"
-                    height="24"
-                  /> -->
-                  <img
-                    src="@/assets/alarmLike.svg"
-                    alt="alarm list icon"
-                    width="24"
-                    height="24"
-                  />
-                  <!-- <img
-                    src="@/assets/alarmMarker.svg"
-                    alt="alarm list icon"
-                    width="24"
-                    height="24"
-                  /> -->
-                </span>
-                <span class="ellipsis__2 alarm_contents">
-                  {{
-                    `두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 `
-                  }}
-                </span>
-              </button>
-            </li>
-            <li class="alarm_list">
-              <button class="alarm_list_button">
-                <span class="alarm_list_icon">
-                  <!-- <img
-                    src="@/assets/alarmComment.svg"
-                    alt="alarm list icon"
-                    width="24"
-                    height="24"
-                  /> -->
-                  <!-- <img
-                    src="@/assets/alarmLike.svg"
-                    alt="alarm list icon"
-                    width="24"
-                    height="24"
-                  /> -->
-                  <img
-                    src="@/assets/alarmMarker.svg"
-                    alt="alarm list icon"
-                    width="24"
-                    height="24"
-                  />
-                </span>
-                <span class="ellipsis__2 alarm_contents">
-                  {{
-                    `두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 두줄이상 엘립시스 `
-                  }}
-                </span>
-              </button>
-            </li>
+          <ul class="alarm_list_wrap" v-if="currentTab === '알림'">
+            <template v-if="alarmList.length > 0">
+              <li
+                class="alarm_list"
+                v-for="item in alarmList.slice(0, 3)"
+                :key="item.id"
+              >
+                <button class="alarm_list_button">
+                  <span class="alarm_list_icon">
+                    <img
+                      src="@/assets/alarmComment.svg"
+                      alt="alarm icon"
+                      width="24"
+                      height="24"
+                    />
+                  </span>
+                  <span class="ellipsis__2 alarm_contents">
+                    {{
+                      `${item.nickname}님이 ${item.tag} '${item.title}'을(를) 남겼습니다.`
+                    }}
+                  </span>
+                </button>
+              </li>
+            </template>
+            <template v-else>
+              <EmptyData type="알림" />
+            </template>
+          </ul>
+          <!-- 내 게시글 -->
+          <ul class="alarm_list_wrap" v-if="currentTab === '내 게시글'">
+            <template v-if="myPostList.length > 0">
+              <li class="alarm_list" v-for="item in myPostList" :key="item.id">
+                <button class="alarm_list_button">
+                  <span class="alarm_list_icon">
+                    <img
+                      src="@/assets/alarmLike.svg"
+                      alt="post icon"
+                      width="24"
+                      height="24"
+                    />
+                  </span>
+                  <span class="ellipsis__2 alarm_contents">{{
+                    item.title
+                  }}</span>
+                </button>
+              </li>
+            </template>
+            <template v-else>
+              <EmptyData type="게시글" />
+            </template>
+          </ul>
+          <!-- 내 댓글 -->
+          <ul class="alarm_list_wrap" v-if="currentTab === '내 댓글'">
+            <template v-if="myCommentList.length > 0">
+              <li
+                class="alarm_list"
+                v-for="item in myCommentList"
+                :key="item.id"
+              >
+                <button class="alarm_list_button">
+                  <span class="alarm_list_icon">
+                    <img
+                      src="@/assets/alarmMarker.svg"
+                      alt="comment icon"
+                      width="24"
+                      height="24"
+                    />
+                  </span>
+                  <span class="ellipsis__2 alarm_contents">{{
+                    item.text
+                  }}</span>
+                </button>
+              </li>
+            </template>
+            <template v-else>
+              <EmptyData type="댓글" />
+            </template>
           </ul>
         </div>
         <!-- 로그인 전 상태일 때-->
@@ -316,7 +271,7 @@
       </div>
     </section>
 
-    <!-- SlidePanel s -->
+    <!-- SlidePanels -->
     <!--  길거리 괴롭힘이란게 뭔가요? SlidePanel -->
     <SlidePanel
       :width="'510px'"
@@ -386,8 +341,13 @@ import { useAuthStore } from '@/store/useAuthStore';
 // import { useDevice } from '@/composables/useDevice';
 import AlarmListBase from '@/components/communityPopup/AlarmListBase.vue';
 import AccountBase from '@/components/communityPopup/AccountBase.vue';
+import TabButtons from '@/components/tabButton/TabButtons.vue';
+import EmptyData from '@/components/EmptyData.vue';
 
 const auth = useAuthStore();
+
+const tabOptions = ['알림', '내 게시글', '내 댓글'];
+const currentTab = ref('알림');
 
 //auth.login()
 //auth.logout()
@@ -419,7 +379,8 @@ const handleListPanelClose = () => {
   isListPanel2depsOpen.value = false;
 };
 
-const openSection = ref(null);
+// const openSection = ref(null);
+const openSection = ref('mypage');
 // 아코디언이 하나만 열려있도록
 const toggleSection = (section) => {
   openSection.value = openSection.value === section ? null : section;
@@ -441,6 +402,8 @@ const alarmList = Array.from({ length: 140 }, (_, i) => ({
   tag: '댓글',
   title: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 게시글`,
 }));
+const myPostList = ref([]);
+const myCommentList = ref([]);
 
 //  페이지네이션 상태
 const currentPage = ref(1);
@@ -640,21 +603,6 @@ const clickNext = () => {
     margin: 15px 0;
   }
 
-  .icon_list_wrap {
-    display: flex;
-    padding: 15px 0;
-    justify-content: space-between;
-    border-bottom: 1px solid #9886dc;
-  }
-  .icon_list {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-  .icon_list > span {
-    font-size: 14px;
-    font-weight: 600;
-  }
   .point_color {
     color: #00ffc2;
   }
