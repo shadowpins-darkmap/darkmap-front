@@ -116,7 +116,7 @@
                 <button class="alarm_list_button">
                   <span class="alarm_list_icon">
                     <img
-                      src="@/assets/alarmComment.svg"
+                      :src="getIcon(item.tag)"
                       alt="alarm icon"
                       width="24"
                       height="24"
@@ -137,14 +137,18 @@
           <!-- 내 게시글 -->
           <ul class="alarm_list_wrap" v-if="currentTab === '내 게시글'">
             <template v-if="myPostList.length > 0">
-              <li class="alarm_list" v-for="item in myPostList" :key="item.id">
+              <li
+                class="alarm_list"
+                v-for="item in myPostList.slice(0, 3)"
+                :key="item.id"
+              >
                 <button class="alarm_list_button">
                   <span class="alarm_list_icon">
                     <img
-                      src="@/assets/alarmLike.svg"
-                      alt="post icon"
-                      width="24"
-                      height="24"
+                      src="@/assets/profileDefault.svg"
+                      alt="profile default image"
+                      width="40"
+                      height="40"
                     />
                   </span>
                   <span class="ellipsis__2 alarm_contents">{{
@@ -162,20 +166,20 @@
             <template v-if="myCommentList.length > 0">
               <li
                 class="alarm_list"
-                v-for="item in myCommentList"
+                v-for="item in myCommentList.slice(0, 3)"
                 :key="item.id"
               >
                 <button class="alarm_list_button">
                   <span class="alarm_list_icon">
                     <img
-                      src="@/assets/alarmMarker.svg"
-                      alt="comment icon"
-                      width="24"
-                      height="24"
+                      src="@/assets/profileDefault.svg"
+                      alt="profile default image"
+                      width="40"
+                      height="40"
                     />
                   </span>
                   <span class="ellipsis__2 alarm_contents">{{
-                    item.text
+                    item.comment
                   }}</span>
                 </button>
               </li>
@@ -311,6 +315,7 @@
     <section class="alarm">
       <AlarmListBase
         :items="currentItems"
+        :currentTab="currentTab"
         :currentPage="currentPage"
         :itemsPerPage="itemsPerPage"
       />
@@ -329,7 +334,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import CarouselWrap from '@/components/carousel/CarouselWrap.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
 import CommunityInfoPanel from '@/components/communityPanel/CommunityInfoPanel.vue';
@@ -343,6 +348,9 @@ import AlarmListBase from '@/components/communityPopup/AlarmListBase.vue';
 import AccountBase from '@/components/communityPopup/AccountBase.vue';
 import TabButtons from '@/components/tabButton/TabButtons.vue';
 import EmptyData from '@/components/EmptyData.vue';
+import iconComment from '@/assets/alarmComment.svg';
+import iconLike from '@/assets/alarmLike.svg';
+import iconMarker from '@/assets/alarmMarker.svg';
 
 const auth = useAuthStore();
 
@@ -354,8 +362,8 @@ const currentTab = ref('알림');
 // TODO :테스트용 임시 로그인 함수
 const handleTestLogin = () => {
   auth.login({
-    nickname: 'namoo',
-    email: 'namoo@email.com',
+    nickname: 'nam',
+    email: 'nam@email.com',
   });
 };
 
@@ -399,16 +407,39 @@ onMounted(() => {
 const alarmList = Array.from({ length: 140 }, (_, i) => ({
   id: i + 1,
   nickname: `검은 태양의 핀 ${i + 1}`,
-  tag: '댓글',
+  tag: '좋아요',
   title: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 게시글`,
 }));
-const myPostList = ref([]);
-const myCommentList = ref([]);
+// const myPostList = ref([]);
+const myPostList = Array.from({ length: 10 }, (_, i) => ({
+  id: i + 1,
+  title: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 게시글`,
+}));
+// const myCommentList = ref([]);
+const myCommentList = ref(
+  Array.from({ length: 40 }, (_, i) => ({
+    id: i + 1,
+    comment: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 comment`,
+  })),
+);
+
+// 알람 아이콘
+const getIcon = (tag) => {
+  switch (tag) {
+    case '댓글':
+      return iconComment;
+    case '좋아요':
+      return iconLike;
+    case '등록':
+      return iconMarker;
+    default:
+      return iconComment;
+  }
+};
 
 //  페이지네이션 상태
 const currentPage = ref(1);
 const itemsPerPage = 6;
-const totalPages = computed(() => Math.ceil(alarmList.length / itemsPerPage));
 
 const pageNumbers = computed(() => {
   const max = 5;
@@ -419,9 +450,33 @@ const pageNumbers = computed(() => {
   );
 });
 
+const totalPages = computed(() => {
+  let totalLength = 0;
+
+  if (currentTab.value === '알림') {
+    totalLength = alarmList.length;
+  } else if (currentTab.value === '내 게시글') {
+    totalLength = myPostList.length;
+  } else if (currentTab.value === '내 댓글') {
+    totalLength = myCommentList.value.length;
+  }
+
+  return Math.ceil(totalLength / itemsPerPage);
+});
+
 const currentItems = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
-  return alarmList.slice(start, start + itemsPerPage);
+  const end = start + itemsPerPage;
+
+  if (currentTab.value === '알림') {
+    return alarmList.slice(start, end);
+  } else if (currentTab.value === '내 게시글') {
+    return myPostList.slice(start, end);
+  } else if (currentTab.value === '내 댓글') {
+    return myCommentList.value.slice(start, end);
+  } else {
+    return [];
+  }
 });
 
 const pageChange = (page) => {
@@ -435,6 +490,12 @@ const clickPrev = () => {
 const clickNext = () => {
   if (currentPage.value < totalPages.value) currentPage.value++;
 };
+
+watch(showAlarmPopup, (visible) => {
+  if (!visible) {
+    currentPage.value = 1;
+  }
+});
 </script>
 
 <style scoped lang="scss">
@@ -644,6 +705,7 @@ const clickNext = () => {
     padding: 15px;
     border-radius: 6px;
     background-color: #4c3d86;
+    text-align: left;
   }
   // 알람의 첫번째, 두번째, 세번째 스타일
   .alarm_list:nth-of-type(1) > .alarm_list_button {

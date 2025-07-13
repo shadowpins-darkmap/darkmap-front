@@ -9,13 +9,29 @@
       <button class="alarm_list_button">
         <span class="alarm_list_icon">
           <img
+            v-if="props.currentTab == '알림'"
             :src="getIcon(item.tag)"
             alt="alarm list icon"
             width="24"
             height="24"
           />
+          <img
+            v-else
+            src="@/assets/profileDefault.svg"
+            alt="profile icon"
+            width="40"
+            height="40"
+          />
         </span>
-        <span class="ellipsis__2 alarm_contents">{{ item.title }}</span>
+        <span class="ellipsis__2 alarm_contents">
+          {{
+            props.currentTab === '알림'
+              ? `${item.nickname}님이 ${item.tag} '${item.title}'을(를) 남겼습니다.`
+              : props.currentTab === '내 게시글'
+                ? item.title
+                : item.comment
+          }}
+        </span>
       </button>
     </li>
   </ul>
@@ -28,10 +44,12 @@ import iconMarker from '@/assets/alarmMarker.svg';
 
 import { defineProps } from 'vue';
 const props = defineProps({
+  currentTab: String,
   items: Array,
   currentPage: Number,
   itemsPerPage: Number,
 });
+
 const getIcon = (tag) => {
   switch (tag) {
     case '댓글':
