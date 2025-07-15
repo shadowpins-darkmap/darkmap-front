@@ -76,12 +76,17 @@
                     />
                   </span>
                 </span>
-                <span class="ellipsis__1 search_list_contents_title">
-                  {{ item.title }}
-                </span>
-                <span class="ellipsis__1 search_list_contents_detail">
-                  {{ item.detail }}
-                </span>
+                <!-- 제목 하이라이팅 -->
+                <span
+                  class="ellipsis__1 search_list_contents_title"
+                  v-html="highlightKeyword(item.title)"
+                ></span>
+
+                <!-- 내용 하이라이팅 -->
+                <span
+                  class="ellipsis__1 search_list_contents_detail"
+                  v-html="highlightKeyword(item.detail)"
+                ></span>
               </span>
             </button>
           </li>
@@ -132,6 +137,13 @@ const handleSearch = () => {
     // 검색 실행 로직 (emit 또는 라우팅 등)
     console.log('검색:', keyword.value);
   }
+};
+// 하이라이트 처리
+const highlightKeyword = (text) => {
+  if (!keyword.value) return text;
+  const escapedKeyword = keyword.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escapedKeyword})`, 'gi');
+  return text.replace(regex, '<mark class="highlight">$1</mark>');
 };
 
 //  페이지네이션 상태
