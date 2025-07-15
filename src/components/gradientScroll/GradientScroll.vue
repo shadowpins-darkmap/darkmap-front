@@ -1,11 +1,19 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount, defineProps, computed } from 'vue';
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  defineProps,
+  computed,
+  // watch,
+} from 'vue';
 
 const props = defineProps({
   width: { type: String, default: '100%' },
   height: { type: String, default: 'auto' },
   gradientColor: { type: String, default: 'rgba(0, 0, 0, 0.6)' },
   direction: { type: String, default: 'horizontal' },
+  showGradient: { type: Boolean, default: true },
 });
 
 const scrollArea = ref(null);
@@ -24,6 +32,12 @@ const updateGradient = () => {
     showEnd.value = el.scrollHeight - el.clientHeight - el.scrollTop > 5;
   }
 };
+
+// 텍스트아리아 일경우
+// watch(
+//   () => scrollArea.value?.scrollHeight,
+//   () => updateGradient(),
+// );
 
 const handleWheel = (e) => {
   const el = scrollArea.value;
@@ -60,7 +74,7 @@ onBeforeUnmount(() => {
   >
     <!-- Start Gradient (Left or Top) -->
     <div
-      v-if="showStart"
+      v-if="showGradient && showStart"
       class="scroll_gradient"
       :class="isHorizontal ? 'left' : 'top'"
       :style="{
@@ -81,7 +95,7 @@ onBeforeUnmount(() => {
 
     <!-- End Gradient (Right or Bottom) -->
     <div
-      v-if="showEnd"
+      v-if="showGradient && showEnd"
       class="scroll_gradient"
       :class="isHorizontal ? 'right' : 'bottom'"
       :style="{

@@ -173,16 +173,29 @@
     </GradientScroll>
     <!-- 댓글 등록 영역 -->
     <div class="comment_footer">
-      <div class="comment_input_wrap">
-        <textarea
-          v-model="comment"
-          class="comment_textarea"
-          placeholder="댓글을 입력해 주세요"
-          maxlength="490"
-          id="comment_text"
-          @input="updateLength"
-          @keydown.enter.prevent="handleEnter"
-        ></textarea>
+      <div
+        class="comment_input_wrap"
+        :style="{ height: commentInputHeight + 48 + 'px' }"
+      >
+        <GradientScroll
+          :width="'100%'"
+          :height="parseInt(commentInputHeight) >= 80 ? 'auto' : '80px'"
+          direction="vertical"
+          gradient-color="rgb(207, 195, 217,1.5)"
+          :show-gradient="parseInt(commentInputHeight) >= 80"
+        >
+          <textarea
+            v-model="comment"
+            class="comment_textarea"
+            placeholder="댓글을 입력해 주세요"
+            maxlength="490"
+            id="comment_text"
+            @input="updateLength"
+            @keydown.enter.prevent="handleEnter"
+            rows="1"
+          ></textarea>
+        </GradientScroll>
+
         <span class="char_count">{{ comment.length }}/490</span>
       </div>
       <button class="comment_submit_button" @click="submitComment">
@@ -308,9 +321,21 @@ const togglePostLike = () => {
   showLikePopup.value = true;
 };
 
+const commentInputHeight = ref(20);
+
 const updateLength = () => {
   if (comment.value.length > 490) {
     comment.value = comment.value.slice(0, 490);
+  }
+
+  // 텍스트 입력시 동적 높이 조절
+  const textarea = document.getElementById('comment_text');
+  if (textarea) {
+    textarea.style.height = 'auto';
+    const scrollH = textarea.scrollHeight;
+    const maxH = 145;
+    commentInputHeight.value = Math.min(scrollH, maxH);
+    textarea.style.height = commentInputHeight.value + 'px';
   }
 };
 
@@ -543,15 +568,20 @@ const toggleLike = (commentId) => {
   background-color: #cfc3d9;
   padding: 15px;
   border-radius: 12px;
-  height: 80px;
+  min-height: 80px;
+  max-height: 145px;
   border: 2px solid #f1cfc8;
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
 }
 .comment_textarea {
   background-color: #cfc3d9;
   border: none;
   width: 100%;
+  display: flex;
+  line-height: 1.2;
+  padding-top: 4px;
 }
 .comment_textarea::placeholder {
   color: #735bcf;
