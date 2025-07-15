@@ -38,7 +38,10 @@
       />
     </div>
     <!-- TODO : link -->
-    <a href="#" target="_blank" class="go_guid_link"
+    <a
+      href="https://dune-purple-f80.notion.site/2-20025ce1e4e980408240ff907e3ca889?source=copy_link"
+      target="_blank"
+      class="go_guid_link"
       >커뮤니티 가이드 보러가기 LINK</a
     >
     <button

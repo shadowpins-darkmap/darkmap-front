@@ -52,6 +52,14 @@ textarea {
 }
 
 /* 전역 공통 클래스 */
+/* 하이라이팅 */
+mark {
+  background-color: #00ffc2 !important;
+  color: #006850 !important;
+  font-weight: bold;
+  padding: 0 2px;
+}
+
 /* 한 줄 생략 (...) */
 .ellipsis__1 {
   display: -webkit-box !important;

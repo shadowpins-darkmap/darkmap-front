@@ -20,9 +20,11 @@
     />
     <BaseInput
       v-model="image"
-      :id="write_image"
+      type="file"
       label="이미지"
-      placeholder="10mb 이하의 png, jpeg, gif 만  첨부 가능합니다."
+      :id="'write_image'"
+      :accept="'image/png, image/jpeg, image/gif'"
+      :onChange="handleImage"
     />
     <button class="submit_button" @click="submitPost">글쓰기</button>
   </div>
@@ -38,7 +40,18 @@ const categories = ['기억', '고민', '질문', '미분류'];
 const selectedCategory = ref(categories[0]);
 const title = ref('');
 const content = ref('');
-const image = ref('');
+const imageFile = ref(null);
+const previewUrl = ref('');
+
+const handleImage = (event) => {
+  const file = event.target.files[0];
+  if (file && file.size < 10 * 1024 * 1024) {
+    imageFile.value = file;
+    previewUrl.value = URL.createObjectURL(file);
+  } else {
+    alert('10mb 이하의 이미지만 첨부할 수 있습니다.');
+  }
+};
 
 const handleCategorySelect = (item) => {
   selectedCategory.value = item;

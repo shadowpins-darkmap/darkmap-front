@@ -32,7 +32,7 @@
     <!-- 리스트 솔팅 탭 -->
     <GradientScroll
       :width="'350px'"
-      :height="'55px'"
+      :height="'75px'"
       gradient-color="rgba(0,0,0,1)"
     >
       <ul class="sort_list_wrap">
@@ -50,39 +50,57 @@
     </GradientScroll>
     <strong class="search_title">총 {{ nn }}건의 검색결과가 있습니다. </strong>
 
-    <!-- 광장 게시글 리스트 -->
-    <ul class="search_list_wrap scroll_area">
-      <li class="search_list" v-for="item in currentItems" :key="item.id">
-        <button class="search_list_button" @click="openDetail(item)">
-          <span class="search_list_contents">
-            <span class="tag_button_wrap">
-              <span class="search_list_tag">
-                {{ item.tag }}
+    <!-- 검색된 게시글 리스트 -->
+    <GradientScroll
+      :width="'100%'"
+      :height="'100%'"
+      direction="vertical"
+      gradient-color="rgba(0,0,0,1)"
+    >
+      <div class="search_scroll_area">
+        <ul class="search_list_wrap">
+          <li class="search_list" v-for="item in currentItems" :key="item.id">
+            <button class="search_list_button" @click="openDetail(item)">
+              <span class="search_list_contents">
+                <span class="tag_button_wrap">
+                  <span class="search_list_tag">
+                    {{ item.tag }}
+                  </span>
+                  <span class="search_list_arrow">
+                    <img
+                      src="@/assets/slideCardArrowGreen.svg"
+                      class="search_list_arrow_icon"
+                      alt="search list arrow icon"
+                      width="18"
+                      height="18"
+                    />
+                  </span>
+                </span>
+                <!-- 제목 하이라이팅 -->
+                <span
+                  class="ellipsis__1 search_list_contents_title"
+                  v-html="highlightKeyword(item.title)"
+                ></span>
+
+                <!-- 내용 하이라이팅 -->
+                <span
+                  class="ellipsis__1 search_list_contents_detail"
+                  v-html="highlightKeyword(item.detail)"
+                ></span>
               </span>
-              <span class="search_list_arrow">
-                <img
-                  src="@/assets/slideCardArrowGreen.svg"
-                  class="search_list_arrow_icon"
-                  alt="search list arrow icon"
-                  width="18"
-                  height="18"
-                />
-              </span>
-            </span>
-            <span class="ellipsis__2 list_contents_title">
-              {{ item.title }}
-            </span>
-          </span>
-        </button>
-      </li>
-    </ul>
-    <PaginationWrap
-      :currentPage="currentPage"
-      :pageNumbers="pageNumbers"
-      @page-change="pageChange"
-      @prev="clickPrev"
-      @next="clickNext"
-    />
+            </button>
+          </li>
+        </ul>
+        <PaginationWrap
+          v-if="postList.length > itemsPerPage"
+          :currentPage="currentPage"
+          :pageNumbers="pageNumbers"
+          @page-change="pageChange"
+          @prev="clickPrev"
+          @next="clickNext"
+        />
+      </div>
+    </GradientScroll>
   </div>
 
   <!-- SlidePanels -->
@@ -120,10 +138,17 @@ const handleSearch = () => {
     console.log('검색:', keyword.value);
   }
 };
+// 하이라이트 처리
+const highlightKeyword = (text) => {
+  if (!keyword.value) return text;
+  const escapedKeyword = keyword.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escapedKeyword})`, 'gi');
+  return text.replace(regex, '<mark class="highlight">$1</mark>');
+};
 
 //  페이지네이션 상태
 const currentPage = ref(1);
-const itemsPerPage = 6;
+const itemsPerPage = 10;
 // 상세 페이지 슬라이드
 const isPanel2depsOpen = ref(false);
 
@@ -133,11 +158,12 @@ const openDetail = (item) => {
 };
 
 // 더미 데이터 TODO
-const postList = Array.from({ length: 140 }, (_, i) => ({
+const postList = Array.from({ length: 40 }, (_, i) => ({
   id: i + 1,
   nickname: `검은 태양의 핀 ${i + 1}`,
   tag: '기억',
-  title: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 게시글`,
+  title: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 게시글 번 게시글`,
+  detail: `안녕하세요. 동네에 살면서 이런 ${i + 1}번 글을 쓰게 될 줄은 몰랐는데, 요즘 너무 불안해서 용기 내어 남깁니다. 저는 ○○아파트 사는 30대 직장인 여성입니다. 게시글`,
   comments: Math.floor(Math.random() * 200),
   likes: Math.floor(Math.random() * 20),
   views: Math.floor(Math.random() * 1000),
@@ -276,9 +302,10 @@ const clickNext = () => {
   color: #000;
 }
 // 광장 게시글 리스트
+.search_scroll_area {
+  margin: 20px 0;
+}
 .search_list_wrap {
-  height: calc(100% - 300px);
-  overflow-y: scroll;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -286,6 +313,19 @@ const clickNext = () => {
 .search_list {
   display: flex;
   width: 100%;
+}
+.search_list_contents_title {
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  min-height: 18px;
+  margin-top: 14px;
+  margin-bottom: 12px;
+}
+.search_list_contents_detail {
+  color: #fff;
+  font-size: 12px;
+  min-height: 15px;
 }
 .tag_button_wrap {
   display: flex;
