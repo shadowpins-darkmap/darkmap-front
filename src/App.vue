@@ -52,7 +52,7 @@ textarea {
 }
 
 /* 전역 공통 클래스 */
-
+/* 하이라이팅 */
 mark {
   background-color: #00ffc2 !important;
   color: #006850 !important;

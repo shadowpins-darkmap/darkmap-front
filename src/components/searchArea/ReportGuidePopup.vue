@@ -4,15 +4,17 @@
     <div class="report_guide_popup" v-if="selected === null">
       <button class="popup_close" @click="$emit('close')">
         <img
-          src="@/assets/reportGuidePopupCloseIcon.svg"
-          alt="popup close icon"
-          width="24"
-          height="24"
+          src="@/assets/sliderCloseIcon.svg"
+          alt="slider close icon"
+          width="36"
+          height="36"
         />
       </button>
       <img
         src="@/assets/reportGuideMainImg.svg"
         class="report_guide_main_img"
+        width="128"
+        height="128"
         alt="report guide main img"
       />
       <strong class="report_guide_popup_title"
@@ -39,7 +41,7 @@
         </li>
         <li>
           <button @click="selected = 'onlinePolice'">
-            서울경찰청 여성청소년범죄신고 (온라인)
+            경찰 민원 포털 신고
           </button>
         </li>
       </ul>
@@ -48,35 +50,55 @@
     <!-- 서울안심이 앱 -->
     <div class="report_guide_popup" v-if="selected === 'safetyApp'">
       <div class="guide_inner">
-        <button class="popup_back_button" @click="selected = null">
-          <img
-            src="@/assets/reportGuideBackArrow.svg"
-            alt="popup back icon"
-            width="24"
-            height="24"
-          />
-          뒤로 가기
-        </button>
+        <div class="popup_top_button_wrap">
+          <button class="popup_back_button" @click="selected = null">
+            <img
+              src="@/assets/popupBack.svg"
+              alt="slider close icon"
+              width="36"
+              height="36"
+            />
+          </button>
+          <button class="popup_top_close" @click="$emit('close')">
+            <img
+              src="@/assets/sliderCloseIcon.svg"
+              alt="slider close icon"
+              width="36"
+              height="36"
+            />
+          </button>
+        </div>
         <img
           src="@/assets/safetyApp1.svg"
           alt="popup safety img"
-          width="204"
-          height="182"
+          width="128"
+          height="128"
           class="top_img_safetyApp1"
         />
         <div class="top_img_wrap">
-          <img
-            src="@/assets/safetyApp2.svg"
-            alt="popup safety img"
-            width="182"
-            height="56"
-          />
-          <img
-            src="@/assets/safetyApp3.svg"
-            alt="popup safety img"
-            width="182"
-            height="56"
-          />
+          <a
+            href="https://play.google.com/store/apps/details?id=kr.go.seoul.ansimi.woman&pcampaignid=web_share"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src="@/assets/safetyApp2.svg"
+              alt="popup safety img"
+              width="182"
+              height="56"
+          /></a>
+          <a
+            href="https://apps.apple.com/kr/app/%EC%84%9C%EC%9A%B8%EC%8B%9C-%EC%95%88%EC%8B%AC%EC%9D%B4/id1204100862?platform=iphone"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src="@/assets/safetyApp3.svg"
+              alt="popup safety img"
+              width="182"
+              height="56"
+            />
+          </a>
         </div>
         <p class="guide_info_text">
           서울시에서 제작한 귀갓길 안전 공립 서비스 무료 앱.
@@ -107,7 +129,7 @@
           관제 모니터링 화면에 내 상황이 전달되고, 필요할 경우 경찰이 출동해서
           조치를 취해줍니다.
         </p>
-        <button class="popup_go_to_button">
+        <!-- <button class="popup_go_to_button">
           <img
             src="@/assets/reportGuideBackArrow.svg"
             alt="popup go to icon"
@@ -117,29 +139,46 @@
           />
           <strong> 소개 페이지 가기 </strong>
           <span> 서울 안심이에 대해 더 궁금하다면? </span>
-        </button>
+        </button> -->
       </div>
     </div>
     <!-- 여성 긴급 전화 1366-->
     <div class="report_guide_popup" v-if="selected === 'tel1366'">
       <div class="guide_inner">
-        <button class="popup_back_button" @click="selected = null">
-          <img
-            src="@/assets/reportGuideBackArrow.svg"
-            alt="popup back icon"
-            width="24"
-            height="24"
-          />
-          뒤로 가기
-        </button>
+        <div class="popup_top_button_wrap">
+          <button class="popup_back_button" @click="selected = null">
+            <img
+              src="@/assets/popupBack.svg"
+              alt="slider close icon"
+              width="36"
+              height="36"
+            />
+          </button>
+          <button class="popup_top_close" @click="$emit('close')">
+            <img
+              src="@/assets/sliderCloseIcon.svg"
+              alt="slider close icon"
+              width="36"
+              height="36"
+            />
+          </button>
+        </div>
         <img
           src="@/assets/tel13661.svg"
           alt="popup tel1366 img"
-          width="148"
-          height="154"
+          width="128"
+          height="128"
           class="top_img_tel1366"
         />
-        <button class="guide_top_button">바로 전화 하기</button>
+
+        <a
+          class="guide_top_button"
+          href="https://seoul1366.or.kr/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          사이트 방문하기
+        </a>
         <p class="guide_info_text">
           지방자치단체 직영 또는 비영리법인·민간단체 등에 위탁 운영되는
           <br />
@@ -158,7 +197,7 @@
           경찰, 병원, 법률기관과 연계하여 피해자를 지원합니다.
         </p>
 
-        <button class="popup_go_to_button">
+        <!-- <button class="popup_go_to_button">
           <img
             src="@/assets/reportGuideBackArrow.svg"
             alt="popup go to icon"
@@ -168,29 +207,45 @@
           />
           <strong> 소개 페이지 가기 </strong>
           <span> 1366에 대해 더 궁금하다면? </span>
-        </button>
+        </button> -->
       </div>
     </div>
     <!-- 청소년 상담 전화 1388 -->
     <div class="report_guide_popup" v-if="selected === 'tel1388'">
       <div class="guide_inner">
-        <button class="popup_back_button" @click="selected = null">
-          <img
-            src="@/assets/reportGuideBackArrow.svg"
-            alt="popup back icon"
-            width="24"
-            height="24"
-          />
-          뒤로 가기
-        </button>
+        <div class="popup_top_button_wrap">
+          <button class="popup_back_button" @click="selected = null">
+            <img
+              src="@/assets/popupBack.svg"
+              alt="slider close icon"
+              width="36"
+              height="36"
+            />
+          </button>
+          <button class="popup_top_close" @click="$emit('close')">
+            <img
+              src="@/assets/sliderCloseIcon.svg"
+              alt="slider close icon"
+              width="36"
+              height="36"
+            />
+          </button>
+        </div>
         <img
           src="@/assets/tel13881.svg"
           alt="popup tel1388 img"
-          width="277"
-          height="183"
+          width="128"
+          height="128"
           class="top_img_tel1388"
         />
-        <button class="guide_top_button">바로 전화 하기</button>
+        <a
+          class="guide_top_button"
+          href="https://www.1388.go.kr/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          사이트 방문하기
+        </a>
         <p class="guide_info_text">
           한국청소년상담복지개발원 청소년사이버상담센터에서 운영하는
           <br />
@@ -209,7 +264,7 @@
           내용을 전문상담자와 상담할 수 있음
         </p>
 
-        <button class="popup_go_to_button">
+        <!-- <button class="popup_go_to_button">
           <img
             src="@/assets/reportGuideBackArrow.svg"
             alt="popup go to icon"
@@ -219,32 +274,47 @@
           />
           <strong> 소개 페이지 가기 </strong>
           <span> 1388에 대해 더 궁금하다면?</span>
-        </button>
+        </button> -->
       </div>
     </div>
     <!-- 여성단체 상담·의료·법률 지원처 주소록 -->
     <div class="report_guide_popup" v-if="selected === 'supportMap'">
       <div class="guide_inner">
-        <button class="popup_back_button" @click="selected = null">
-          <img
-            src="@/assets/reportGuideBackArrow.svg"
-            alt="popup back icon"
-            width="24"
-            height="24"
-          />
-          뒤로 가기
-        </button>
+        <div class="popup_top_button_wrap">
+          <button class="popup_back_button" @click="selected = null">
+            <img
+              src="@/assets/popupBack.svg"
+              alt="slider close icon"
+              width="36"
+              height="36"
+            />
+          </button>
+          <button class="popup_top_close" @click="$emit('close')">
+            <img
+              src="@/assets/sliderCloseIcon.svg"
+              alt="slider close icon"
+              width="36"
+              height="36"
+            />
+          </button>
+        </div>
         <img
           src="@/assets/supportMap.svg"
           alt="popup tel1388 img"
-          width="160"
-          height="160"
+          width="128"
+          height="128"
           class="top_img_tel1388"
         />
-        <button class="guide_top_goto_button">주소록 링크 가기</button>
+        <a
+          class="guide_top_button"
+          href="https://docs.google.com/spreadsheets/d/1sr2FJuWAyPDiXlg8oyjVtiKtyHfbQJqmSVYQ1FsqD3c/edit?usp=sharing"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          주소록 링크 가기
+        </a>
         <p class="guide_info_text">
-          페미니즘 활동 그룹 셰도우 핀즈가 수집하고 업데이트하는 여성 폭력
-          지원처 주소록.
+          셰도우 핀즈가 수집하고 업데이트하는 여성 폭력 지원처 주소록.
         </p>
         <strong class="guide_info_title mt_20">포함 범위</strong>
         <p class="guide_info_text">
@@ -252,29 +322,45 @@
           상담 지원처, 수사기관, 법조계
         </p>
         <strong class="guide_info_title">최종 업데이트 일</strong>
-        <p class="guide_info_text">2023.10.??</p>
+        <p class="guide_info_text">2023.10.22</p>
       </div>
     </div>
     <!-- 서울경찰청 여성청소년범죄신고 (온라인)-->
     <div class="report_guide_popup" v-if="selected === 'onlinePolice'">
       <div class="guide_inner">
-        <button class="popup_back_button" @click="selected = null">
-          <img
-            src="@/assets/reportGuideBackArrow.svg"
-            alt="popup back icon"
-            width="24"
-            height="24"
-          />
-          뒤로 가기
-        </button>
+        <div class="popup_top_button_wrap">
+          <button class="popup_back_button" @click="selected = null">
+            <img
+              src="@/assets/popupBack.svg"
+              alt="slider close icon"
+              width="36"
+              height="36"
+            />
+          </button>
+          <button class="popup_top_close" @click="$emit('close')">
+            <img
+              src="@/assets/sliderCloseIcon.svg"
+              alt="slider close icon"
+              width="36"
+              height="36"
+            />
+          </button>
+        </div>
         <img
           src="@/assets/onlinePolice.svg"
           alt="popup onlinePolice img"
-          width="172"
-          height="172"
+          width="128"
+          height="128"
           class="top_img_onlinePolice"
         />
-        <button class="guide_top_goto_button">전자 민원 넣기</button>
+        <a
+          class="guide_top_button"
+          href="https://minwon.police.go.kr/#requestMinwon/report/STT-105"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          전자 민원 넣기
+        </a>
         <p class="guide_info_text">
           서울 경찰청 홈페이지에서 여성청소년범죄 관련 전자 민원을 넣을 수 있는
           창구
@@ -317,7 +403,7 @@ const handleBackgroundClick = () => {
 .report_guide_popup {
   width: 558px;
   height: 754px;
-  background-color: #fff;
+  background-color: #6d54ce;
   border-radius: 15px;
   display: flex;
   align-items: center;
@@ -333,40 +419,59 @@ const handleBackgroundClick = () => {
 }
 .report_guide_popup_title {
   font-size: 20px;
-  color: #000;
+  color: #fff;
   padding-bottom: 20px;
 }
 .report_guide_popup_description {
   font-size: 14px;
   font-weight: normal;
-  color: #004de8;
+  color: #fff;
   padding-bottom: 30px;
 }
 .report_guide_list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
 }
-
+.popup_top_button_wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
 // selected
 .top_img_wrap {
   display: flex;
   gap: 20px;
 }
 .top_img_safetyApp1 {
-  margin: 10px 0;
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+.top_img_tel1366 {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.top_img_tel1388 {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.top_img_onlinePolice {
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 .guide_top_button {
-  width: 256px;
-  height: 30px;
+  width: 215px;
+  height: 42px;
   font-size: 14px;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #7aa6ff;
+  background-color: #000;
   color: #fff;
-  border-radius: 4px;
+  border: 1px solid #f1cfc8;
+  border-radius: 42px;
   margin-top: 20px;
 }
 .guide_top_goto_button {
@@ -388,7 +493,7 @@ const handleBackgroundClick = () => {
   margin-top: 20px;
 }
 .guide_info_text {
-  color: #ffefeb;
+  color: #fff;
   font-size: 14px;
   padding: 20px 10px;
   word-break: keep-all;
@@ -396,7 +501,7 @@ const handleBackgroundClick = () => {
 }
 .guide_info_title {
   display: flex;
-  color: #ffefeb;
+  color: #fff;
   font-size: 14px;
   padding-top: 10px;
 }
@@ -404,46 +509,49 @@ const handleBackgroundClick = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px 10px;
-  border-radius: 4px;
-  background-color: #f9f9f9;
-  border: 1px solid #d3d3d3;
+  padding: 15px 10px;
+  border-radius: 42px;
+  background-color: #b6a9e7;
+  border: 1px solid #b6a9e7;
   min-width: 256px;
-  color: #424142;
+  color: #000;
   font-size: 14px;
   cursor: pointer;
+  height: 42px;
+}
+.report_guide_list button:hover {
+  background-color: #000;
+  color: #fff;
+  font-weight: bold;
 }
 
-.popup_back_button {
-  height: 24px;
-  display: flex;
-  align-items: center;
-  color: #ffefeb;
-  align-self: flex-start;
-}
 .popup_go_to_button {
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
   gap: 5px;
   width: 100%;
-  color: #ffefeb;
+  color: #fff;
   position: absolute;
   bottom: 10px;
   right: 10px;
   cursor: pointer;
+}
+
+.popup_go_to_button > strong {
+  text-decoration: underline;
 }
 .popup_go_to_icon {
   display: flex;
   transform: rotate(180deg) translateY(1px);
 }
 .guide_inner {
-  background-color: #313457;
+  background-color: #6d54ce;
   width: 100%;
   height: 100%;
   padding: 15px;
   border-radius: 14px;
-  border: 1px solid #ffffff9b;
+  /* border: 1px solid #ffffff9b; */
   display: flex;
   flex-direction: column;
   align-items: center;
