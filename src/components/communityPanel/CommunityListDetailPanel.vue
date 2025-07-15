@@ -87,7 +87,7 @@
       <div class="comments_list_wrap">
         <ul>
           <li
-            v-for="comment in comments"
+            v-for="comment in paginatedComments"
             :key="comment.id"
             class="comments_item"
           >
@@ -156,6 +156,19 @@
             </div>
           </li>
         </ul>
+        <div
+          v-if="comments.length > commentsPerPage"
+          class="comment_pagination_wrap"
+        >
+          <PaginationWrap
+            v-if="comments.length > commentsPerPage"
+            :currentPage="commentsPage"
+            :pageNumbers="
+              Array.from({ length: commentsTotalPages }, (_, i) => i + 1)
+            "
+            @page-change="changeCommentPage"
+          />
+        </div>
       </div>
     </GradientScroll>
     <!-- 댓글 등록 영역 -->
@@ -236,11 +249,12 @@
 
 <script setup>
 // emits: close, openDetail
-import { ref, defineProps, nextTick } from 'vue';
+import { ref, defineProps, nextTick, computed } from 'vue';
 import GradientScroll from '@/components/gradientScroll/GradientScroll.vue';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
 import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
 import CommunityPostReportForm from '@/components/communityPopup/CommunityPostReportForm.vue';
+import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
 
 const props = defineProps({
   post: {
@@ -325,42 +339,34 @@ const handleEnter = (e) => {
 // 더미 데이터 TODO
 const myNickname = '붉은핀';
 
-const comments = ref([
-  {
-    id: 1,
-    nickname: '정말 무서운 경험이셨겠어요0',
-    content: '미친... 저도 비슷한 일 있어서 쓰레기 버릴때마다 긴장해요.',
+const comments = ref(
+  Array.from({ length: 20 }, (_, i) => ({
+    id: i + 1,
+    nickname: `붉은 핀의 아이디 ${i + 1}`,
+    content: `This is a dummy comment number ${i + 1}.`,
     updateDate: '2025-05-05',
     updateTime: 'PM 8:00',
-    recommendCount: 999,
-  },
-  {
-    id: 2,
-    nickname: '붉은핀',
-    content: '댓글 테스트',
-    updateDate: '2025-05-05',
-    updateTime: 'PM 8:00',
-    recommendCount: 0,
-  },
-  {
-    id: 3,
-    nickname: '붉은핀',
-    content:
-      '저도 비슷한 경험이 있어서 너무 공감이 됩니다. 밤늦게 집에 들어갈 때마다 괜히 뒤를 한 번 더 돌아보게 되고, 누가 따라오는 건 아닌지 긴장하게 돼요. 그럴 때마다 괜히 핸드폰을 귀에 대고 통화하는 척하거나, 이어폰을 빼고 주변 소리에 더 집중하게 되더라고요. 사실 이런 불안감은 겪어본 사람만 알 수 있는 감정인데, 이렇게 공유해주셔서 감사해요. 저는 한번은 집 앞에서 모르는 사람이 갑자기 말을 걸어서 너무 놀란 적도 있어요. 그런 경험이 쌓이다 보니 외출 자체가 두려워졌고, 밤에는 될 수 있으면 외출을 피하게 되었어요. 혼자 사는 여성분들 정말 조심하셔야 하고, 이런 일은 그냥 넘기지 말고 주변에 알리는 게 중요한 것 같아요. 저도 다음부터는 바로 신고하거나 관리사무소에 알려보려고요. 부디 더 이상 불쾌한 일이 없길 바랍니다.',
-    updateDate: '2025-05-05',
-    updateTime: 'PM 8:00',
-    recommendCount: 9,
-  },
-  {
-    id: 4,
-    nickname: '이런 일은 다시 없길 바라요2',
-    content:
-      '저도 비슷한 경험이 있어서 너무 공감이 됩니다. 밤늦게 집에 들어갈 때마다 괜히 뒤를 한 번 더 돌아보게 되고, 누가 따라오는 건 아닌지 긴장하게 돼요. 그럴 때마다 괜히 핸드폰을 귀에 대고 통화하는 척하거나, 이어폰을 빼고 주변 소리에 더 집중하게 되더라고요. 사실 이런 불안감은 겪어본 사람만 알 수 있는 감정인데, 이렇게 공유해주셔서 감사해요. 저는 한번은 집 앞에서 모르는 사람이 갑자기 말을 걸어서 너무 놀란 적도 있어요. 그런 경험이 쌓이다 보니 외출 자체가 두려워졌고, 밤에는 될 수 있으면 외출을 피하게 되었어요. 혼자 사는 여성분들 정말 조심하셔야 하고, 이런 일은 그냥 넘기지 말고 주변에 알리는 게 중요한 것 같아요. 저도 다음부터는 바로 신고하거나 관리사무소에 알려보려고요. 부디 더 이상 불쾌한 일이 없길 바랍니다.',
-    updateDate: '2025-05-05',
-    updateTime: 'PM 8:00',
-    recommendCount: 9,
-  },
-]);
+    recommendCount: i * 2,
+  })),
+);
+
+// 댓글 페이지네이션
+const commentsPerPage = 10;
+const commentsPage = ref(1);
+
+const paginatedComments = computed(() => {
+  const start = (commentsPage.value - 1) * commentsPerPage;
+  return comments.value.slice(start, start + commentsPerPage);
+});
+
+const commentsTotalPages = computed(() =>
+  Math.ceil(comments.value.length / commentsPerPage),
+);
+
+const changeCommentPage = (page) => {
+  commentsPage.value = page;
+};
+
 // 내 댓글 지우기
 const deleteComment = (id) => {
   comments.value = comments.value.filter((c) => c.id !== id);
@@ -528,7 +534,10 @@ const toggleLike = (commentId) => {
 }
 .icon_button {
 }
-
+.comment_pagination_wrap {
+  border-top: 1px solid #fff;
+  margin-top: 20px;
+}
 /* 댓글 등록 영역  */
 .comment_input_wrap {
   background-color: #cfc3d9;
