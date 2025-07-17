@@ -12,21 +12,28 @@
 
     <div class="account_profile_wrap">
       <!-- 닉네임 -->
-      <label class="form_label" for="nickname">닉네임</label>
-      <input
-        id="nickname"
-        type="text"
-        class="form_input"
-        placeholder="닉네임 입력"
-        v-model="nickname"
-      />
-
+      <div>
+        <label class="form_label" for="nickname">닉네임</label>
+        <input
+          id="nickname"
+          type="text"
+          class="form_input"
+          placeholder="닉네임 입력"
+          v-model="nickname"
+        />
+      </div>
       <!-- 약관 동의 -->
       <div class="terms_section">
         <p class="terms_title">서비스 법률 권한 설정</p>
-        <div class="term_item" v-for="item in items" :key="item.id">
+        <div class="term_item" v-for="item in toggleItems" :key="item.id">
           <span class="term_label">{{ item.label }}</span>
-          <label class="toggle_switch">
+          <label
+            class="toggle_switch"
+            :class="{
+              'required-on': item.required && item.agreed,
+              'optional-on': !item.required && item.agreed,
+            }"
+          >
             <input type="checkbox" v-model="item.agreed" />
             <span class="slider"></span>
           </label>
@@ -37,14 +44,24 @@
       <!-- 계정 상태 -->
       <div class="account_status">
         <p class="terms_title">계정 상태</p>
-        <div class="account_action">
-          <span>🔌</span>
-          <button>로그아웃</button>
-        </div>
-        <div class="account_action">
-          <span>📤</span>
-          <button>탈퇴하기</button>
-        </div>
+        <button class="account_action">
+          <img
+            width="30px"
+            height="30px"
+            src="@/assets/accountLogout.svg"
+            alt="delete"
+          />
+          <span>로그아웃</span>
+        </button>
+        <button class="account_action">
+          <img
+            width="30px"
+            height="30px"
+            src="@/assets/accountDelete.svg"
+            alt="delete"
+          />
+          <span>탈퇴하기</span>
+        </button>
       </div>
 
       <!-- 수정 완료 버튼 -->
@@ -61,16 +78,32 @@ import { defineProps, ref } from 'vue';
 const props = defineProps({
   items: Object,
 });
-const nickname = ref(props.items.nickname);
+// const nickname = ref(props.items.nickname);
+const nickname = ref('nickname');
+
+const toggleItems = ref([
+  {
+    id: 1,
+    label: '사이트이용약관',
+    agreed: true,
+    required: true, // 필수 여부
+  },
+  {
+    id: 2,
+    label: '개인정보처리방침',
+    agreed: false,
+    required: true,
+  },
+  {
+    id: 3,
+    label: '마케팅광고수신',
+    agreed: true,
+    required: false,
+  },
+]);
 </script>
 
 <style scoped>
-.account_wrap {
-  display: flex;
-  flex-direction: row;
-  margin-top: 50px;
-}
-
 /* 닉네임 인풋 */
 .form_label {
   display: block;
@@ -80,9 +113,10 @@ const nickname = ref(props.items.nickname);
   font-size: 20px;
 }
 .form_input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
+  display: flex;
+  width: 260px;
+  padding: 12px 20px;
+  border-radius: 20px;
   border: 2px solid #f1cfc8;
   font-size: 14px;
 }
@@ -92,32 +126,35 @@ const nickname = ref(props.items.nickname);
 
 .account_wrap {
   display: flex;
-  flex-direction: column;
-  gap: 30px;
-  padding: 20px;
+  flex-direction: row;
+  margin-top: 50px;
+  justify-content: space-between;
   color: #fff;
 }
 
 .account_profile_img {
   display: flex;
   justify-content: center;
+  padding-right: 20px;
 }
 
 .account_profile_wrap {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  flex: 1 0 0;
+  gap: 40px;
 }
 
 /* 닉네임 인풋 */
 .form_label {
   font-weight: bold;
-  font-size: 20px;
+  font-size: 18px;
 }
 .form_input {
   width: 100%;
   padding: 12px;
-  border-radius: 10px;
+  border-radius: 20px;
+  height: 50px;
   border: 2px solid #f1cfc8;
   font-size: 14px;
   color: #333;
@@ -127,18 +164,21 @@ const nickname = ref(props.items.nickname);
 .terms_section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 .terms_title {
   font-weight: bold;
-  font-size: 16px;
+  font-size: 18px;
+  margin-bottom: 12px;
 }
 .term_item {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-bottom: 5px;
 }
 .term_label {
+  font-size: 16px;
+  text-decoration: underline;
   flex: 1;
 }
 .term_state {
@@ -147,13 +187,24 @@ const nickname = ref(props.items.nickname);
 
 /* 계정 상태 */
 .account_status {
-  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
 }
+
 .account_action {
+  width: 100px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 5px 0;
+  margin-bottom: 8px;
+  gap: 8px;
+  align-self: flex-end;
+}
+.account_action > span {
+  font-size: 16px;
+  text-decoration: underline;
+  color: #fff;
+  display: flex;
+  padding-top: 2px;
 }
 
 /* 토글 스위치 */
@@ -191,7 +242,7 @@ const nickname = ref(props.items.nickname);
   transition: 0.4s;
 }
 .toggle_switch input:checked + .slider {
-  background-color: #ff77d6;
+  background-color: #ff99e5;
 }
 .toggle_switch input:checked + .slider::before {
   transform: translateX(20px);
@@ -206,5 +257,7 @@ const nickname = ref(props.items.nickname);
   padding: 14px;
   border-radius: 30px;
   border: 2px solid #fff;
+  width: 138px;
+  align-self: flex-end;
 }
 </style>
