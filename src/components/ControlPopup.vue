@@ -167,7 +167,8 @@
     :width="'510px'"
     :visible="isListPanelOpen"
     @close="isListPanelOpen = false"
-    :right="true"
+    :right="'auto'"
+    :left="'0'"
   >
     <SearchListPanel @close="handleListPanelClose" />
   </SlidePanel>

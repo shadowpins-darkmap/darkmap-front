@@ -1,6 +1,6 @@
 <template>
   <div class="BaseCommunity">
-    <section class="BaseCommunity__popup base">
+    <section class="BaseCommunity__popup base" v-if="!showAccountSection">
       <!-- 아코디언 타이틀 클릭시 토글 -->
       <button class="accordion__header" @click="toggleSection('mypage')">
         <img
@@ -85,7 +85,7 @@
             ⚡️ {{ auth.user?.nickname }}님을 위한 브리핑
             <button
               class="BaseCommunity__setting"
-              @click="showAccountPopup = true"
+              @click="showAccountSection = true"
             >
               <img
                 src="@/assets/settingButtonIcon.svg"
@@ -217,7 +217,12 @@
         </div>
       </div>
     </section>
-
+    <section class="BaseCommunity__popup base" v-if="showAccountSection">
+      <AccountBase
+        @back="showAccountSection = false"
+        @open-terms-panel="isTermsPanelOpen = true"
+      />
+    </section>
     <!-- 다크맵 투어 일지 (고정) -->
     <section class="BaseCommunity__popup">
       <!-- 아코디언 타이틀 클릭시 토글 -->
@@ -308,6 +313,20 @@
         @openDetail="isListPanelOpen = true"
       />
     </SlidePanel>
+
+    <!-- 사이트 이용약관 -->
+    <SlidePanel
+      :width="'510px'"
+      :visible="isTermsPanelOpen"
+      @close="isTermsPanelOpen = false"
+      :right="'auto'"
+      :left="'0'"
+    >
+      <TermsSidePanel
+        @close="isTermsPanelOpen = false"
+        @open-terms-panel="isTermsPanelOpen = true"
+      />
+    </SlidePanel>
   </div>
   <!-- 팝업  -->
   <CommonPopup :visible="showAlarmPopup" @close="showAlarmPopup = false">
@@ -328,9 +347,6 @@
       />
     </section>
   </CommonPopup>
-  <CommonPopup :visible="showAccountPopup" @close="showAccountPopup = false">
-    <AccountBase />
-  </CommonPopup>
 </template>
 
 <script setup>
@@ -344,6 +360,7 @@ import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
 import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
 import { useAuthStore } from '@/store/useAuthStore';
 // import { useDevice } from '@/composables/useDevice';
+import TermsSidePanel from '@/components/commonPanel/TermsSidePanel.vue';
 import AlarmListBase from '@/components/communityPopup/AlarmListBase.vue';
 import AccountBase from '@/components/communityPopup/AccountBase.vue';
 import TabButtons from '@/components/tabButton/TabButtons.vue';
@@ -369,13 +386,15 @@ const handleTestLogin = () => {
 
 // const { isMobile } = useDevice();
 const showAlarmPopup = ref(false);
-const showAccountPopup = ref(false);
+const showAccountSection = ref(false);
 
 const isPanelOpen = ref(false);
 const isPanel2depsOpen = ref(false);
 
 const isListPanelOpen = ref(false);
 const isListPanel2depsOpen = ref(false);
+
+const isTermsPanelOpen = ref(false);
 
 const handlePanelClose = () => {
   isPanelOpen.value = false;

@@ -1,5 +1,13 @@
 <template>
   <div class="account_wrap">
+    <button class="popup_back_button" @click="$emit('back')">
+      <img
+        src="@/assets/popupBack.svg"
+        alt="slider close icon"
+        width="36"
+        height="36"
+      />
+    </button>
     <div class="account_profile_img">
       <img
         src="@/assets/accountProfileImg.svg"
@@ -26,7 +34,9 @@
       <div class="terms_section">
         <p class="terms_title">서비스 법률 권한 설정</p>
         <div class="term_item" v-for="item in toggleItems" :key="item.id">
-          <span class="term_label">{{ item.label }}</span>
+          <button class="term_label" @click="openTerms(item.label)">
+            {{ item.label }}
+          </button>
           <label
             class="toggle_switch"
             :class="{
@@ -67,15 +77,13 @@
       <!-- 수정 완료 버튼 -->
       <button class="submit_btn">수정완료</button>
     </div>
-
-    {{ props.items }}
   </div>
 </template>
 
 <script setup>
-import { defineProps, ref } from 'vue';
+import { defineProps, ref, defineEmits } from 'vue';
 
-const props = defineProps({
+defineProps({
   items: Object,
 });
 // const nickname = ref(props.items.nickname);
@@ -101,6 +109,14 @@ const toggleItems = ref([
     required: false,
   },
 ]);
+
+const emit = defineEmits(['open-terms-panel']);
+
+const openTerms = (label) => {
+  if (label === '사이트이용약관') {
+    emit('open-terms-panel');
+  }
+};
 </script>
 
 <style scoped>
@@ -130,6 +146,12 @@ const toggleItems = ref([
   margin-top: 50px;
   justify-content: space-between;
   color: #fff;
+  position: relative;
+}
+.popup_back_button {
+  position: absolute;
+  top: -50px;
+  left: 0px;
 }
 
 .account_profile_img {
@@ -174,12 +196,14 @@ const toggleItems = ref([
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 .term_label {
   font-size: 16px;
   text-decoration: underline;
   flex: 1;
+  color: #fff;
+  text-align: left;
 }
 .term_state {
   font-size: 14px;
@@ -250,13 +274,13 @@ const toggleItems = ref([
 
 /* 제출 버튼 */
 .submit_btn {
-  margin-top: 30px;
+  margin-top: 10px;
   background: black;
   color: white;
   font-weight: bold;
   padding: 14px;
   border-radius: 30px;
-  border: 2px solid #fff;
+  border: 2px solid #f1cfc8;
   width: 138px;
   align-self: flex-end;
 }
