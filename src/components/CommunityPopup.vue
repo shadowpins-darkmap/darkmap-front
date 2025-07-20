@@ -522,7 +522,6 @@ watch(showAlarmPopup, (visible) => {
   position: absolute;
   right: 40px;
   top: 40px;
-  height: calc(100% - 80px);
   display: flex;
   flex-direction: column;
   z-index: 9;
