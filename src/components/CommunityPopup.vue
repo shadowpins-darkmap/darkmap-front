@@ -525,6 +525,7 @@ watch(showAlarmPopup, (visible) => {
   display: flex;
   flex-direction: column;
   z-index: 9;
+  gap: 30px;
 
   &__popup {
     width: 436px;
@@ -532,7 +533,6 @@ watch(showAlarmPopup, (visible) => {
     border: solid 2px #f1cfc8;
     background-color: #6d54ce;
     border-radius: 20px;
-    margin-bottom: 30px;
   }
 
   // 알람
