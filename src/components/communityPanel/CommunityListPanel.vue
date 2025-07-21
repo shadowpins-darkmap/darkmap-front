@@ -281,7 +281,7 @@ const clickNext = () => {
 .community_list_wrap {
   border-top: 2px solid #00ffc2;
   border-bottom: 2px solid #00ffc2;
-  height: 420px;
+  height: calc(100% - 390px);
   overflow-y: scroll;
 }
 .community_list {
