@@ -39,135 +39,138 @@
     <!-- 본문 스크롤 영역 -->
     <GradientScroll
       :width="'100%'"
-      :height="'400px'"
+      :height="'calc(100% - 400px)'"
       direction="vertical"
       gradient-color="rgba(64,64,64,1.5)"
     >
-      <!-- 본문 내용 -->
-      <div class="detail_content_wrap">
-        <p class="detail_content">
-          `안녕하세요.동네에 살면서 이런 글을 쓰게 될 줄은 몰랐는데`
-        </p>
-        <div class="detail_icon_wrap">
-          <!-- 좋아요 아이콘 -->
-          <button
-            class="detail_icon_button"
-            aria-label="좋아요"
-            @click="togglePostLike"
-          >
-            <img
-              :src="
-                isPostLiked
-                  ? require('@/assets/commentHeartIconOn.svg')
-                  : require('@/assets/commentHeartIconOff.svg')
-              "
-              alt="like"
-            />
-            <span class="detail_icon_text"> 이 글을 추천해요 </span>
-          </button>
-          <!-- 신고 아이콘 -->
-          <button
-            class="detail_icon_button"
-            aria-label="신고"
-            @click="openReportPopup('post', props.post.id)"
-          >
-            <img
-              :src="
-                isPostReport
-                  ? require('@/assets/commentReportIconOn.svg')
-                  : require('@/assets/commentReportIconOff.svg')
-              "
-              alt="report"
-            />
-            <span class="detail_icon_text"> 이 글을 신고하고 싶어요 </span>
-          </button>
-        </div>
-      </div>
-      <!-- 댓글 게시 영역 -->
-      <div class="comments_list_wrap">
-        <ul>
-          <li
-            v-for="comment in paginatedComments"
-            :key="comment.id"
-            class="comments_item"
-          >
-            <div class="comment_profile">
+      <div class="detail_scroll_wrap">
+        <!-- 본문 내용 -->
+        <div class="detail_content_wrap">
+          <p class="detail_content">
+            안녕하세요.동네에 살면서 이런 글을 쓰게 될 줄은 몰랐는데
+            안녕하세요.동네에 살면서 이런 글을 쓰게 될 줄은 몰랐는데 안녕하세요
+          </p>
+          <div class="detail_icon_wrap">
+            <!-- 좋아요 아이콘 -->
+            <button
+              class="detail_icon_button"
+              aria-label="좋아요"
+              @click="togglePostLike"
+            >
               <img
-                src="@/assets/profileDefault.svg"
-                alt="profile"
-                width="40"
-                height="40"
+                :src="
+                  isPostLiked
+                    ? require('@/assets/commentHeartIconOn.svg')
+                    : require('@/assets/commentHeartIconOff.svg')
+                "
+                alt="like"
               />
-              <span class="comment_nickname">{{ comment.nickname }}</span>
-            </div>
-            <!-- 댓글 내용 영역 -->
-            <div class="comment_bubble_wrap">
-              <span class="comment_data_wrap">
-                <span class="comment_data">{{ comment.updateDate }}</span>
-                <span class="comment_data">{{ comment.updateTime }}</span>
-                <span class="comment_data"
-                  >추천 {{ comment.recommendCount }}</span
-                >
-              </span>
-              <span class="comment_bubble">
-                <p class="comment_content">{{ comment.content }}</p>
-              </span>
-              <span class="comment_icons">
-                <!-- 댓글 좋아요 아이콘 -->
-                <button
-                  class="icon_button"
-                  aria-label="좋아요"
-                  @click="toggleLike(comment.id)"
-                >
-                  <img
-                    :src="
-                      likedComments.has(comment.id)
-                        ? require('@/assets/commentHeartIconOn.svg')
-                        : require('@/assets/commentHeartIconOff.svg')
-                    "
-                    alt="like"
-                  />
-                </button>
-                <!-- 댓글 신고 아이콘 -->
-                <button
-                  class="icon_button"
-                  aria-label="신고"
-                  @click="openReportPopup('comment', comment.id)"
-                >
-                  <img
-                    :src="
-                      reportedComments.has(comment.id)
-                        ? require('@/assets/commentReportIconOn.svg')
-                        : require('@/assets/commentReportIconOff.svg')
-                    "
-                    alt="report"
-                  />
-                </button>
-                <!-- 내가 쓴 댓글이면 삭제 아이콘 표시 -->
-                <button
-                  v-if="comment.nickname === myNickname"
-                  class="icon_button"
-                  aria-label="삭제"
-                  @click="deleteComment(comment.id)"
-                >
-                  <img src="@/assets/commentDeleteIcon.svg" alt="delete" />
-                </button>
-              </span>
-            </div>
-          </li>
-        </ul>
-        <div
-          v-if="comments.length > commentsPerPage"
-          class="comment_pagination_wrap"
-        >
-          <PaginationWrap
+              <span class="detail_icon_text"> 이 글을 추천해요 </span>
+            </button>
+            <!-- 신고 아이콘 -->
+            <button
+              class="detail_icon_button"
+              aria-label="신고"
+              @click="openReportPopup('post', props.post.id)"
+            >
+              <img
+                :src="
+                  isPostReport
+                    ? require('@/assets/commentReportIconOn.svg')
+                    : require('@/assets/commentReportIconOff.svg')
+                "
+                alt="report"
+              />
+              <span class="detail_icon_text"> 이 글을 신고하고 싶어요 </span>
+            </button>
+          </div>
+        </div>
+        <!-- 댓글 게시 영역 -->
+        <div class="comments_list_wrap">
+          <ul>
+            <li
+              v-for="comment in paginatedComments"
+              :key="comment.id"
+              class="comments_item"
+            >
+              <div class="comment_profile">
+                <img
+                  src="@/assets/profileDefault.svg"
+                  alt="profile"
+                  width="40"
+                  height="40"
+                />
+                <span class="comment_nickname">{{ comment.nickname }}</span>
+              </div>
+              <!-- 댓글 내용 영역 -->
+              <div class="comment_bubble_wrap">
+                <span class="comment_data_wrap">
+                  <span class="comment_data">{{ comment.updateDate }}</span>
+                  <span class="comment_data">{{ comment.updateTime }}</span>
+                  <span class="comment_data"
+                    >추천 {{ comment.recommendCount }}</span
+                  >
+                </span>
+                <span class="comment_bubble">
+                  <p class="comment_content">{{ comment.content }}</p>
+                </span>
+                <span class="comment_icons">
+                  <!-- 댓글 좋아요 아이콘 -->
+                  <button
+                    class="icon_button"
+                    aria-label="좋아요"
+                    @click="toggleLike(comment.id)"
+                  >
+                    <img
+                      :src="
+                        likedComments.has(comment.id)
+                          ? require('@/assets/commentHeartIconOn.svg')
+                          : require('@/assets/commentHeartIconOff.svg')
+                      "
+                      alt="like"
+                    />
+                  </button>
+                  <!-- 댓글 신고 아이콘 -->
+                  <button
+                    class="icon_button"
+                    aria-label="신고"
+                    @click="openReportPopup('comment', comment.id)"
+                  >
+                    <img
+                      :src="
+                        reportedComments.has(comment.id)
+                          ? require('@/assets/commentReportIconOn.svg')
+                          : require('@/assets/commentReportIconOff.svg')
+                      "
+                      alt="report"
+                    />
+                  </button>
+                  <!-- 내가 쓴 댓글이면 삭제 아이콘 표시 -->
+                  <button
+                    v-if="comment.nickname === myNickname"
+                    class="icon_button"
+                    aria-label="삭제"
+                    @click="deleteComment(comment.id)"
+                  >
+                    <img src="@/assets/commentDeleteIcon.svg" alt="delete" />
+                  </button>
+                </span>
+              </div>
+            </li>
+          </ul>
+          <div
             v-if="comments.length > commentsPerPage"
-            :currentPage="commentsPage"
-            :pageNumbers="
-              Array.from({ length: commentsTotalPages }, (_, i) => i + 1)
-            "
-            @page-change="changeCommentPage"
-          />
+            class="comment_pagination_wrap"
+          >
+            <PaginationWrap
+              v-if="comments.length > commentsPerPage"
+              :currentPage="commentsPage"
+              :pageNumbers="
+                Array.from({ length: commentsTotalPages }, (_, i) => i + 1)
+              "
+              @page-change="changeCommentPage"
+            />
+          </div>
         </div>
       </div>
     </GradientScroll>
@@ -462,6 +465,7 @@ const toggleLike = (commentId) => {
   line-height: 1.5;
   max-width: 196px;
 }
+
 .detail_content_wrap {
   padding-left: 95px;
 }
@@ -592,6 +596,8 @@ const toggleLike = (commentId) => {
   position: absolute;
   bottom: 40px;
   width: calc(100% - 60px);
+  background-color: #404040;
+  z-index: 100;
 }
 .char_count {
   font-size: 14px;
