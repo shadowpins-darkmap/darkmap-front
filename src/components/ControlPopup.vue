@@ -34,30 +34,30 @@
     </div>
     <!-- 컨텐츠 솔팅  -->
     <div class="head_panel">
-      <div class="panel_item">
-        <div class="crime_logo" style="background: #ffa8a8">
+      <button class="panel_item" @click="clickCrimeLogo(0)">
+        <span class="crime_logo" style="background: #ffa8a8">
           <img src="../assets/flasherLogo.svg" />
-        </div>
-        <div class="panel_item_text">바바리맨</div>
-      </div>
-      <div class="panel_item">
-        <div class="crime_logo" style="background: #1cd6ff">
+        </span>
+        <span class="panel_item_text">바바리맨</span>
+      </button>
+      <button class="panel_item" @click="clickCrimeLogo(1)">
+        <span class="crime_logo" style="background: #1cd6ff">
           <img src="../assets/huntingLogo2.svg" />
-        </div>
-        <div class="panel_item_text">헌팅</div>
-      </div>
-      <div class="panel_item">
-        <div class="crime_logo" style="background: #b56bff">
+        </span>
+        <span class="panel_item_text">헌팅</span>
+      </button>
+      <button class="panel_item" @click="clickCrimeLogo(2)">
+        <span class="crime_logo" style="background: #b56bff">
           <img src="../assets/chasingLogo2.svg" />
-        </div>
-        <div class="panel_item_text">미행</div>
-      </div>
-      <div class="panel_item">
-        <div class="crime_logo" style="background: #ffed89">
+        </span>
+        <span class="panel_item_text">미행</span>
+      </button>
+      <button class="panel_item" @click="clickCrimeLogo(3)">
+        <span class="crime_logo" style="background: #ffed89">
           <img src="../assets/assaultLogo.svg" />
-        </div>
-        <div class="panel_item_text">폭행</div>
-      </div>
+        </span>
+        <span class="panel_item_text">폭행</span>
+      </button>
     </div>
     <div class="body_panel">
       <strong class="body_title"><span>테마 투어</span></strong>
@@ -352,6 +352,13 @@ const changeGu = (newGu) => {
 const allDongChecked = computed(() => {
   return dongList.value.every((dong) => dong.checked);
 });
+
+const clickCrimeLogo = (idx) => {
+  for (let i = 0; i < crimeTypes.value.length; i++) {
+    crimeTypes.value[i].checked = idx === i;
+  }
+  emits('changeFilter', crimeTypes.value, selectGu.value, dongList.value);
+};
 
 const clickAllDong = () => {
   const newCheckedState = !allDongChecked.value;
