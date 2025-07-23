@@ -97,15 +97,6 @@
               계정설정
             </button>
           </strong>
-
-          <TabButtons v-model="currentTab" :tabs="tabOptions" />
-          <!-- 알림 -->
-          <button
-            class="BaseCommunity__more_alarm"
-            @click="showAlarmPopup = true"
-          >
-            전체보기
-          </button>
           <!-- 내 활동 내역 -->
           <ul class="icon_list_wrap">
             <li class="icon_list">
@@ -142,6 +133,16 @@
               <span class="point_color">{{ auth.user?.commentCount }}</span>
             </li>
           </ul>
+
+          <TabButtons v-model="currentTab" :tabs="tabOptions" />
+          <!-- 알림 -->
+          <button
+            class="BaseCommunity__more_alarm"
+            @click="showAlarmPopup = true"
+          >
+            전체보기
+          </button>
+
           <ul class="alarm_list_wrap" v-if="currentTab === '알림'">
             <template v-if="alarmList.length > 0">
               <li
