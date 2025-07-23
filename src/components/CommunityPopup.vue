@@ -97,8 +97,8 @@
               계정설정
             </button>
           </strong>
-          <!-- 내 활동 내역 -->
-          <ul class="icon_list_wrap">
+          <!-- 알림 - 내 활동 내역 -->
+          <ul class="icon_list_wrap" v-if="currentTab === '알림'">
             <li class="icon_list">
               <img
                 src="@/assets/iconListComment.svg"
@@ -108,7 +108,9 @@
                 height="16"
               />
               <span>새 댓글</span>
-              <span class="point_color">{{ auth.user?.commentCount }}</span>
+              <span class="point_color">{{
+                auth.user?.commentCount ?? 0
+              }}</span>
             </li>
             <li class="icon_list">
               <img
@@ -119,7 +121,9 @@
                 height="16"
               />
               <span>새 좋아요</span>
-              <span class="point_color">{{ auth.user?.commentCount }}</span>
+              <span class="point_color">{{
+                auth.user?.commentCount ?? 0
+              }}</span>
             </li>
             <li class="icon_list">
               <img
@@ -130,10 +134,21 @@
                 height="16"
               />
               <span>다크플레이스 등록</span>
-              <span class="point_color">{{ auth.user?.commentCount }}</span>
+              <span class="point_color">{{
+                auth.user?.commentCount ?? 0
+              }}</span>
             </li>
           </ul>
-
+          <p class="tap_count_info" v-if="currentTab === '내 게시글'">
+            현재까지 총
+            <span class="point_color">{{ auth.user?.commentCount ?? 0 }}</span
+            >건의 글을 작성했어요.
+          </p>
+          <p class="tap_count_info" v-if="currentTab === '내 댓글'">
+            현재까지 총
+            <span class="point_color">{{ auth.user?.commentCount ?? 0 }}</span
+            >건의 댓글을 작성했어요.
+          </p>
           <TabButtons v-model="currentTab" :tabs="tabOptions" />
           <!-- 알림 -->
           <button

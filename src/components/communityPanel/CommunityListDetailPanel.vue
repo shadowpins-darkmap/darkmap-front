@@ -500,7 +500,9 @@ const toggleLike = (commentId) => {
   font-size: 10px;
   color: #00ffc2;
 }
-
+.tap_count_info {
+  font-size: 14px;
+}
 /* 댓글 게시 영역 */
 .comments_list_wrap {
   border-top: 1px solid #fff;
