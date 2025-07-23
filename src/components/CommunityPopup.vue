@@ -279,8 +279,9 @@
         <p class="content_text_title">
           현재까지 <span class="highlight">123</span> 명의 회원이 자신의 길거리
           괴롭힘 경험담을 <br />
-          <span class="highlight">12344</span> 개 지역 항목에 공유해주셨습니다.
-          기억에 감사드립니다.
+          <span class="highlight">12344</span>가지 이야기하고<br />
+          <span class="highlight">12344</span>개의 사건 장소를 제보해주셨습니다.
+          기여에 감사드립니다.
         </p>
         <div class="tour__links">
           <button class="tour_link_button">
