@@ -9,7 +9,7 @@
       />
     </button>
 
-    <strong class="slider_title">1. 바바리맨</strong>
+    <strong class="slider_title">{{ detailType }}</strong>
     <div class="slider_contents_wrap scroll_area">
       <p class="slider_contents">
         용어로도 출판이나 연출을 지칭하는 입숨을 표준 이런 들어가는 디자인
@@ -18,26 +18,33 @@
         사용할 시각 이용된다.
       </p>
       <p class="slider_contents">
-        프로젝트 채우기 사용하는 차지하는 프로젝트 보여줄 내용이 입숨을
-        타이포그래피, 지칭하는 프로젝트 사용할 프로젝트 출판이나 채워지기 디자인
-        보여줄 프로젝트 내용이 차지하는 시각적 사용할 연출을 타이포그래피, 때
-      </p>
-      <p class="slider_contents">
-        프로젝트 채우기 사용하는 차지하는 프로젝트 보여줄 내용이 입숨을
-        타이포그래피, 지칭하는 프로젝트 사용할 프로젝트 출판이나 채워지기 디자인
-        보여줄 프로젝트 내용이 차지하는 시각적 사용할 연출을 타이포그래피, 때
-      </p>
-      <p class="slider_contents">
-        프로젝트 채우기 사용하는 차지하는 프로젝트 보여줄 내용이 입숨을
-        타이포그래피, 지칭하는 프로젝트 사용할 프로젝트 출판이나 채워지기 디자인
-        보여줄 프로젝트 내용이 차지하는 시각적 사용할 연출을 타이포그래피, 때
+        {{ getDetailContent(detailType) }}
       </p>
     </div>
   </div>
 </template>
 
 <script setup>
+import { defineProps } from 'vue';
 // emits: close
+defineProps({
+  detailType: {
+    type: String,
+    required: true,
+  },
+});
+
+const getDetailContent = (type) => {
+  switch (type) {
+    case '바바리맨':
+      return '바바리맨은 길거리에서 외설적 행동을 하는 행위입니다...';
+    case '헌팅':
+      return '헌팅은 원치 않는 접근이나 연락 시도를 포함할 수 있습니다...';
+    // ...
+    default:
+      return '내용이 없습니다.';
+  }
+};
 </script>
 <style scoped lang="scss">
 /* 사이드 슬라이더 */

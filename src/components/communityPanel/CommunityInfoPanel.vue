@@ -9,7 +9,8 @@
       />
     </button>
     <strong class="slider_title ponit_color"
-      >길거리 괴롭힘이란게 뭔가요?</strong>
+      >길거리 괴롭힘이란게 뭔가요?</strong
+    >
     <div class="slider_contents_wrap scroll_area">
       <p class="slider_contents">
         용어로도 출판이나 연출을 지칭하는 입숨을 표준 이런 들어가는 디자인
@@ -25,45 +26,9 @@
     </div>
     <strong class="slider_title_sub">길거리 괴롭힘의 유형</strong>
     <ol class="slider_list">
-      <li>
-        <button class="slider_list_button" @click="$emit('openDetail')">
-          <span> 1. 바바리맨 </span>
-          <img
-            src="@/assets/sliderGoDetailIcon.svg"
-            class="slider_list_icon"
-            alt="slider arrow icon"
-            width="16"
-            height="16"
-          />
-        </button>
-      </li>
-      <li>
-        <button class="slider_list_button">
-          <span> 2. 헌팅 </span>
-          <img
-            src="@/assets/sliderGoDetailIcon.svg"
-            class="slider_list_icon"
-            alt="slider arrow icon"
-            width="16"
-            height="16"
-          />
-        </button>
-      </li>
-      <li>
-        <button class="slider_list_button">
-          <span> 3. 미행 </span>
-          <img
-            src="@/assets/sliderGoDetailIcon.svg"
-            class="slider_list_icon"
-            alt="slider arrow icon"
-            width="16"
-            height="16"
-          />
-        </button>
-      </li>
-      <li>
-        <button class="slider_list_button">
-          <span> 4. 폭행 </span>
+      <li v-for="(title, i) in titles" :key="i">
+        <button class="slider_list_button" @click="$emit('openDetail', title)">
+          <span>{{ i + 1 }}. {{ title }}</span>
           <img
             src="@/assets/sliderGoDetailIcon.svg"
             class="slider_list_icon"
@@ -79,6 +44,7 @@
 
 <script setup>
 // emits: close, openDetail
+const titles = ['바바리맨', '헌팅', '미행', '폭행'];
 </script>
 
 <style scoped lang="scss">

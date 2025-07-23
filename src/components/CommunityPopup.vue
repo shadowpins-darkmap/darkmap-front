@@ -326,7 +326,8 @@
     >
       <CommunityInfoPanel
         @close="handlePanelClose"
-        @openDetail="isPanel2depsOpen = true"
+        @openDetail="handleOpenDetail"
+        :detailType="selectedDetailType"
       />
     </SlidePanel>
 
@@ -336,7 +337,10 @@
       :right="'510px'"
       @close="isPanel2depsOpen = false"
     >
-      <CommunityInfo2depsPanel @close="isPanel2depsOpen = false" />
+      <CommunityInfo2depsPanel
+        @close="isPanel2depsOpen = false"
+        :detailType="selectedDetailType"
+      />
     </SlidePanel>
 
     <!-- 광장 커뮤니티  SlidePanel -->
@@ -410,6 +414,12 @@ const auth = useAuthStore();
 
 const tabOptions = ['알림', '내 게시글', '내 댓글'];
 const currentTab = ref('알림');
+const selectedDetailType = ref('');
+
+const handleOpenDetail = (type) => {
+  selectedDetailType.value = type;
+  isPanel2depsOpen.value = true;
+};
 
 //auth.login()
 //auth.logout()
