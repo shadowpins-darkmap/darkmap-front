@@ -679,7 +679,8 @@ watch(showAlarmPopup, (visible) => {
   &__button_box {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-end;
+    margin-right: 20px;
     justify-content: center;
     gap: 15px;
   }
@@ -719,9 +720,9 @@ watch(showAlarmPopup, (visible) => {
   }
   .icon_list_wrap {
     display: flex;
-    padding: 15px 0;
+    /* padding: 15px 0; */
     justify-content: space-between;
-    border-bottom: 1px solid #9886dc;
+    /* border-bottom: 1px solid #9886dc; */
   }
   .icon_list {
     display: flex;
