@@ -106,6 +106,42 @@
           >
             전체보기
           </button>
+          <!-- 내 활동 내역 -->
+          <ul class="icon_list_wrap">
+            <li class="icon_list">
+              <img
+                src="@/assets/iconListComment.svg"
+                class="my_list_icon"
+                alt="my list icon"
+                width="16"
+                height="16"
+              />
+              <span>새 댓글</span>
+              <span class="point_color">{{ auth.user?.commentCount }}</span>
+            </li>
+            <li class="icon_list">
+              <img
+                src="@/assets/iconListLike.svg"
+                class="my_list_icon"
+                alt="my list icon"
+                width="16"
+                height="16"
+              />
+              <span>새 좋아요</span>
+              <span class="point_color">{{ auth.user?.commentCount }}</span>
+            </li>
+            <li class="icon_list">
+              <img
+                src="@/assets/iconListMarker.svg"
+                class="my_list_icon"
+                alt="my list icon"
+                width="16"
+                height="16"
+              />
+              <span>다크플레이스 등록</span>
+              <span class="point_color">{{ auth.user?.commentCount }}</span>
+            </li>
+          </ul>
           <ul class="alarm_list_wrap" v-if="currentTab === '알림'">
             <template v-if="alarmList.length > 0">
               <li
@@ -536,7 +572,6 @@ watch(showAlarmPopup, (visible) => {
   }
 
   // 알람
-
   &__greeting {
     display: flex;
     justify-content: space-between;
@@ -681,7 +716,21 @@ watch(showAlarmPopup, (visible) => {
   .margin_15 {
     margin: 15px 0;
   }
-
+  .icon_list_wrap {
+    display: flex;
+    padding: 15px 0;
+    justify-content: space-between;
+    border-bottom: 1px solid #9886dc;
+  }
+  .icon_list {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .icon_list > span {
+    font-size: 14px;
+    font-weight: 600;
+  }
   .point_color {
     color: #00ffc2;
   }
