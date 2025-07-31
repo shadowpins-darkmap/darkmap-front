@@ -21,7 +21,7 @@
   &::after {
     content: '';
     position: absolute;
-    top: 50%;
+    top: 45%;
     left: 0;
     transform: translate(-100%, -50%);
     width: 0;
@@ -89,6 +89,8 @@
     border-radius: 10px;
     margin-right: 8px;
     font-weight: bold;
+    margin-bottom: 10px;
+    display: inline-block;
   }
 
   &__locationAddress {
