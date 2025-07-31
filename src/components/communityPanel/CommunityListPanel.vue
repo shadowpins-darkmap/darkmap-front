@@ -37,40 +37,49 @@
     </GradientScroll>
 
     <!-- 광장 게시글 리스트 -->
-    <ul class="community_list_wrap scroll_area">
-      <li class="community_list" v-for="item in currentItems" :key="item.id">
-        <button class="community_list_button" @click="openDetail(item)">
-          <span class="community_list_profile">
-            <img
-              src="@/assets/profileDefault.svg"
-              alt="profile default image"
-              width="40"
-              height="40"
-            />
-          </span>
-          <strong class="community_list_nickname">{{ item.nickname }}</strong>
-          <span class="community_list_contents">
-            <span class="list_contents_tag">
+
+    <ul class="community_list_wrap">
+      <GradientScroll
+        :width="'100%'"
+        :height="'100%'"
+        gradient-color="rgba(0,0,0,1)"
+        direction="vertical"
+      >
+        <li class="community_list" v-for="item in currentItems" :key="item.id">
+          <button class="community_list_button" @click="openDetail(item)">
+            <span class="community_list_profile">
               <img
-                src="@/assets/tagBulletIcon.svg"
-                alt="tag bullet icon"
-                width="8"
-                height="8"
+                src="@/assets/profileDefault.svg"
+                alt="profile default image"
+                width="40"
+                height="40"
               />
-              {{ item.tag }}
             </span>
-            <span class="ellipsis__2 list_contents_title">
-              {{ item.title }}
+            <strong class="community_list_nickname">{{ item.nickname }}</strong>
+            <span class="community_list_contents">
+              <span class="list_contents_tag">
+                <img
+                  src="@/assets/tagBulletIcon.svg"
+                  alt="tag bullet icon"
+                  width="8"
+                  height="8"
+                />
+                {{ item.tag }}
+              </span>
+              <span class="ellipsis__2 list_contents_title">
+                {{ item.title }}
+              </span>
+              <span class="list_contents_conut_wrap">
+                <span class="comment_count">댓글 {{ item.comments }}</span>
+                <span class="like_count">좋아요 {{ item.likes }}</span>
+                <span class="views_count">조회 {{ item.views }}</span>
+              </span>
             </span>
-            <span class="list_contents_conut_wrap">
-              <span class="comment_count">댓글 {{ item.comments }}</span>
-              <span class="like_count">좋아요 {{ item.likes }}</span>
-              <span class="views_count">조회 {{ item.views }}</span>
-            </span>
-          </span>
-        </button>
-      </li>
+          </button>
+        </li>
+      </GradientScroll>
     </ul>
+
     <PaginationWrap
       :currentPage="currentPage"
       :pageNumbers="pageNumbers"
