@@ -508,6 +508,7 @@ const handleCarouselClick = (card) => {
 
 const handleCommunityMove = () => {
   if (!auth.isLoggedIn) showLoginAlert.value = true;
+  isListPanelOpen.value = true;
 };
 
 // const openSection = ref(null);
