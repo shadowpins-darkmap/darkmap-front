@@ -245,11 +245,13 @@
         <div v-else>
           <p class="BaseCommunity__hot_title">
             🔥 지금 가장 뜨거운 글이에요!
-            <button class="BaseCommunity__more">전체보기</button>
+            <button class="BaseCommunity__more" @click="showLoginAlert = true">
+              전체보기
+            </button>
           </p>
           <!-- 게시글 슬라이더 -->
           <div class="BaseCommunity__card">
-            <CarouselWrap />
+            <CarouselWrap :onCardClick="(card) => handleCarouselClick(card)" />
           </div>
 
           <!-- 로그인 유도 영역 -->
@@ -258,7 +260,12 @@
               오늘 처음 방문하셨나요? 가입 이후에 광장의 모든 글을 보실 수
               있어요.
             </p>
-            <button class="BaseCommunity__black_button">회원가입</button>
+            <button
+              class="BaseCommunity__black_button"
+              @click="showLoginAlert = true"
+            >
+              회원가입
+            </button>
             <button
               class="BaseCommunity__login_button"
               @click="handleTestLogin"
@@ -299,7 +306,7 @@
           기여에 감사드립니다.
         </p>
         <div class="tour__links">
-          <button class="tour_link_button">
+          <button class="tour_link_button" @click="handleCommunityMove">
             <span>저도 길거리 괴롭힘을 당한 적이 있는 것 같아요 </span>
             <img
               src="@/assets/arrowCirlcleButtonRight.svg"
@@ -309,7 +316,7 @@
               height="12"
             />
           </button>
-          <button class="tour_link_button">
+          <button class="tour_link_button" @click="handleCommunityMove">
             <span>다른 사람들의 괴롭힘 경험담 이야기를 듣고 싶어요</span>
             <img
               src="@/assets/arrowCirlcleButtonRight.svg"
@@ -404,6 +411,24 @@
       />
     </section>
   </CommonPopup>
+  <CommonPopup :visible="showLoginPopup" @close="showLoginPopup = false">
+    <LoginPopup></LoginPopup>
+  </CommonPopup>
+  <BaseAlertPopup
+    v-if="showLoginAlert"
+    @cancel="showLoginAlert = false"
+    @confirm="
+      () => {
+        showLoginPopup = true;
+        showLoginAlert = false;
+      }
+    "
+    :showTwoButtons="true"
+    cancelText="닫기"
+    confirmText="로그인"
+  >
+    <p>로그인이 필요합니다!</p>
+  </BaseAlertPopup>
 </template>
 
 <script setup>
@@ -414,6 +439,8 @@ import CommunityInfoPanel from '@/components/communityPanel/CommunityInfoPanel.v
 import CommunityInfo2depsPanel from '@/components/communityPanel/CommunityInfo2depsPanel.vue';
 import CommunityListPanel from '@/components/communityPanel/CommunityListPanel.vue';
 import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
+import BaseAlertPopup from '@/components/BaseAlert.vue';
+import LoginPopup from '@/components/commonPopup/LoginPopup.vue';
 import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
 import { useAuthStore } from '@/store/useAuthStore';
 // import { useDevice } from '@/composables/useDevice';
@@ -441,6 +468,7 @@ const handleOpenDetail = (type) => {
 //auth.logout()
 // TODO :테스트용 임시 로그인 함수
 const handleTestLogin = () => {
+  showLoginAlert.value = true;
   auth.login({
     nickname: 'nam',
     email: 'nam@email.com',
@@ -448,6 +476,8 @@ const handleTestLogin = () => {
 };
 
 // const { isMobile } = useDevice();
+const showLoginAlert = ref(false);
+const showLoginPopup = ref(false);
 const showAlarmPopup = ref(false);
 const showAccountSection = ref(false);
 
@@ -467,6 +497,17 @@ const handlePanelClose = () => {
 const handleListPanelClose = () => {
   isListPanelOpen.value = false;
   isListPanel2depsOpen.value = false;
+};
+
+const handleCarouselClick = (card) => {
+  console.log('카드 클릭됨!', card);
+  if (!auth.isLoggedIn) showLoginAlert.value = true;
+  // router.push(`/article/${card.id}`);
+  // 또는 modalStore.open(card)
+};
+
+const handleCommunityMove = () => {
+  if (!auth.isLoggedIn) showLoginAlert.value = true;
 };
 
 // const openSection = ref(null);

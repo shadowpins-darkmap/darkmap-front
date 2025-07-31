@@ -3,7 +3,19 @@
     <div class="base_alert_popup">
       <p class="popup_title">{{ title }}</p>
       <p class="popup_description"><slot></slot></p>
-      <button class="confirm_button" @click="$emit('confirm')">확인</button>
+
+      <div v-if="showTwoButtons" class="button_group">
+        <button class="cancel_button" @click="$emit('cancel')">
+          {{ cancelText }}
+        </button>
+        <button class="confirm_button" @click="$emit('confirm')">
+          {{ confirmText }}
+        </button>
+      </div>
+
+      <button v-else class="confirm_button" @click="$emit('confirm')">
+        {{ confirmText }}
+      </button>
     </div>
   </div>
 </template>
@@ -14,6 +26,18 @@ defineProps({
   title: {
     type: String,
     required: true,
+  },
+  showTwoButtons: {
+    type: Boolean,
+    default: false,
+  },
+  confirmText: {
+    type: String,
+    default: '확인',
+  },
+  cancelText: {
+    type: String,
+    default: '닫기',
   },
 });
 defineEmits(['confirm']);
@@ -62,5 +86,21 @@ defineEmits(['confirm']);
   min-width: 120px;
   border: none;
   cursor: pointer;
+}
+.cancel_button {
+  background: #b6a9e7;
+  color: #000;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 8px;
+  min-width: 120px;
+  border: none;
+  cursor: pointer;
+}
+.button_group {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
 }
 </style>

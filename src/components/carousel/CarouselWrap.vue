@@ -26,6 +26,10 @@ const props = defineProps({
   pauseAutoplayOnHover: { type: Boolean, default: true },
   height: { type: [String, Number], default: 200 },
   green: { type: Boolean, default: false },
+  onCardClick: {
+    type: Function,
+    default: null,
+  },
 });
 
 const carouselConfig = {
@@ -41,7 +45,11 @@ const carouselConfig = {
 <template>
   <Carousel v-bind="carouselConfig">
     <Slide v-for="card in cards" :key="card.id">
-      <div class="slide_wrap" :class="{ green: props.green }">
+      <div
+        class="slide_wrap"
+        :class="{ green: props.green }"
+        @click="props.onCardClick && props.onCardClick(card)"
+      >
         <div class="slide_card">
           <span class="slide_card_tag">{{ card.tag }}</span>
           <span class="slide_card_arrow">
