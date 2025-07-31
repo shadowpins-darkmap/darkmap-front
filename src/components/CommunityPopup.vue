@@ -253,7 +253,7 @@
           </div>
 
           <!-- 로그인 유도 영역 -->
-          <div class="BaseCommunity__button_box">
+          <div class="BaseCommunity__button_box_center">
             <p class="BaseCommunity__title">
               오늘 처음 방문하셨나요? 가입 이후에 광장의 모든 글을 보실 수
               있어요.
@@ -706,6 +706,14 @@ watch(showAlarmPopup, (visible) => {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+    margin-right: 20px;
+    justify-content: center;
+    gap: 15px;
+  }
+  &__button_box_center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin-right: 20px;
     justify-content: center;
     gap: 15px;

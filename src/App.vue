@@ -79,21 +79,36 @@ mark {
 }
 
 /* scroll reset */
-.scroll_area::-webkit-scrollbar-thumb {
-  background-color: #babac0;
-  border-radius: 16px;
+.scroll_area {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: fit-content;
 }
 /* 스크롤바 막대 설정*/
-.scroll_area::-webkit-scrollbar-thumb {
-  background-color: #babac0;
-  border-radius: 16px;
+.scroll_area::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
-.scroll_area::-webkit-scrollbar-thumb:hover {
-  background-color: #a0a0a5;
+.scroll_area::-webkit-scrollbar:hover {
+  width: 10px;
+  height: 10px;
+}
+.scroll_area::-webkit-scrollbar-button {
+  display: none;
+}
+.scroll_area::-webkit-scrollbar-thumb {
+  background-color: #ffefeb;
+  border-radius: 6px;
+}
+/* 스크롤바 뒷 배경 설정*/
+.scroll_area::-webkit-scrollbar-track {
+  background-color: rgba(255, 239, 235, 0.65);
+  margin: 6px 0;
+  border-radius: 6px;
 }
 
 /* 스크롤바 뒷 배경 설정*/
-.scroll_area::-webkit-scrollbar-track {
+/* .scroll_area::-webkit-scrollbar-track {
   border-radius: 10px;
   background-color: transparent;
 }
@@ -102,5 +117,5 @@ mark {
 }
 .scroll_area::-webkit-scrollbar-button {
   display: none;
-}
+} */
 </style>

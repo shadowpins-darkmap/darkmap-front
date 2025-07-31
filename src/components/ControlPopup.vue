@@ -59,7 +59,8 @@
         <span class="panel_item_text">폭행</span>
       </button>
     </div>
-    <div class="body_panel">
+
+    <div class="body_panel scroll_area">
       <strong class="body_title"><span>테마 투어</span></strong>
       <div class="select_all">
         <div @click="clickAllCrime">
