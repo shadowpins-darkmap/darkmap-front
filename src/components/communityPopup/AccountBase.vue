@@ -33,21 +33,33 @@
       <!-- 약관 동의 -->
       <div class="terms_section">
         <p class="terms_title">서비스 법률 권한 설정</p>
-        <div class="term_item" v-for="item in toggleItems" :key="item.id">
-          <button class="term_label" @click="openTerms(item.label)">
-            {{ item.label }}
+        <!-- 필수 동의 항목 -->
+        <div class="term_item">
+          <button class="term_label" @click="openTerms('개인정보처리방침')">
+            개인정보처리방침
           </button>
+
+          <span class="term_state">업데이트 2025.7.7</span>
+        </div>
+
+        <!-- 선택 동의 항목 -->
+        <div class="term_item">
+          <button class="term_label" @click="openTerms('마케팅 및 광고 수신')">
+            마케팅 및 광고 수신
+          </button>
+          <span :class="[marketing.agreed ? 'term_state' : 'term_state_off']"
+            >부동의
+          </span>
           <label
             class="toggle_switch"
-            :class="{
-              'required-on': item.required && item.agreed,
-              'optional-on': !item.required && item.agreed,
-            }"
+            :class="{ 'optional-on': marketing.agreed }"
           >
-            <input type="checkbox" v-model="item.agreed" />
+            <input type="checkbox" v-model="marketing.agreed" />
             <span class="slider"></span>
           </label>
-          <span class="term_state">{{ item.agreed ? '동의' : '철회' }}</span>
+          <span :class="[marketing.agreed ? 'term_state_on' : 'term_state']"
+            >동의</span
+          >
         </div>
       </div>
 
@@ -89,32 +101,19 @@ defineProps({
 // const nickname = ref(props.items.nickname);
 const nickname = ref('nickname');
 
-const toggleItems = ref([
-  {
-    id: 1,
-    label: '사이트이용약관',
-    agreed: true,
-    required: true, // 필수 여부
-  },
-  {
-    id: 2,
-    label: '개인정보처리방침',
-    agreed: false,
-    required: true,
-  },
-  {
-    id: 3,
-    label: '마케팅광고수신',
-    agreed: true,
-    required: false,
-  },
-]);
-
+const marketing = ref({ agreed: true });
 const emit = defineEmits(['open-terms-panel']);
 
 const openTerms = (label) => {
-  if (label === '사이트이용약관') {
+  if (label === '개인정보처리방침') {
     emit('open-terms-panel');
+  }
+  if (label === '마케팅 및 광고 수신') {
+    window.open(
+      'https://dune-purple-f80.notion.site/20025ce1e4e980488049ccff29c43668',
+      '_blank',
+      'noopener,noreferrer',
+    );
   }
 };
 </script>
@@ -206,9 +205,18 @@ const openTerms = (label) => {
   text-align: left;
 }
 .term_state {
-  font-size: 14px;
+  font-size: 13px;
 }
-
+.term_state_on {
+  font-size: 13px;
+  color: #ff99e5;
+  font-weight: 500;
+}
+.term_state_off {
+  font-size: 13px;
+  color: #ababab;
+  font-weight: 500;
+}
 /* 계정 상태 */
 .account_status {
   display: flex;
@@ -235,8 +243,8 @@ const openTerms = (label) => {
 .toggle_switch {
   position: relative;
   display: inline-block;
-  width: 40px;
-  height: 20px;
+  width: 34px;
+  height: 15px;
 }
 .toggle_switch input {
   opacity: 0;
@@ -250,26 +258,26 @@ const openTerms = (label) => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background-color: #ababab;
   border-radius: 20px;
   transition: 0.4s;
 }
 .slider::before {
   position: absolute;
   content: '';
-  height: 16px;
-  width: 16px;
-  left: 2px;
-  bottom: 2px;
+  height: 13px;
+  width: 18px;
+  left: 1px;
+  bottom: 1px;
   background-color: white;
-  border-radius: 50%;
+  border-radius: 13px;
   transition: 0.4s;
 }
 .toggle_switch input:checked + .slider {
   background-color: #ff99e5;
 }
 .toggle_switch input:checked + .slider::before {
-  transform: translateX(20px);
+  transform: translateX(15px);
 }
 
 /* 제출 버튼 */

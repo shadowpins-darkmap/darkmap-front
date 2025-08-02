@@ -1,14 +1,22 @@
 <template>
   <footer class="BaseFooter">
     <div class="BaseFooterintro">
-      <a :href="LINK_LIST.intro" target="_blank" class="BaseFooterlink">
+      <a
+        :href="'https://weareshadowpins.com/'"
+        target="_blank"
+        class="BaseFooterlink"
+      >
         셰도우 핀즈 </a
       >의 K-다크맵 투어 Ver.1.0
     </div>
     <div class="BaseFootercontainer">
-      <a :href="LINK_LIST.privacyPolicy" target="_blank" class="BaseFooterlink">
+      <button
+        type="button"
+        class="BaseFooterlink"
+        @click="isTermsPanelOpen = true"
+      >
         개인정보처리방침
-      </a>
+      </button>
       <a
         :href="'https://forms.gle/Kr93YqK5ZjsiqvpF6'"
         target="_blank"
@@ -23,15 +31,27 @@
       >
     </div>
   </footer>
+
+  <!-- 사이트 이용약관 -->
+  <SlidePanel
+    :width="'510px'"
+    :visible="isTermsPanelOpen"
+    @close="isTermsPanelOpen = false"
+    :right="'auto'"
+    :left="'0'"
+  >
+    <TermsSidePanel
+      @close="isTermsPanelOpen = false"
+      @open-terms-panel="isTermsPanelOpen = true"
+    />
+  </SlidePanel>
 </template>
 
 <script setup>
-const LINK_LIST = {
-  intro: 'https://weareshadowpins.com/',
-  privacyPolicy:
-    'https://dune-purple-f80.notion.site/20025ce1e4e980689f25e1db1373fd9c?pvs=4',
-  contact: '',
-};
+import { ref } from 'vue';
+import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
+import TermsSidePanel from '@/components/commonPanel/TermsSidePanel.vue';
+const isTermsPanelOpen = ref(false);
 </script>
 
 <style lang="scss" scoped>
