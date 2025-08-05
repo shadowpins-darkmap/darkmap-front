@@ -1,6 +1,7 @@
 import { createWebHistory, createRouter } from 'vue-router'
 import RenderMap from '@/components/RenderMap.vue'
-import SocialRedirect from '@/components/socialRedirect/SocialRedirect.vue';
+import SocialRedirectKakao from '@/components/socialRedirect/SocialRedirectKakao.vue';
+import SocialRedirectGoogle from '@/components/socialRedirect/SocialRedirectGoogle.vue';
 
 const routes = [
 	{
@@ -9,9 +10,14 @@ const routes = [
 		component: RenderMap, // Path로 이동될 Component
 	},
 	{
-		path: '/social-redirect', // 리다이렉트 전용 경로
-		name: 'SocialRedirect',
-		component: SocialRedirect,
+		path: '/api/v1/auth/login/kakao/callback',
+		name: 'SocialRedirectKakao',
+		component: SocialRedirectKakao,
+	},
+	{
+		path: '/social-redirect',
+		name: 'SocialRedirectGoogle',
+		component: SocialRedirectGoogle,
 	},
 ]
 
