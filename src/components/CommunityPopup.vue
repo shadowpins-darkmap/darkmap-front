@@ -466,14 +466,6 @@ const handleOpenDetail = (type) => {
 
 //auth.login()
 //auth.logout()
-// TODO :테스트용 임시 로그인 함수
-const handleTestLogin = () => {
-  showLoginAlert.value = true;
-  auth.login({
-    nickname: 'nam',
-    email: 'nam@email.com',
-  });
-};
 
 // const { isMobile } = useDevice();
 const showLoginAlert = ref(false);

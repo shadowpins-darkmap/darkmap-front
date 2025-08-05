@@ -291,5 +291,6 @@ const openTerms = (label) => {
   border: 2px solid #f1cfc8;
   width: 138px;
   align-self: flex-end;
+  font-size: 14px;
 }
 </style>

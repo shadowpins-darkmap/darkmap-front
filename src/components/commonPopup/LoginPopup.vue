@@ -10,7 +10,7 @@
     </div>
 
     <div class="login_buttons_wrap">
-      <button class="yellow_button" @click="isGoogleOpen = true">
+      <button class="yellow_button" @click="handleSocialLogin('kakao')">
         <img
           width="20"
           height="18"
@@ -20,7 +20,7 @@
         />
         카카오로 계속하기
       </button>
-      <button class="black_button" @click="isGoogleOpen = true">
+      <button class="black_button" @click="handleSocialLogin('google')">
         Google 계정으로 계속하기
       </button>
     </div>
@@ -28,8 +28,45 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-const isGoogleOpen = ref(false);
+const handleSocialLogin = (provider) => {
+  const loginUrl =
+    provider === 'kakao'
+      ? 'https://api.kdark.weareshadowpins.com/api/v1/auth/login/kakao'
+      : 'https://api.kdark.weareshadowpins.com/oauth2/authorization/google';
+
+  window.open(loginUrl, '소셜로그인', 'width=500,height=700');
+
+  const receiveMessage = async (event) => {
+    const { accessToken, refreshToken } = event.data;
+    if (!accessToken) return;
+
+    console.log('receiveMessage✅ accessToken:', accessToken);
+    console.log('receiveMessage✅ refreshToken:', refreshToken);
+
+    // 토큰 저장
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+
+    // ✅ 프로필 요청으로 로그인 확인
+    const res = await fetch(
+      'https://api.kdark.weareshadowpins.com/api/v1/member/profile',
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+
+    const user = await res.json();
+    console.log('로그인 유저 정보:', user);
+
+    window.removeEventListener('message', receiveMessage);
+  };
+
+  window.addEventListener('message', receiveMessage);
+};
 </script>
 
 <style scoped>
