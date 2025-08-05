@@ -29,9 +29,12 @@
 
 <script setup>
 const handleSocialLogin = (provider) => {
+  const redirectUri =
+    'https://darkmap-pi.vercel.app/api/v1/auth/login/kakao/callback';
+
   const loginUrl =
     provider === 'kakao'
-      ? 'https://api.kdark.weareshadowpins.com/api/v1/auth/login/kakao'
+      ? `https://api.kdark.weareshadowpins.com/api/v1/auth/login/kakao?redirect_uri=${encodeURIComponent(redirectUri)}`
       : 'https://api.kdark.weareshadowpins.com/oauth2/authorization/google';
 
   window.open(loginUrl, '소셜로그인', 'width=500,height=700');

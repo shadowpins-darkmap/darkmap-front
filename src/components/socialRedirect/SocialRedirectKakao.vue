@@ -15,7 +15,7 @@ onMounted(async () => {
     console.error('❌ code 누락됨');
     return;
   }
-
+  console.log(' code', code);
   try {
     const res = await fetch(
       `https://api.kdark.weareshadowpins.com/api/v1/auth/login/kakao/callback?code=${code}`,
