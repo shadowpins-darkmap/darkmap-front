@@ -78,11 +78,16 @@ mark {
   text-overflow: ellipsis;
 }
 
-/* scroll reset */
+/* scroll reset 전역 커스텀 스크롤 */
 .scroll_area {
   overflow-y: auto;
   overflow-x: hidden;
   height: fit-content;
+}
+
+.scroll_area_wrap {
+  padding: 24px 0;
+  padding-right: 6px;
 }
 /* 스크롤바 막대 설정*/
 .scroll_area::-webkit-scrollbar {
@@ -103,7 +108,6 @@ mark {
 /* 스크롤바 뒷 배경 설정*/
 .scroll_area::-webkit-scrollbar-track {
   background-color: rgba(255, 239, 235, 0.65);
-  margin: 6px 0;
   border-radius: 6px;
 }
 

@@ -45,14 +45,17 @@
 }
 
 .body_panel {
-  max-height: 500px;
+  max-height: 450px;
   // overflow: hidden;
-  width: 436px;
+  width: 426px;
+  padding: 0 18px;
+  box-sizing: border-box;
+}
+
+.body_panel_wrap {
   border-radius: 20px;
   border: #f1cfc8 2px solid;
   background-color: #6d54ce;
-  padding: 25px;
-  box-sizing: border-box;
 }
 .body_title_wrap {
   padding-top: 28px;
