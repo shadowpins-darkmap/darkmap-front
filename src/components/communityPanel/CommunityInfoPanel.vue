@@ -48,12 +48,15 @@
           있습니다. K-다크맵 투어는 여성의 이 보이지 않는 경험을 구체화하기 위한
           프로젝트입니다.
         </p>
-        <!-- <p class="slider_contents">
-        출처:
-        <a :href="'https://righttobe.org/'" target="_blank"
-          >https://femiwiki.com/w/길거리_괴롭힘</a
-        >
-      </p> -->
+        <p class="slider_contents">
+          출처:
+          <a
+            :href="'https://femiwiki.com/w/%EA%B8%B8%EA%B1%B0%EB%A6%AC_%EA%B4%B4%EB%A1%AD%ED%9E%98'"
+            target="_blank"
+            class="slider_contents_link"
+            >https://femiwiki.com/w/길거리_괴롭힘</a
+          >
+        </p>
       </GradientScroll>
     </div>
 

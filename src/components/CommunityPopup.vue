@@ -39,7 +39,7 @@
             <span v-show="currentBubbleIndex === 1" class="next_bubble_text">
               잠깐! 모두가 지켜야할 커뮤니티 가이드를 읽으셨나요?
               <a
-                href="https://TODO_link.com"
+                href="https://dune-purple-f80.notion.site/20025ce1e4e980408240ff907e3ca889?source=copy_link"
                 target="_blank"
                 class="next_bubble_text link"
                 >전문 보러가기</a

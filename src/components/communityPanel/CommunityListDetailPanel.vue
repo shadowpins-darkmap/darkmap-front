@@ -507,6 +507,7 @@ const toggleLike = (commentId) => {
 .comments_list_wrap {
   border-top: 1px solid #fff;
   padding: 20px 0;
+  margin-bottom: 60px;
 }
 .comments_list_wrap ul {
   display: flex;

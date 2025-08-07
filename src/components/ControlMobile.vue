@@ -7,7 +7,7 @@
       </div>
     </div>
     <div class="ControlMobile__banner">
-      지도는 PC/데스크탑에서만 볼 수 있습니다
+      지도와 커뮤니티는 데스크탑에서만 볼 수 있어요
     </div>
     <div class="ControlMobile__body">
       <div class="ControlMobile__section">

@@ -7,7 +7,7 @@
         class="BaseFooterlink"
       >
         셰도우 핀즈 </a
-      >의 K-다크맵 투어 Ver.1.0
+      >의 K-다크맵 투어 Ver.1.1
     </div>
     <div class="BaseFootercontainer">
       <button
