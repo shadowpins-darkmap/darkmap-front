@@ -28,31 +28,45 @@
 </template>
 
 <script setup>
-const handleSocialLogin = (provider) => {
-  const redirectUri =
-    'https://darkmap-pi.vercel.app/api/v1/auth/login/kakao/callback';
+// import { onBeforeUnmount } from 'vue';
+const TRUSTED_ORIGINS = [
+  'https://darkmap-pi.vercel.app', // 리다이렉트 페이지가 열리는 프론트 도메인
+  'http://localhost:8080', // 로컬에서 테스트 시
+];
+let popupRef = null;
 
+const handleSocialLogin = (provider) => {
   const loginUrl =
     provider === 'kakao'
-      ? `https://api.kdark.weareshadowpins.com/api/v1/auth/login/kakao?redirect_uri=${encodeURIComponent(redirectUri)}`
+      ? `https://api.kdark.weareshadowpins.com/api/v1/auth/login/kakao`
       : 'https://api.kdark.weareshadowpins.com/oauth2/authorization/google';
 
-  window.open(loginUrl, '소셜로그인', 'width=500,height=700');
+  popupRef = window.open(loginUrl, '소셜로그인', 'width=500,height=700');
 
-  const receiveMessage = async (event) => {
-    const { accessToken, refreshToken } = event.data;
-    if (!accessToken) return;
+  if (!popupRef) {
+    alert('팝업이 차단되었습니다. 팝업 허용을 켜주세요.');
+    return;
+  }
 
-    console.log('receiveMessage✅ accessToken:', accessToken);
-    console.log('receiveMessage✅ refreshToken:', refreshToken);
+  const receiveMessage = (event) => {
+    // 1) 오리진 체크
+    if (!TRUSTED_ORIGINS.includes(event.origin)) return;
+    console.log('     if (event.source !== popupRef) return;: ', event.data);
+    // 2) 해당 팝업에서 온 메시지인지 체크
+    if (event.source !== popupRef) return;
+    if ((event.data || {}).type !== 'SOCIAL_LOGIN_RESULT') return;
 
-    // 토큰 저장
+    const { success, accessToken, refreshToken } = event.data;
+    if (!success || !accessToken) return;
+    // 3) 토큰 저장
     localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
+    if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
 
+    // 4) 정리
     window.removeEventListener('message', receiveMessage);
+    popupRef.close();
   };
-
+  console.log('    receiveMessage: ');
   window.addEventListener('message', receiveMessage);
 };
 </script>

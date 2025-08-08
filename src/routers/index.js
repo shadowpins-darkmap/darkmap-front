@@ -15,7 +15,8 @@ const routes = [
 		component: SocialRedirectKakao,
 	},
 	{
-		path: '/social-redirect-google',
+		// path: '/social-redirect-google',
+		path: '/social-redirect',
 		name: 'SocialRedirectGoogle',
 		component: SocialRedirectGoogle,
 	},
