@@ -10,12 +10,12 @@ const routes = [
 		component: RenderMap, // Path로 이동될 Component
 	},
 	{
-		path: '/api/v1/auth/login/kakao/callback',
+		path: '/social-redirect-kakao',
 		name: 'SocialRedirectKakao',
 		component: SocialRedirectKakao,
 	},
 	{
-		path: '/social-redirect',
+		path: '/social-redirect-google',
 		name: 'SocialRedirectGoogle',
 		component: SocialRedirectGoogle,
 	},
