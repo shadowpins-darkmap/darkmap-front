@@ -94,7 +94,7 @@
 
 <script setup>
 import { defineProps, ref, defineEmits } from 'vue';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/store/useAuthStore';
 
 defineProps({
   items: Object,
