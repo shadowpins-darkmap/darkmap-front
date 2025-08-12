@@ -28,7 +28,12 @@
 </template>
 
 <script setup>
-// import { onBeforeUnmount } from 'vue';
+// import { ref, onMounted, watch } from 'vue';
+import { onMounted } from 'vue';
+import { useAuthStore } from '@/store/useAuthStore';
+
+const auth = useAuthStore();
+
 const TRUSTED_ORIGINS = [
   'https://darkmap-pi.vercel.app', // 리다이렉트 페이지가 열리는 프론트 도메인
   'http://localhost:8080', // 로컬에서 테스트 시
@@ -69,6 +74,20 @@ const handleSocialLogin = (provider) => {
   console.log('    receiveMessage: ');
   window.addEventListener('message', receiveMessage);
 };
+
+// 앱 진입 시 저장된 토큰으로 로그인 복원
+onMounted(() => {
+  auth.initFromStorage();
+});
+
+// ✅ 로그인 성공하면 팝업 닫기
+// watch(
+//   () => auth.isLoggedIn,
+//   (v) => {
+//     if (v) showLoginPopup.value = false;
+//   },
+//   { immediate: true },
+// );
 </script>
 
 <style scoped>
