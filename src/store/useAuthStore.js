@@ -13,15 +13,15 @@ export const useAuthStore = defineStore('auth', {
 			const at = localStorage.getItem('accessToken');
 			if (at) {
 				this.accessToken = at;
-				// 선택: 사용자 프로필 호출
-				// this.fetchMe().catch(() => this.logout());
+				//  사용자 정보 호출
+				this.fetchMe().catch(() => this.logout());
 			}
 		},
 		loginWithTokens(at) {
 			this.accessToken = at;
 			localStorage.setItem('accessToken', at);
-			// 선택: 사용자 프로필 바로 불러오기
-			// this.fetchMe().catch(() => this.logout());
+			//  사용자 정보 호출
+			this.fetchMe().catch(() => this.logout());
 		},
 		async logout() {
 			//TODO : api 
