@@ -66,7 +66,7 @@
       <!-- 계정 상태 -->
       <div class="account_status">
         <p class="terms_title">계정 상태</p>
-        <button class="account_action" @click="logout">
+        <button class="account_action" @click="onLogout">
           <img
             width="30px"
             height="30px"
@@ -102,7 +102,7 @@ defineProps({
 const emit = defineEmits(['back', 'open-terms-panel']);
 const auth = useAuthStore();
 
-const logout = async () => {
+const onLogout = async () => {
   await auth.logout();
   emit('back');
 };
