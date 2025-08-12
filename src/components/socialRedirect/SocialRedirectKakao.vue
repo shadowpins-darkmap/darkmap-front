@@ -1,7 +1,7 @@
 <template>
   <div class="redirect">
     <p>{{ status }}</p>
-    <small>href: {{ href }}</small>
+    <small>token: {{ shortToken }}</small>
   </div>
 </template>
 
@@ -9,66 +9,34 @@
 import { ref, onMounted } from 'vue';
 
 const status = ref('로그인 정보 확인중…');
-const href = window.location.href;
+const shortToken = ref('');
 
-function pingParent(type, payload = {}) {
-  try {
-    if (window.opener) {
-      window.opener.postMessage({ type, ...payload }, '*'); // 테스트 용으로 *
-    }
-  } catch (e) {
-    // eslint-disable-next-line no-alert
-    // alert('postMessage error: ' + (e?.message || e));
-  }
-}
+const PARENT_ORIGIN = 'https://darkmap-pi.vercel.app'; // 최종 배포 오리진
 
-onMounted(async () => {
-  document.title = '[mounted] redirecting…';
+onMounted(() => {
   status.value = '✅ onMounted 진입';
-  pingParent('REDIRECT_MOUNTED');
 
-  const url = new URL(window.location.href);
-  const code = url.searchParams.get('token');
+  // 1) 쿼리에서 토큰/성공여부 파싱
+  const params = new URLSearchParams(window.location.search);
+  const success = params.get('success') === 'true';
+  const accessToken = params.get('token'); // 서버가 token으로 내려줌
+  const refreshToken =
+    params.get('refreshToken') || params.get('refresh_token');
 
-  if (!code) {
-    status.value = '❌ code 파라미터 없음';
-    pingParent('NO_CODE');
+  if (!success || !accessToken) {
+    status.value = '❌ token 없음 또는 success=false';
     return;
   }
 
-  status.value = `🔎 code 발견: ${code.slice(0, 8)}…`;
-  pingParent('CODE_FOUND', { code });
+  // 2) 저장
+  localStorage.setItem('accessToken', accessToken);
+  if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+  shortToken.value = accessToken.slice(0, 12) + '…';
+  status.value = '💾 토큰 저장 완료';
 
+  // 3) 부모 창에 알림 (먼저 잘 받는지 확인하려면 '*'로 테스트 후 PARENT_ORIGIN으로 바꾸세요)
   try {
-    status.value = '🔁 토큰 교환 요청 중…';
-    const res = await fetch(
-      `https://api.kdark.weareshadowpins.com/api/v1/auth/login/kakao/callback?code=${code}`,
-      {
-        // 쿠키 사용해야 한다면 백엔드 CORS/SameSite 설정에 맞춰 아래 사용
-        // credentials: 'include',
-      },
-    );
-
-    if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      status.value = `🚫 교환 실패: ${res.status}`;
-      pingParent('EXCHANGE_FAILED', { status: res.status, text });
-      return;
-    }
-
-    const data = await res.json().catch(() => ({}));
-    status.value = '✅ 토큰 수신';
-    document.title = '[ok] tokens received';
-
-    const { accessToken, refreshToken } = data || {};
-    pingParent('TOKENS_RECEIVED', {
-      accessToken: !!accessToken,
-      refreshToken: !!refreshToken,
-    });
-
-    // 부모 창에 토큰 전달
-    if (window.opener && accessToken) {
-      pingParent('SENDING_TO_PARENT');
+    if (window.opener) {
       window.opener.postMessage(
         {
           type: 'SOCIAL_LOGIN_RESULT',
@@ -76,19 +44,20 @@ onMounted(async () => {
           accessToken,
           refreshToken,
         },
-        '*', // 테스트 용: 수신되는지 먼저 확인 → 되면 정확한 origin으로 바꾸기
+        PARENT_ORIGIN,
+        // '*'
       );
-      status.value = '📨 부모에 전달 완료, 창 닫기 준비…';
+      status.value = '📨 부모창에 전달 완료';
     } else {
-      status.value = '⚠️ accessToken 부재 또는 opener 없음';
-      pingParent('NO_OPENER_OR_TOKEN');
+      status.value = '⚠️ opener 없음(부모창을 못 찾음)';
     }
-
-    setTimeout(() => window.close(), 500);
-  } catch (err) {
-    status.value = '💥 예외 발생(콘솔 확인)';
-    console.error('🚫 토큰 교환 실패:', err);
-    pingParent('EXCEPTION', { message: String(err) });
+  } catch (e) {
+    console.error('postMessage error:', e);
   }
+
+  // 4) 창 닫기
+  setTimeout(() => {
+    window.close();
+  }, 300);
 });
 </script>
