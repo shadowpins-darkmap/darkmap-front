@@ -61,12 +61,12 @@ const handleSocialLogin = (provider) => {
     if (event.source !== popupRef) return;
     if ((event.data || {}).type !== 'SOCIAL_LOGIN_RESULT') return;
 
-    const { success, accessToken, refreshToken } = event.data;
+    const { success, accessToken } = event.data;
     // TODO : 데이터 받은 뒤 엑세스 토큰으로 api
     if (!success || !accessToken) return;
     // 3) 토큰 저장
     // ✅ 전역 로그인 처리 (localStorage 저장 포함)
-    auth.loginWithTokens(accessToken, refreshToken);
+    auth.loginWithTokens(accessToken);
 
     // 4) 정리
     window.removeEventListener('message', receiveMessage);

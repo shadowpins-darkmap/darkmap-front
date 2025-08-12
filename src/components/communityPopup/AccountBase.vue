@@ -102,8 +102,8 @@ defineProps({
 const emit = defineEmits(['back', 'open-terms-panel']);
 const auth = useAuthStore();
 
-const logout = () => {
-  auth.logout();
+const logout = async () => {
+  await auth.logout();
   emit('back');
 };
 

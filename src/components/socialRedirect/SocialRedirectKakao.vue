@@ -8,7 +8,6 @@
 import { ref, onMounted } from 'vue';
 
 const status = ref('로그인 정보 확인중…');
-const shortToken = ref('');
 
 const PARENT_ORIGIN = 'https://darkmap-pi.vercel.app'; // 최종 배포 오리진
 
@@ -19,8 +18,6 @@ onMounted(() => {
   const params = new URLSearchParams(window.location.search);
   const success = params.get('success') === 'true';
   const accessToken = params.get('token'); // 서버가 token으로 내려줌
-  const refreshToken =
-    params.get('refreshToken') || params.get('refresh_token');
 
   if (!success || !accessToken) {
     status.value = '❌ token 없음 또는 success=false';
@@ -29,8 +26,6 @@ onMounted(() => {
 
   // 2) 저장
   localStorage.setItem('accessToken', accessToken);
-  if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
-  shortToken.value = accessToken.slice(0, 12) + '…';
   status.value = '💾 토큰 저장 완료';
 
   // 3) 부모 창에 알림 (먼저 잘 받는지 확인하려면 '*'로 테스트 후 PARENT_ORIGIN으로 바꾸세요)
@@ -41,7 +36,6 @@ onMounted(() => {
           type: 'SOCIAL_LOGIN_RESULT',
           success: true,
           accessToken,
-          refreshToken,
         },
         PARENT_ORIGIN,
         // '*',

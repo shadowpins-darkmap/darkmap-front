@@ -3,7 +3,6 @@ import { defineStore } from 'pinia';
 export const useAuthStore = defineStore('auth', {
 	state: () => ({
 		accessToken: null,
-		refreshToken: null,
 		user: null
 	}),
 	getters: {
@@ -12,28 +11,28 @@ export const useAuthStore = defineStore('auth', {
 	actions: {
 		initFromStorage() {
 			const at = localStorage.getItem('accessToken');
-			const rt = localStorage.getItem('refreshToken');
 			if (at) {
 				this.accessToken = at;
-				this.refreshToken = rt;
 				// 선택: 사용자 프로필 호출
 				// this.fetchMe().catch(() => this.logout());
 			}
 		},
-		loginWithTokens(at, rt) {
+		loginWithTokens(at) {
 			this.accessToken = at;
-			this.refreshToken = rt ?? null;
 			localStorage.setItem('accessToken', at);
-			if (rt) localStorage.setItem('refreshToken', rt);
 			// 선택: 사용자 프로필 바로 불러오기
 			// this.fetchMe().catch(() => this.logout());
 		},
-		logout() {
+		async logout() {
+			//TODO : api 
+			await fetch('https://api.kdark.weareshadowpins.com/api/v1/auth/logout', {
+				method: 'POST',
+				credentials: 'include', // 쿠키 포함
+			});
+
 			this.accessToken = null;
-			this.refreshToken = null;
 			this.user = null;
 			localStorage.removeItem('accessToken');
-			localStorage.removeItem('refreshToken');
 		},
 		// async fetchMe() {
 		// 	// 실제 API로 교체하세요

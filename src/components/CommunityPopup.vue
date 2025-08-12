@@ -464,9 +464,6 @@ const handleOpenDetail = (type) => {
   isPanel2depsOpen.value = true;
 };
 
-//auth.login()
-//auth.logout()
-
 // const { isMobile } = useDevice();
 const showLoginAlert = ref(false);
 const showLoginPopup = ref(false);
