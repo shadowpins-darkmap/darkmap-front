@@ -1,41 +1,56 @@
 <template>
   <div class="redirect">
-    <p>로그인 정보를 확인 중입니다...</p>
+    <p>{{ status }}</p>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
-console.log('[index] href:', location.href);
+import { ref, onMounted } from 'vue';
 
-// const PARENT_ORIGIN = 'https://darkmap-pi.vercel.app'; // prod
-// const PARENT_ORIGIN = 'http://localhost:8080'; // dev
+const status = ref('로그인 정보 확인중…');
+
+const PARENT_ORIGIN = 'https://darkmap-pi.vercel.app';
+
 onMounted(() => {
-  document.title = 'redirecting...';
-  const qs = new URLSearchParams(window.location.search);
-  console.log('qs : ', qs);
+  status.value = '✅ onMounted 진입';
 
-  const success = qs.get('success') === 'true';
-  const accessToken = qs.get('token') || qs.get('accessToken');
-  const refreshToken =
-    qs.get('refreshToken') || qs.get('refresh_token') || null;
+  // 1) 쿼리에서 토큰/성공여부 파싱
+  const params = new URLSearchParams(window.location.search);
+  const success = params.get('success') === 'true';
+  const accessToken = params.get('token'); // 서버가 token으로 내려줌
 
-  // 부모창으로 메시지 전송
-  if (window.opener) {
-    // window.opener.postMessage({ success, accessToken, refreshToken }, '*');
-    // window.opener.postMessage(
-    //   { success, accessToken, refreshToken },
-    //   PARENT_ORIGIN,
-    // );
-    window.opener.postMessage(
-      { type: 'SOCIAL_LOGIN_RESULT', success, accessToken, refreshToken },
-      'https://darkmap-pi.vercel.app',
-    );
+  if (!success || !accessToken) {
+    status.value = '❌ token 없음 또는 success=false';
+    return;
   }
 
-  // 약간의 여유를 두고 창 닫기
+  // 2) 저장
+  localStorage.setItem('accessToken', accessToken);
+  status.value = '💾 토큰 저장 완료';
+
+  // 3) 부모 창에 알림 (먼저 잘 받는지 확인하려면 '*'로 테스트 후 PARENT_ORIGIN으로 바꾸세요)
+  try {
+    if (window.opener) {
+      window.opener.postMessage(
+        {
+          type: 'SOCIAL_LOGIN_RESULT',
+          success: true,
+          accessToken,
+        },
+        PARENT_ORIGIN,
+        // '*',
+      );
+      status.value = '📨 부모창에 전달 완료';
+    } else {
+      status.value = '⚠️ opener 없음(부모창을 못 찾음)';
+    }
+  } catch (e) {
+    console.error('postMessage error:', e);
+  }
+
+  // 4) 창 닫기
   setTimeout(() => {
     window.close();
-  }, 100);
+  }, 300);
 });
 </script>
