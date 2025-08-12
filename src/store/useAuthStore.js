@@ -34,14 +34,13 @@ export const useAuthStore = defineStore('auth', {
 			this.user = null;
 			localStorage.removeItem('accessToken');
 		},
-		// async fetchMe() {
-		// 	// 실제 API로 교체하세요
-		// 	// 예) GET https://api.kdark.weareshadowpins.com/api/v1/me
-		// 	const res = await fetch('/api/me', {
-		// 		headers: { Authorization: `Bearer ${this.accessToken}` },
-		// 	});
-		// 	if (!res.ok) throw new Error('ME_FAILED');
-		// 	this.user = await res.json();
-		// },
+		async fetchMe() {
+			// TODO :  API 확인 필요
+			const res = await fetch('https://api.kdark.weareshadowpins.com/api/v1/member/me', {
+				headers: { Authorization: `Bearer ${this.accessToken}` },
+			});
+			if (!res.ok) throw new Error('ME_FAILED');
+			this.user = await res.json();
+		},
 	},
 });
