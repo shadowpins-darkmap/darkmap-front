@@ -612,6 +612,19 @@ watch(showAlarmPopup, (visible) => {
     currentPage.value = 1;
   }
 });
+
+onMounted(() => {
+  auth.initFromStorage();
+});
+
+// ✅ 로그인 성공하면 팝업 닫기
+watch(
+  () => auth.isLoggedIn,
+  (loggedIn) => {
+    if (loggedIn) showLoginPopup.value = false;
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped lang="scss">

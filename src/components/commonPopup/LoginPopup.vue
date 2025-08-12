@@ -28,8 +28,7 @@
 </template>
 
 <script setup>
-// import { ref, onMounted, watch } from 'vue';
-import { onMounted } from 'vue';
+import { onBeforeUnmount } from 'vue';
 import { useAuthStore } from '@/store/useAuthStore';
 
 const auth = useAuthStore();
@@ -39,6 +38,7 @@ const TRUSTED_ORIGINS = [
   'http://localhost:8080', // 로컬에서 테스트 시
 ];
 let popupRef = null;
+let isBound = false;
 
 const handleSocialLogin = (provider) => {
   const loginUrl =
@@ -56,38 +56,33 @@ const handleSocialLogin = (provider) => {
   const receiveMessage = (event) => {
     // 1) 오리진 체크
     if (!TRUSTED_ORIGINS.includes(event.origin)) return;
-    console.log('     if (event.source !== popupRef) return;: ', event.data);
+    console.log('event.data: ', event.data);
     // 2) 해당 팝업에서 온 메시지인지 체크
     if (event.source !== popupRef) return;
     if ((event.data || {}).type !== 'SOCIAL_LOGIN_RESULT') return;
 
     const { success, accessToken, refreshToken } = event.data;
+    // TODO : 데이터 받은 뒤 엑세스 토큰으로 api
     if (!success || !accessToken) return;
     // 3) 토큰 저장
-    localStorage.setItem('accessToken', accessToken);
-    if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+    // ✅ 전역 로그인 처리 (localStorage 저장 포함)
+    auth.loginWithTokens(accessToken, refreshToken);
 
     // 4) 정리
     window.removeEventListener('message', receiveMessage);
-    popupRef.close();
+    isBound = false;
   };
-  console.log('    receiveMessage: ');
-  window.addEventListener('message', receiveMessage);
+  if (!isBound) {
+    window.addEventListener('message', receiveMessage);
+    isBound = true;
+  }
 };
 
-// 앱 진입 시 저장된 토큰으로 로그인 복원
-onMounted(() => {
-  auth.initFromStorage();
+onBeforeUnmount(() => {
+  // 안전 정리
+  // receiveMessage가 클로저라면 remove는 위에서 이미 처리됨
+  popupRef = null;
 });
-
-// ✅ 로그인 성공하면 팝업 닫기
-// watch(
-//   () => auth.isLoggedIn,
-//   (v) => {
-//     if (v) showLoginPopup.value = false;
-//   },
-//   { immediate: true },
-// );
 </script>
 
 <style scoped>

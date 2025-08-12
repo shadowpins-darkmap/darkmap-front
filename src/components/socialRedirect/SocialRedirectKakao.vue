@@ -1,7 +1,6 @@
 <template>
   <div class="redirect">
     <p>{{ status }}</p>
-    <small>token: {{ shortToken }}</small>
   </div>
 </template>
 
@@ -45,7 +44,7 @@ onMounted(() => {
           refreshToken,
         },
         PARENT_ORIGIN,
-        // '*'
+        // '*',
       );
       status.value = '📨 부모창에 전달 완료';
     } else {
