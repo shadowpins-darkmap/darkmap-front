@@ -28,7 +28,7 @@ onMounted(async () => {
   pingParent('REDIRECT_MOUNTED');
 
   const url = new URL(window.location.href);
-  const code = url.searchParams.get('code');
+  const code = url.searchParams.get('token');
 
   if (!code) {
     status.value = '❌ code 파라미터 없음';
