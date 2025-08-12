@@ -66,7 +66,7 @@
       <!-- 계정 상태 -->
       <div class="account_status">
         <p class="terms_title">계정 상태</p>
-        <button class="account_action">
+        <button class="account_action" @click="logout">
           <img
             width="30px"
             height="30px"
@@ -94,15 +94,23 @@
 
 <script setup>
 import { defineProps, ref, defineEmits } from 'vue';
+import { useAuthStore } from '@/stores/auth';
 
 defineProps({
   items: Object,
 });
+const emit = defineEmits(['back', 'open-terms-panel']);
+const auth = useAuthStore();
+
+const logout = () => {
+  auth.logout();
+  emit('back');
+};
+
 // const nickname = ref(props.items.nickname);
 const nickname = ref('nickname');
 
 const marketing = ref({ agreed: true });
-const emit = defineEmits(['open-terms-panel']);
 
 const openTerms = (label) => {
   if (label === '개인정보처리방침') {

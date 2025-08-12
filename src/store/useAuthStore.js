@@ -17,7 +17,7 @@ export const useAuthStore = defineStore('auth', {
 				this.accessToken = at;
 				this.refreshToken = rt;
 				// 선택: 사용자 프로필 호출
-				this.fetchMe().catch(() => this.logout());
+				// this.fetchMe().catch(() => this.logout());
 			}
 		},
 		loginWithTokens(at, rt) {
@@ -25,7 +25,7 @@ export const useAuthStore = defineStore('auth', {
 			this.refreshToken = rt ?? null;
 			localStorage.setItem('accessToken', at);
 			if (rt) localStorage.setItem('refreshToken', rt);
-			// // 선택: 사용자 프로필 바로 불러오기
+			// 선택: 사용자 프로필 바로 불러오기
 			// this.fetchMe().catch(() => this.logout());
 		},
 		logout() {
