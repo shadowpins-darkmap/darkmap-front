@@ -432,7 +432,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed, watch, onBeforeUnmount } from 'vue';
 import CarouselWrap from '@/components/carousel/CarouselWrap.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
 import CommunityInfoPanel from '@/components/communityPanel/CommunityInfoPanel.vue';
@@ -610,16 +610,27 @@ watch(showAlarmPopup, (visible) => {
   }
 });
 
+let bubbleTimer = null;
+
 onMounted(() => {
+  // 로컬스토리지 토큰 복구 → 자동 로그인
   auth.initFromStorage();
+
+  // 인삿말 토글
+  bubbleTimer = setInterval(() => {
+    currentBubbleIndex.value = (currentBubbleIndex.value + 1) % 2;
+  }, 3000);
 });
-console.log('auth ---- ', auth.me);
+onBeforeUnmount(() => {
+  if (bubbleTimer) clearInterval(bubbleTimer);
+});
+
 // ✅ 로그인 성공하면 팝업 닫기
 watch(
   () => auth.isLoggedIn,
   (loggedIn) => {
     console.log('auth ---- ', auth);
-    console.log('auth ---- ', auth.me);
+    console.log('auth ----1 ', auth.me);
     if (loggedIn) showLoginPopup.value = false;
     if (loggedIn && !auth.me) auth.fetchAll();
   },
