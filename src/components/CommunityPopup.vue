@@ -432,7 +432,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue';
 import CarouselWrap from '@/components/carousel/CarouselWrap.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
 import CommunityInfoPanel from '@/components/communityPanel/CommunityInfoPanel.vue';
@@ -442,29 +442,22 @@ import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
 import LoginPopup from '@/components/commonPopup/LoginPopup.vue';
 import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
-import { useAuthStore } from '@/store/useAuthStore';
-// import { useDevice } from '@/composables/useDevice';
 import TermsSidePanel from '@/components/commonPanel/TermsSidePanel.vue';
 import AlarmListBase from '@/components/communityPopup/AlarmListBase.vue';
 import AccountBase from '@/components/communityPopup/AccountBase.vue';
 import TabButtons from '@/components/tabButton/TabButtons.vue';
 import EmptyData from '@/components/EmptyData.vue';
+import { useAuthStore } from '@/store/useAuthStore';
 import iconComment from '@/assets/alarmComment.svg';
 import iconLike from '@/assets/alarmLike.svg';
 import iconMarker from '@/assets/alarmMarker.svg';
 
 const auth = useAuthStore();
 
+/* --------- UI 상태 --------- */
 const tabOptions = ['알림', '내 게시글', '내 댓글'];
 const currentTab = ref('알림');
 const selectedDetailType = ref('');
-
-const handleOpenDetail = (type) => {
-  selectedDetailType.value = type;
-  isPanel2depsOpen.value = true;
-};
-
-// const { isMobile } = useDevice();
 const showLoginAlert = ref(false);
 const showLoginPopup = ref(false);
 const showAlarmPopup = ref(false);
@@ -472,144 +465,17 @@ const showAccountSection = ref(false);
 
 const isPanelOpen = ref(false);
 const isPanel2depsOpen = ref(false);
-
 const isListPanelOpen = ref(false);
 const isListPanel2depsOpen = ref(false);
-
 const isTermsPanelOpen = ref(false);
 
-const handlePanelClose = () => {
-  isPanelOpen.value = false;
-  isPanel2depsOpen.value = false;
-};
-
-const handleListPanelClose = () => {
-  isListPanelOpen.value = false;
-  isListPanel2depsOpen.value = false;
-};
-
-const handleCarouselClick = (card) => {
-  console.log('카드 클릭됨!', card);
-  if (!auth.isLoggedIn) showLoginAlert.value = true;
-  // router.push(`/article/${card.id}`);
-  // 또는 modalStore.open(card)
-};
-
-const handleCommunityMove = () => {
-  if (!auth.isLoggedIn) showLoginAlert.value = true;
-  isListPanelOpen.value = true;
-};
-
-// const openSection = ref(null);
+/* --------- 아코디언 / 인삿말 --------- */
 const openSection = ref('mypage');
-// 아코디언이 하나만 열려있도록
 const toggleSection = (section) => {
   openSection.value = openSection.value === section ? null : section;
 };
 
-// greeting 애니메이션
 const currentBubbleIndex = ref(0);
-
-onMounted(() => {
-  setInterval(() => {
-    currentBubbleIndex.value = (currentBubbleIndex.value + 1) % 2;
-  }, 3000);
-});
-
-// 더미 데이터 TODO
-const alarmList = Array.from({ length: 140 }, (_, i) => ({
-  id: i + 1,
-  nickname: `검은 태양의 핀 ${i + 1}`,
-  tag: '좋아요',
-  title: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 게시글`,
-}));
-// const myPostList = ref([]);
-const myPostList = Array.from({ length: 10 }, (_, i) => ({
-  id: i + 1,
-  title: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 게시글`,
-}));
-// const myCommentList = ref([]);
-const myCommentList = ref(
-  Array.from({ length: 40 }, (_, i) => ({
-    id: i + 1,
-    comment: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 comment`,
-  })),
-);
-
-// 알람 아이콘
-const getIcon = (tag) => {
-  switch (tag) {
-    case '댓글':
-      return iconComment;
-    case '좋아요':
-      return iconLike;
-    case '등록':
-      return iconMarker;
-    default:
-      return iconComment;
-  }
-};
-
-//  페이지네이션 상태
-const currentPage = ref(1);
-const itemsPerPage = 6;
-
-const pageNumbers = computed(() => {
-  const max = 5;
-  const start = Math.floor((currentPage.value - 1) / max) * max + 1;
-  return Array.from(
-    { length: Math.min(max, totalPages.value - start + 1) },
-    (_, i) => start + i,
-  );
-});
-
-const totalPages = computed(() => {
-  let totalLength = 0;
-
-  if (currentTab.value === '알림') {
-    totalLength = alarmList.length;
-  } else if (currentTab.value === '내 게시글') {
-    totalLength = myPostList.length;
-  } else if (currentTab.value === '내 댓글') {
-    totalLength = myCommentList.value.length;
-  }
-
-  return Math.ceil(totalLength / itemsPerPage);
-});
-
-const currentItems = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-
-  if (currentTab.value === '알림') {
-    return alarmList.slice(start, end);
-  } else if (currentTab.value === '내 게시글') {
-    return myPostList.slice(start, end);
-  } else if (currentTab.value === '내 댓글') {
-    return myCommentList.value.slice(start, end);
-  } else {
-    return [];
-  }
-});
-
-const pageChange = (page) => {
-  currentPage.value = page;
-};
-
-const clickPrev = () => {
-  if (currentPage.value > 1) currentPage.value--;
-};
-
-const clickNext = () => {
-  if (currentPage.value < totalPages.value) currentPage.value++;
-};
-
-watch(showAlarmPopup, (visible) => {
-  if (!visible) {
-    currentPage.value = 1;
-  }
-});
-
 let bubbleTimer = null;
 
 onMounted(() => {
@@ -625,17 +491,118 @@ onBeforeUnmount(() => {
   if (bubbleTimer) clearInterval(bubbleTimer);
 });
 
-// ✅ 로그인 성공하면 팝업 닫기
+/* --------- 로그인 후 반응 --------- */
 watch(
   () => auth.isLoggedIn,
   (loggedIn) => {
-    console.log('auth ---- ', auth);
-    console.log('auth ----1 ', auth.me);
-    if (loggedIn) showLoginPopup.value = false;
-    if (loggedIn && !auth.me) auth.fetchAll();
+    if (loggedIn) {
+      // 로그인 팝업 닫기
+      showLoginPopup.value = false;
+      // 사용자 정보가 없으면 최초로 불러오기(스토어에 fetchAll 구현)
+      if (!auth.me) auth.fetchAll();
+    }
   },
   { immediate: true },
 );
+
+/* --------- 더미 데이터 (UI 확인용) --------- */
+const alarmList = Array.from({ length: 140 }, (_, i) => ({
+  id: i + 1,
+  nickname: `검은 태양의 핀 ${i + 1}`,
+  tag: '좋아요',
+  title: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 게시글`,
+}));
+const myPostList = Array.from({ length: 10 }, (_, i) => ({
+  id: i + 1,
+  title: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 게시글`,
+}));
+const myCommentList = ref(
+  Array.from({ length: 40 }, (_, i) => ({
+    id: i + 1,
+    comment: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 comment`,
+  })),
+);
+
+/* --------- 유틸 --------- */
+const getIcon = (tag) => {
+  switch (tag) {
+    case '댓글':
+      return iconComment;
+    case '좋아요':
+      return iconLike;
+    case '등록':
+      return iconMarker;
+    default:
+      return iconComment;
+  }
+};
+
+/* --------- 페이징 --------- */
+const currentPage = ref(1);
+const itemsPerPage = 6;
+
+const totalPages = computed(() => {
+  let totalLength = 0;
+  if (currentTab.value === '알림') totalLength = alarmList.length;
+  else if (currentTab.value === '내 게시글') totalLength = myPostList.length;
+  else if (currentTab.value === '내 댓글')
+    totalLength = myCommentList.value.length;
+  return Math.ceil(totalLength / itemsPerPage);
+});
+
+const pageNumbers = computed(() => {
+  const max = 5;
+  const start = Math.floor((currentPage.value - 1) / max) * max + 1;
+  return Array.from(
+    { length: Math.min(max, totalPages.value - start + 1) },
+    (_, i) => start + i,
+  );
+});
+
+const currentItems = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  if (currentTab.value === '알림') return alarmList.slice(start, end);
+  if (currentTab.value === '내 게시글') return myPostList.slice(start, end);
+  if (currentTab.value === '내 댓글')
+    return myCommentList.value.slice(start, end);
+  return [];
+});
+
+const pageChange = (p) => (currentPage.value = p);
+const clickPrev = () => currentPage.value > 1 && currentPage.value--;
+const clickNext = () =>
+  currentPage.value < totalPages.value && currentPage.value++;
+
+watch(showAlarmPopup, (v) => {
+  if (!v) currentPage.value = 1;
+});
+
+/* --------- 버튼 핸들러 --------- */
+const handleOpenDetail = (type) => {
+  selectedDetailType.value = type;
+  isPanel2depsOpen.value = true;
+};
+
+const handleListPanelClose = () => {
+  isListPanelOpen.value = false;
+  isListPanel2depsOpen.value = false;
+};
+
+const handlePanelClose = () => {
+  isPanelOpen.value = false;
+  isPanel2depsOpen.value = false;
+};
+
+const handleCarouselClick = (card) => {
+  console.log('카드 클릭됨!', card);
+  if (!auth.isLoggedIn) showLoginAlert.value = true;
+};
+
+const handleCommunityMove = () => {
+  if (!auth.isLoggedIn) showLoginAlert.value = true;
+  isListPanelOpen.value = true;
+};
 </script>
 
 <style scoped lang="scss">
