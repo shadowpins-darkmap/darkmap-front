@@ -613,12 +613,15 @@ watch(showAlarmPopup, (visible) => {
 onMounted(() => {
   auth.initFromStorage();
 });
-
+console.log('auth ---- ', auth.me);
 // ✅ 로그인 성공하면 팝업 닫기
 watch(
   () => auth.isLoggedIn,
   (loggedIn) => {
+    console.log('auth ---- ', auth);
+    console.log('auth ---- ', auth.me);
     if (loggedIn) showLoginPopup.value = false;
+    if (loggedIn && !auth.me) auth.fetchAll();
   },
   { immediate: true },
 );

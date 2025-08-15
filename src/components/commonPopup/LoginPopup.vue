@@ -53,7 +53,7 @@ const handleSocialLogin = (provider) => {
     return;
   }
 
-  const receiveMessage = (event) => {
+  const receiveMessage = async (event) => {
     // 1) 오리진 체크
     if (!TRUSTED_ORIGINS.includes(event.origin)) return;
     console.log('event.data: ', event.data);
@@ -67,6 +67,11 @@ const handleSocialLogin = (provider) => {
     // 3) 토큰 저장
     // ✅ 전역 로그인 처리 (localStorage 저장 포함)
     auth.loginWithTokens(accessToken);
+    try {
+      await auth.fetchAll(); // me + profile 로드
+    } catch (e) {
+      console.error('fetchAll failed:', e);
+    }
 
     // 4) 정리
     window.removeEventListener('message', receiveMessage);
