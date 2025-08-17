@@ -6,9 +6,9 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 
 const app = createApp(App)
 
-app.use(routers)
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
 app.use(pinia);
+app.use(routers)
 app.mount('#app')

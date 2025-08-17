@@ -10,9 +10,8 @@ export default {
 import { onMounted } from 'vue';
 import { useStatsStore } from '@/store/useStatsStore';
 
-const statsStore = useStatsStore();
-
 onMounted(() => {
+  const statsStore = useStatsStore();
   statsStore.fetchStats(); // 앱 시작 시 통계 fetch
 });
 </script>
