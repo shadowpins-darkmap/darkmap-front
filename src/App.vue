@@ -12,7 +12,7 @@ import { useStatsStore } from '@/store/useStatsStore';
 
 onMounted(() => {
   const statsStore = useStatsStore();
-  statsStore.fetchStats(); // 앱 시작 시 통계 fetch
+  statsStore.fetchStats();
 });
 </script>
 
