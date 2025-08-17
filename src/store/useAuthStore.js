@@ -26,6 +26,7 @@ export const useAuthStore = defineStore('auth', {
 		myBoards: [],
 		boardsPage: 0,
 		boardsTotalPages: 0,
+		boardsTotalElements: 0,
 
 		myComments: [],
 		commentsPage: 0,
@@ -107,6 +108,7 @@ export const useAuthStore = defineStore('auth', {
 			this.myBoards = data.content;
 			this.boardsPage = data.pageable.pageNumber;
 			this.boardsTotalPages = data.totalPages;
+			this.boardsTotalElements = data.totalElements;
 		},
 
 		// ✅ 댓글 페이지네이션
