@@ -262,15 +262,9 @@
             </p>
             <button
               class="BaseCommunity__black_button"
-              @click="showLoginAlert = true"
+              @click="showLoginPopup = true"
             >
-              회원가입
-            </button>
-            <button
-              class="BaseCommunity__login_button"
-              @click="handleTestLogin"
-            >
-              기존 회원 로그인
+              로그인
             </button>
           </div>
         </div>
