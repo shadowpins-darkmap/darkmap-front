@@ -486,6 +486,9 @@ onBeforeUnmount(() => {
 });
 
 /* --------- 로그인 후 반응 --------- */
+console.log('auth.isLoggedIn -------', auth.isLoggedIn);
+console.log('auth.nickname -------', auth.nickname);
+console.log('auth.profile -------', auth.profile);
 watch(
   () => auth.isLoggedIn,
   (loggedIn) => {
@@ -493,7 +496,7 @@ watch(
       // 로그인 팝업 닫기
       showLoginPopup.value = false;
       // 사용자 정보가 없으면 최초로 불러오기(스토어에 fetchAll 구현)
-      if (!auth.me) auth.fetchAll();
+      // if (!auth.me) auth.fetchAll();
     }
   },
   { immediate: true },
@@ -736,6 +739,7 @@ const handleCommunityMove = () => {
     margin-right: 20px;
     justify-content: center;
     gap: 15px;
+    margin-bottom: 40px;
   }
   &__title {
     font-weight: 700;

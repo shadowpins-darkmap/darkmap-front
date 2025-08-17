@@ -4,9 +4,19 @@ import api from '@/lib/api';
 export const useAuthStore = defineStore('auth', {
 	state: () => ({
 		accessToken: null,
-		me: null,       // /member/me 결과
-		profile: null,  // /member/profile 결과
 		loading: false,
+
+		// me 응답에서 가져올 항목
+		email: null,
+		nickname: null,
+		id: null,
+		level: null,
+		loginCount: null,
+		joinedAt: null,
+
+		// profile 응답에서 가져올 항목
+		profile: null,
+		message: null,
 	}),
 	getters: {
 		isLoggedIn: (s) => !!s.accessToken,
@@ -44,12 +54,22 @@ export const useAuthStore = defineStore('auth', {
 		// 개별 호출
 		async fetchMe() {
 			const { data } = await api.get('/api/v1/member/me');
-			this.me = data;
+			// this.me = data;
+			// 상세 필드 저장
+			this.email = data.email;
+			this.nickname = data.nickname;
+			this.id = data.id;
+			this.level = data.level;
+			this.loginCount = data.loginCount;
+			this.joinedAt = data.joinedAt;
+
 			return data;
 		},
 		async fetchProfile() {
 			const { data } = await api.get('/api/v1/member/profile');
-			this.profile = data;
+			this.profile = data.data;
+			// 상세 필드 저장
+			this.message = data.message;
 			return data;
 		},
 
