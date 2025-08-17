@@ -6,6 +6,15 @@
 export default {
   name: 'App',
 };
+
+import { onMounted } from 'vue';
+import { useStatsStore } from '@/store/useStatsStore';
+
+const statsStore = useStatsStore();
+
+onMounted(() => {
+  statsStore.fetchStats();
+});
 </script>
 
 <style>

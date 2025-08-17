@@ -291,7 +291,7 @@
         @open-terms-panel="isTermsPanelOpen = true"
       />
     </section>
-    <!-- 다크맵 투어 일지 (고정) -->
+    <!-- 다크맵 투어 일지 (고정 데이터 로그인이 필요없음) -->
     <section class="BaseCommunity__popup">
       <!-- 아코디언 타이틀 클릭시 토글 -->
       <button class="accordion__header" @click="toggleSection('tour')">
@@ -308,11 +308,13 @@
       <!-- 아코디언 본문 -->
       <div class="content_text" v-show="openSection === 'tour'">
         <p class="content_text_title">
-          현재까지 <span class="highlight">123</span> 명의 회원이 자신의 길거리
-          괴롭힘 경험담을 <br />
-          <span class="highlight">12344</span>가지 이야기하고<br />
-          <span class="highlight">12344</span>개의 사건 장소를 제보해주셨습니다.
-          기여에 감사드립니다.
+          현재까지
+          <span class="highlight">{{ statsStore.totalMemberCount }}</span> 명의
+          회원이 자신의 길거리<br />
+          <span class="highlight">{{ statsStore.totalBoardCount }}</span
+          >가지 이야기하고<br />
+          <span class="highlight">{{ statsStore.incidentReportCount }}</span
+          >개의 사건 장소를 제보해주셨습니다.
         </p>
         <div class="tour__links">
           <button class="tour_link_button" @click="handleCommunityMove">
@@ -457,11 +459,13 @@ import AccountBase from '@/components/communityPopup/AccountBase.vue';
 import TabButtons from '@/components/tabButton/TabButtons.vue';
 import EmptyData from '@/components/EmptyData.vue';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useStatsStore } from '@/store/useStatsStore';
 import iconComment from '@/assets/alarmComment.svg';
 import iconLike from '@/assets/alarmLike.svg';
 import iconMarker from '@/assets/alarmMarker.svg';
 
 const auth = useAuthStore();
+const statsStore = useStatsStore();
 
 /* --------- UI 상태 --------- */
 const tabOptions = ['알림', '내 게시글', '내 댓글'];
