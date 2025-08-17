@@ -108,9 +108,7 @@
                 height="16"
               />
               <span>새 댓글</span>
-              <span class="point_color">{{
-                auth.user?.commentCount ?? 0
-              }}</span>
+              <span class="point_color">{{ auth.newCommentsCount ?? 0 }}</span>
             </li>
             <li class="icon_list">
               <img
@@ -121,9 +119,7 @@
                 height="16"
               />
               <span>새 좋아요</span>
-              <span class="point_color">{{
-                auth.user?.commentCount ?? 0
-              }}</span>
+              <span class="point_color">{{ auth.newLikesCount ?? 0 }}</span>
             </li>
             <li class="icon_list">
               <img
@@ -135,18 +131,20 @@
               />
               <span>다크플레이스 등록</span>
               <span class="point_color">{{
-                auth.user?.commentCount ?? 0
+                auth.approvedReportCount ?? 0
               }}</span>
             </li>
           </ul>
           <p class="tap_count_info" v-if="currentTab === '내 게시글'">
             현재까지 총
-            <span class="point_color">{{ auth.user?.commentCount ?? 0 }}</span
+            <span class="point_color">{{
+              auth.myBoards.data.pageInfo.totalElements ?? 0
+            }}</span
             >건의 글을 작성했어요.
           </p>
           <p class="tap_count_info" v-if="currentTab === '내 댓글'">
             현재까지 총
-            <span class="point_color">{{ auth.user?.commentCount ?? 0 }}</span
+            <span class="point_color">{{ auth.myCommentCount ?? 0 }}</span
             >건의 댓글을 작성했어요.
           </p>
           <TabButtons v-model="currentTab" :tabs="tabOptions" />
@@ -496,8 +494,14 @@ watch(
       console.log('auth.isLoggedIn -------', auth.isLoggedIn);
       console.log('auth.nickname -------', auth.nickname);
       console.log('auth.profile -------', auth.profile);
+      console.log('auth.notifications -------', auth.notifications);
+      console.log(
+        'auth.myBoards -------',
+        auth.myBoards.data.pageInfo.totalElements,
+      );
+      console.log('auth.myComments -------', auth.myComments);
       // 사용자 정보가 없으면 최초로 불러오기(스토어에 fetchAll 구현)
-      if (!auth.profile) auth.fetchProfile();
+      // if (!auth.profile) auth.fetchProfile();
     }
   },
   { immediate: true },
@@ -703,7 +707,7 @@ const handleCommunityMove = () => {
     letter-spacing: -0.5px;
     vertical-align: middle;
     color: #fff;
-		line-height: 1.4;
+    line-height: 1.4;
   }
 
   &__more {
