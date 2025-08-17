@@ -34,6 +34,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 const auth = useAuthStore();
 
 const TRUSTED_ORIGINS = [
+  // TODO: 배포 주소 메인 도메인으로 변경필요
   'https://darkmap-pi.vercel.app', // 리다이렉트 페이지가 열리는 프론트 도메인
   'http://localhost:8080', // 로컬에서 테스트 시
 ];

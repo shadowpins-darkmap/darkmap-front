@@ -8,7 +8,7 @@
 import { ref, onMounted } from 'vue';
 
 const status = ref('로그인 정보 확인중…');
-
+// TODO: 배포 주소 메인 도메인으로 변경필요
 const PARENT_ORIGIN = 'https://darkmap-pi.vercel.app'; // 최종 배포 오리진
 
 onMounted(() => {
