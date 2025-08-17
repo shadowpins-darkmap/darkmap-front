@@ -148,13 +148,32 @@
             >건의 댓글을 작성했어요.
           </p>
           <TabButtons v-model="currentTab" :tabs="tabOptions" />
+
+          <template v-if="alarmList.length > 3 && currentTab === '알림'">
+            <button
+              class="BaseCommunity__more_alarm"
+              @click="showAlarmPopup = true"
+            >
+              전체보기
+            </button>
+          </template>
+          <template v-if="myPostList.length > 3 && currentTab === '내 게시글'">
+            <button
+              class="BaseCommunity__more_alarm"
+              @click="showAlarmPopup = true"
+            >
+              전체보기
+            </button>
+          </template>
+          <template v-if="myCommentList.length > 3 && currentTab === '내 댓글'">
+            <button
+              class="BaseCommunity__more_alarm"
+              @click="showAlarmPopup = true"
+            >
+              전체보기
+            </button>
+          </template>
           <!-- 알림 -->
-          <button
-            class="BaseCommunity__more_alarm"
-            @click="showAlarmPopup = true"
-          >
-            전체보기
-          </button>
 
           <ul class="alarm_list_wrap" v-if="currentTab === '알림'">
             <template v-if="alarmList.length > 0">
@@ -508,22 +527,9 @@ watch(
 );
 
 /* --------- 더미 데이터 (UI 확인용) --------- */
-const alarmList = Array.from({ length: 140 }, (_, i) => ({
-  id: i + 1,
-  nickname: `검은 태양의 핀 ${i + 1}`,
-  tag: '좋아요',
-  title: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 게시글`,
-}));
-const myPostList = Array.from({ length: 10 }, (_, i) => ({
-  id: i + 1,
-  title: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 게시글`,
-}));
-const myCommentList = ref(
-  Array.from({ length: 40 }, (_, i) => ({
-    id: i + 1,
-    comment: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 comment`,
-  })),
-);
+const alarmList = computed(() => auth.notifications?.data?.newComments || []);
+const myPostList = computed(() => auth.myBoards?.data?.boards || []);
+const myCommentList = computed(() => auth.myComments || []);
 
 /* --------- 유틸 --------- */
 const getIcon = (tag) => {
@@ -545,8 +551,9 @@ const itemsPerPage = 6;
 
 const totalPages = computed(() => {
   let totalLength = 0;
-  if (currentTab.value === '알림') totalLength = alarmList.length;
-  else if (currentTab.value === '내 게시글') totalLength = myPostList.length;
+  if (currentTab.value === '알림') totalLength = alarmList.value.length;
+  else if (currentTab.value === '내 게시글')
+    totalLength = myPostList.value.length;
   else if (currentTab.value === '내 댓글')
     totalLength = myCommentList.value.length;
   return Math.ceil(totalLength / itemsPerPage);
@@ -564,8 +571,10 @@ const pageNumbers = computed(() => {
 const currentItems = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
   const end = start + itemsPerPage;
-  if (currentTab.value === '알림') return alarmList.slice(start, end);
-  if (currentTab.value === '내 게시글') return myPostList.slice(start, end);
+
+  if (currentTab.value === '알림') return alarmList.value.slice(start, end);
+  if (currentTab.value === '내 게시글')
+    return myPostList.value.slice(start, end);
   if (currentTab.value === '내 댓글')
     return myCommentList.value.slice(start, end);
   return [];
