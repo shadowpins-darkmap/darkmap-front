@@ -17,6 +17,19 @@ export const useAuthStore = defineStore('auth', {
 		// profile 응답에서 가져올 항목
 		profile: null,
 		message: null,
+
+		// 내 알림, 게시글, 댓글 목록
+		notifications: [],
+		notificationsPage: 0,
+		notificationsTotalPages: 0,
+
+		myBoards: [],
+		boardsPage: 0,
+		boardsTotalPages: 0,
+
+		myComments: [],
+		commentsPage: 0,
+		commentsTotalPages: 0,
 	}),
 	getters: {
 		isLoggedIn: (s) => !!s.accessToken,
@@ -41,13 +54,20 @@ export const useAuthStore = defineStore('auth', {
 		},
 
 		async logout() {
-
 			// 서버에 세션 종료 알림 (쿠키 기반)
 			await api.post('/api/v1/auth/logout');
-
 			this.accessToken = null;
-			this.me = null;
+			this.email = null;
+			this.nickname = null;
+			this.id = null;
+			this.level = null;
+			this.loginCount = null;
+			this.joinedAt = null;
 			this.profile = null;
+			this.message = null;
+			this.notifications = [];
+			this.myBoards = [];
+			this.myComments = [];
 			localStorage.removeItem('accessToken');
 		},
 
@@ -62,22 +82,53 @@ export const useAuthStore = defineStore('auth', {
 			this.level = data.level;
 			this.loginCount = data.loginCount;
 			this.joinedAt = data.joinedAt;
-
 			return data;
 		},
 		async fetchProfile() {
 			const { data } = await api.get('/api/v1/member/profile');
 			this.profile = data.data;
-			// 상세 필드 저장
 			this.message = data.message;
 			return data;
 		},
+		// ✅ 알림 페이지네이션
+		async fetchNotifications({ page = 0, size = 10, hours = 48 } = {}) {
+			const { data } = await api.get('/api/v1/users/notifications', {
+				params: { page, size, hours },
+			});
+			this.notifications = data.content;
+			this.notificationsPage = data.pageable.pageNumber;
+			this.notificationsTotalPages = data.totalPages;
+		},
+		// ✅ 게시글 페이지네이션
+		async fetchMyBoards({ page = 0, size = 10 } = {}) {
+			const { data } = await api.get('/api/v1/boards/my', {
+				params: { page, size },
+			});
+			this.myBoards = data.content;
+			this.boardsPage = data.pageable.pageNumber;
+			this.boardsTotalPages = data.totalPages;
+		},
 
+		// ✅ 댓글 페이지네이션
+		async fetchMyComments({ page = 0, size = 10 } = {}) {
+			const { data } = await api.get('/api/v1/comments/my', {
+				params: { page, size },
+			});
+			this.myComments = data.content;
+			this.commentsPage = data.pageable.pageNumber;
+			this.commentsTotalPages = data.totalPages;
+		},
 		// 둘 다 한 번에
 		async fetchAll() {
 			this.loading = true;
 			try {
-				const [me] = await Promise.all([this.fetchMe(), this.fetchProfile()]);
+				const [me] = await Promise.all([
+					this.fetchMe(),
+					this.fetchProfile(),
+					this.fetchNotifications(),
+					this.fetchMyBoards(),
+					this.fetchMyComments(),
+				]);
 				return me;
 			} finally {
 				this.loading = false;

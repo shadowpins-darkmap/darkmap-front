@@ -492,13 +492,12 @@ watch(
     if (loggedIn) {
       // 로그인 팝업 닫기
       showLoginPopup.value = false;
-      auth.fetchMe();
-      auth.fetchProfile();
+
       console.log('auth.isLoggedIn -------', auth.isLoggedIn);
       console.log('auth.nickname -------', auth.nickname);
       console.log('auth.profile -------', auth.profile);
       // 사용자 정보가 없으면 최초로 불러오기(스토어에 fetchAll 구현)
-      // if (!auth.me) auth.fetchAll();
+      if (!auth.profile) auth.fetchProfile();
     }
   },
   { immediate: true },
@@ -704,6 +703,7 @@ const handleCommunityMove = () => {
     letter-spacing: -0.5px;
     vertical-align: middle;
     color: #fff;
+		line-height: 1.4;
   }
 
   &__more {
@@ -725,6 +725,11 @@ const handleCommunityMove = () => {
     line-height: 18px;
     color: #fff;
     padding-top: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    gap: 3px;
   }
   &__button_box {
     display: flex;
