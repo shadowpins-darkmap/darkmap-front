@@ -492,6 +492,8 @@ watch(
     if (loggedIn) {
       // 로그인 팝업 닫기
       showLoginPopup.value = false;
+      auth.fetchMe();
+      auth.fetchProfile();
       console.log('auth.isLoggedIn -------', auth.isLoggedIn);
       console.log('auth.nickname -------', auth.nickname);
       console.log('auth.profile -------', auth.profile);
