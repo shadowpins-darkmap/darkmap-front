@@ -138,7 +138,7 @@
           <p class="tap_count_info" v-if="currentTab === '내 게시글'">
             현재까지 총
             <span class="point_color">{{
-              auth.myBoards.data.pageInfo.totalElements ?? 0
+              auth.myBoards.pageInfo.totalElements ?? 0
             }}</span
             >건의 글을 작성했어요.
           </p>
@@ -516,7 +516,7 @@ watch(
       console.log('auth.notifications -------', auth.notifications);
       console.log(
         'auth.myBoards -------',
-        auth.myBoards.data.pageInfo.totalElements,
+        auth.myBoards.pageInfo.totalElements,
       );
       console.log('auth.myComments -------', auth.myComments);
       // 사용자 정보가 없으면 최초로 불러오기(스토어에 fetchAll 구현)
