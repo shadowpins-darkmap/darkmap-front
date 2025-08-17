@@ -32,7 +32,7 @@
         <p class="BaseCommunity__bubble">
           <span class="BaseCommunity__bubble_text">
             <span v-show="currentBubbleIndex === 0">
-              <span v-if="auth.isLoggedIn">{{ auth.user?.nickname }}님 </span>
+              <span v-if="auth.isLoggedIn">{{ auth.nickname }}님 </span>
               안녕하세요!<br />
               오늘 하루 길거리에서 무슨 일 없으셨나요?
             </span>
@@ -82,7 +82,7 @@
             </button>
           </div>
           <strong class="BaseCommunity__hot_title margin_15">
-            ⚡️ {{ auth.user?.nickname }}님을 위한 브리핑
+            ⚡️ {{ auth.nickname }}님을 위한 브리핑
             <button
               class="BaseCommunity__setting"
               @click="showAccountSection = true"
@@ -486,15 +486,15 @@ onBeforeUnmount(() => {
 });
 
 /* --------- 로그인 후 반응 --------- */
-console.log('auth.isLoggedIn -------', auth.isLoggedIn);
-console.log('auth.nickname -------', auth.nickname);
-console.log('auth.profile -------', auth.profile);
 watch(
   () => auth.isLoggedIn,
   (loggedIn) => {
     if (loggedIn) {
       // 로그인 팝업 닫기
       showLoginPopup.value = false;
+      console.log('auth.isLoggedIn -------', auth.isLoggedIn);
+      console.log('auth.nickname -------', auth.nickname);
+      console.log('auth.profile -------', auth.profile);
       // 사용자 정보가 없으면 최초로 불러오기(스토어에 fetchAll 구현)
       // if (!auth.me) auth.fetchAll();
     }
