@@ -1,33 +1,22 @@
 <template>
   <div class="form_wrap">
-    <BaseDropdown
-      :list="categories"
-      :selected="selectedCategory"
-      :onSelect="handleCategorySelect"
-    />
-    <BaseInput
-      v-model="title"
-      :id="write_title"
-      label="제목"
-      placeholder="제목을 입력하세요"
-    />
-    <BaseTextarea
-      v-model="content"
-      label="내용"
-      placeholder="내용을 입력하세요"
-      :id="write_contents"
-      :height="'300px'"
-    />
-    <BaseInput
-      v-model="image"
-      type="file"
-      label="이미지"
-      :id="'write_image'"
-      :accept="'image/png, image/jpeg, image/gif'"
-      :onChange="handleImage"
-    />
+    <BaseDropdown :list="categories" :selected="selectedCategory" :onSelect="handleCategorySelect" />
+    <BaseInput v-model="title" :id="write_title" label="제목" placeholder="제목을 입력하세요" />
+    <BaseTextarea v-model="content" label="내용" placeholder="내용을 입력하세요" :id="write_contents" :height="'300px'" />
+    <BaseInput v-model="image" type="file" label="이미지" :id="'write_image'" :accept="'image/png, image/jpeg, image/gif'"
+      :onChange="handleImage" />
     <button class="submit_button" @click="submitPost">글쓰기</button>
   </div>
+
+  <BaseAlertPopup v-if="showSuccessAlert" @confirm="handleSuccessConfirm" title="글쓰기를 완료했습니다." confirmText="확인">
+    <p>감사합니다! K-다크맵 투어는 시민들의 기억과<br />이야기를 지키는 안전한 공간이 되겠습니다.</p>
+  </BaseAlertPopup>
+  <BaseAlertPopup v-if="showErrorAlert" @confirm="showErrorAlert = false" title="게시글 작성 실패" confirmText="확인">
+    <p>게시글 작성에 실패했습니다.<br />다시 시도해주세요.</p>
+  </BaseAlertPopup>
+  <BaseAlertPopup v-if="showValidationAlert" @confirm="showValidationAlert = false" title="입력 확인" confirmText="확인">
+    <p>제목과 내용을 입력해주세요.</p>
+  </BaseAlertPopup>
 </template>
 
 <script setup>
@@ -35,6 +24,8 @@ import { ref, defineEmits } from 'vue';
 import BaseDropdown from '@/components/BaseDropdown.vue';
 import BaseInput from '@/components/communityPopup/BaseInput.vue';
 import BaseTextarea from '@/components/communityPopup/BaseTextarea.vue';
+import BaseAlertPopup from '@/components/BaseAlert.vue';
+import { createBoard } from '@/api/boards';
 
 const categories = ['기억', '고민', '질문', '미분류'];
 const selectedCategory = ref(categories[0]);
@@ -42,6 +33,9 @@ const title = ref('');
 const content = ref('');
 const imageFile = ref(null);
 const previewUrl = ref('');
+const showSuccessAlert = ref(false);
+const showErrorAlert = ref(false);
+const showValidationAlert = ref(false);
 
 const handleImage = (event) => {
   const file = event.target.files[0];
@@ -56,13 +50,42 @@ const handleImage = (event) => {
 const handleCategorySelect = (item) => {
   selectedCategory.value = item;
 };
-const emit = defineEmits(['submit']);
-const submitPost = () => {
-  emit('submit', {
-    category: selectedCategory.value,
-    title: title.value,
-    content: content.value,
-  });
+
+const handleSuccessConfirm = () => {
+  showSuccessAlert.value = false;
+  emit('close');
+};
+const emit = defineEmits(['submit', 'close']);
+const submitPost = async () => {
+  try {
+    if (!title.value.trim() || !content.value.trim()) {
+      showValidationAlert.value = true;
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('category', selectedCategory.value);
+    formData.append('title', title.value);
+    formData.append('content', content.value);
+    if (imageFile.value) {
+      formData.append('image', imageFile.value);
+    }
+
+    const response = await createBoard(formData);
+
+    showSuccessAlert.value = true;
+    emit('submit', response.data);
+
+  } catch (error) {
+    console.error('게시글 작성 실패:', {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      config: error.config
+    });
+    showErrorAlert.value = true;
+  }
 };
 </script>
 
