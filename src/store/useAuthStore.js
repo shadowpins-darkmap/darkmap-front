@@ -1,140 +1,165 @@
 import { defineStore } from 'pinia';
-import api from '@/lib/api';
+import { userApi } from '@/api/user';
 
 export const useAuthStore = defineStore('auth', {
-	state: () => ({
-		accessToken: null,
-		loading: false,
+  state: () => ({
+    accessToken: null,
+    loading: false,
 
-		// me 응답에서 가져올 항목
-		email: null,
-		nickname: null,
-		id: null,
-		level: null,
-		loginCount: null,
-		joinedAt: null,
+    email: null,
+    nickname: null,
+    id: null,
+    level: null,
+    loginCount: null,
+    joinedAt: null,
 
-		// profile 응답에서 가져올 항목
-		profile: null,
-		message: null,
+    profile: null,
+    message: null,
 
-		// 내 알림, 게시글, 댓글 목록
-		notifications: [],
-		notificationsPage: 0,
-		notificationsTotalPages: 0,
+    notifications: [],
+    notificationsPage: 0,
+    notificationsTotalPages: 0,
 
-		myBoards: [],
-		boardsPage: 0,
-		boardsTotalPages: 0,
-		boardsTotalElements: 0,
+    myBoards: [],
+    boardsPage: 0,
+    boardsTotalPages: 0,
+    boardsTotalElements: 0,
 
-		myComments: [],
-		commentsPage: 0,
-		commentsTotalPages: 0,
-	}),
-	getters: {
-		isLoggedIn: (s) => !!s.accessToken,
-	},
-	actions: {
-		// 앱 시작 시 로컬 토큰으로 복원
-		async initFromStorage() {
-			const at = localStorage.getItem('accessToken');
-			if (!at) return;
-			this.accessToken = at;
-			try {
-				await this.fetchAll(); // me + profile
-			} catch (e) {
-				this.logout();
-			}
-		},
+    myComments: [],
+    commentsPage: 0,
+    commentsTotalPages: 0,
+  }),
 
-		// 팝업에서 받은 토큰을 저장(쿠키 refresh는 서버가 보유)
-		loginWithTokens(at) {
-			this.accessToken = at;
-			localStorage.setItem('accessToken', at);
-		},
+  getters: {
+    isLoggedIn: (s) => !!s.accessToken,
+  },
 
-		async logout() {
-			// 서버에 세션 종료 알림 (쿠키 기반)
-			await api.post('/api/v1/auth/logout');
-			this.accessToken = null;
-			this.email = null;
-			this.nickname = null;
-			this.id = null;
-			this.level = null;
-			this.loginCount = null;
-			this.joinedAt = null;
-			this.profile = null;
-			this.message = null;
-			this.notifications = [];
-			this.myBoards = [];
-			this.myComments = [];
-			localStorage.removeItem('accessToken');
-		},
+  actions: {
+    setAccessToken(token) {
+      this.accessToken = token;
+      if (token) {
+        localStorage.setItem('accessToken', token);
+      } else {
+        localStorage.removeItem('accessToken');
+      }
+    },
 
-		// 개별 호출
-		async fetchMe() {
-			const { data } = await api.get('/api/v1/member/me');
-			// this.me = data;
-			// 상세 필드 저장
-			this.email = data.email;
-			this.nickname = data.nickname;
-			this.id = data.id;
-			this.level = data.level;
-			this.loginCount = data.loginCount;
-			this.joinedAt = data.joinedAt;
-			return data;
-		},
-		async fetchProfile() {
-			const { data } = await api.get('/api/v1/member/profile');
-			this.profile = data.data;
-			this.message = data.message;
-			return data;
-		},
-		// ✅ 알림 페이지네이션
-		async fetchNotifications({ page = 0, size = 10, hours = 48 } = {}) {
-			const { data } = await api.get('/api/v1/users/notifications', {
-				params: { page, size, hours },
-			});
-			this.notifications = data.content;
-			this.notificationsPage = data.pageable.pageNumber;
-			this.notificationsTotalPages = data.totalPages;
-		},
-		// ✅ 게시글 페이지네이션
-		async fetchMyBoards({ page = 0, size = 10 } = {}) {
-			const { data } = await api.get('/api/v1/boards/my', {
-				params: { page, size },
-			});
-			this.myBoards = data.content;
-			this.boardsPage = data.pageable.pageNumber;
-			this.boardsTotalPages = data.totalPages;
-			this.boardsTotalElements = data.totalElements;
-		},
+    setUserInfo(userData) {
+      this.email = userData.email;
+      this.nickname = userData.nickname;
+      this.id = userData.id;
+      this.level = userData.level;
+      this.loginCount = userData.loginCount;
+      this.joinedAt = userData.joinedAt;
+    },
 
-		// ✅ 댓글 페이지네이션
-		async fetchMyComments({ page = 0, size = 10 } = {}) {
-			const { data } = await api.get('/api/v1/comments/my', {
-				params: { page, size },
-			});
-			this.myComments = data.content;
-			this.commentsPage = data.pageable.pageNumber;
-			this.commentsTotalPages = data.totalPages;
-		},
-		// 둘 다 한 번에
-		async fetchAll() {
-			this.loading = true;
-			try {
-				const [me] = await Promise.all([
-					this.fetchMe(),
-					this.fetchProfile(),
-					this.fetchNotifications(),
-					this.fetchMyBoards(),
-					this.fetchMyComments(),
-				]);
-				return me;
-			} finally {
-				this.loading = false;
-			}
-		},
-	},
+    setProfile(profileData) {
+      this.profile = profileData.data;
+      this.message = profileData.message;
+    },
+
+    setNotifications(data) {
+      this.notifications = data.content;
+      this.notificationsPage = data.pageable.pageNumber;
+      this.notificationsTotalPages = data.totalPages;
+    },
+
+    setMyBoards(response) {
+      this.myBoards = response.data;
+      this.boardsPage = response.data?.pageInfo?.currentPage || 0;
+      this.boardsTotalPages = response.data?.pageInfo?.totalPages || 0;
+      this.boardsTotalElements = response.data?.pageInfo?.totalElements || 0;
+    },
+
+    setMyComments(data) {
+      this.myComments = data.content;
+      this.commentsPage = data.pageable.pageNumber;
+      this.commentsTotalPages = data.totalPages;
+    },
+
+    // 상태 초기화
+    clearUserData() {
+      this.accessToken = null;
+      this.email = null;
+      this.nickname = null;
+      this.id = null;
+      this.level = null;
+      this.loginCount = null;
+      this.joinedAt = null;
+      this.profile = null;
+      this.message = null;
+      this.notifications = [];
+      this.myBoards = [];
+      this.myComments = [];
+    },
+
+    async initFromStorage() {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return;
+
+      this.accessToken = token;
+      try {
+        await this.fetchAllUserData();
+      } catch (e) {
+        console.error('토큰 복원 실패:', e);
+        // await this.logout();
+      }
+    },
+
+    loginWithTokens(accessToken) {
+      this.setAccessToken(accessToken);
+    },
+
+    async logout() {
+      try {
+        await userApi.logout();
+      } catch (e) {
+        console.error('로그아웃 API 실패:', e);
+      }
+      this.clearUserData();
+    },
+
+    async fetchUserProfile() {
+      const data = await userApi.getMe();
+      this.setUserInfo(data);
+      return data;
+    },
+
+    async fetchProfile() {
+      const data = await userApi.getProfile();
+      this.setProfile(data);
+      return data;
+    },
+
+    async fetchNotifications(params) {
+      const data = await userApi.getNotifications(params);
+      this.setNotifications(data);
+    },
+
+    async fetchMyBoards(params) {
+      const data = await userApi.getMyBoards(params);
+      this.setMyBoards(data);
+    },
+
+    async fetchMyComments(params) {
+      const data = await userApi.getMyComments(params);
+      this.setMyComments(data);
+    },
+
+    async fetchAllUserData() {
+      this.loading = true;
+      try {
+        const [userData] = await Promise.all([
+          this.fetchUserProfile(),
+          this.fetchProfile(),
+          this.fetchNotifications(),
+          this.fetchMyBoards(),
+          this.fetchMyComments(),
+        ]);
+        return userData;
+      } finally {
+        this.loading = false;
+      }
+    },
+  },
 });
