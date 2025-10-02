@@ -19,7 +19,6 @@
     </div>
 
     <div class="account_profile_wrap">
-      <!-- 닉네임 -->
       <div>
         <label class="form_label" for="nickname">닉네임</label>
         <input
@@ -87,14 +86,43 @@
       </div>
 
       <!-- 수정 완료 버튼 -->
-      <button class="submit_btn">수정완료</button>
+      <button class="submit_btn" @click="handleSubmit">수정완료</button>
     </div>
   </div>
+  
+  <BaseAlertPopup
+    v-if="showErrorAlert"
+    @confirm="showErrorAlert = false"
+    title="프로필 수정 실패"
+    confirmText="확인"
+  >
+    <p>{{ errorMessage }}</p>
+  </BaseAlertPopup>
+  
+  <BaseAlertPopup
+    v-if="showSuccessAlert"
+    @confirm="showSuccessAlert = false"
+    title="프로필 수정 완료"
+    confirmText="확인"
+  >
+    <p>프로필 수정을 완료했습니다.</p>
+  </BaseAlertPopup>
+  
+  <BaseAlertPopup
+    v-if="showLoadErrorAlert"
+    @confirm="handleLoadErrorConfirm"
+    title="프로필 로드 실패"
+    confirmText="확인"
+  >
+    <p>프로필 불러오기에 실패했습니다.</p>
+  </BaseAlertPopup>
 </template>
 
 <script setup>
-import { defineProps, ref, defineEmits } from 'vue';
+import { defineProps, ref, defineEmits, onMounted } from 'vue';
 import { useAuthStore } from '@/store/useAuthStore';
+import { userApi } from '@/api/user';
+import BaseAlertPopup from '@/components/BaseAlert.vue';
 
 defineProps({
   items: Object,
@@ -107,10 +135,80 @@ const onLogout = async () => {
   emit('back');
 };
 
-// const nickname = ref(props.items.nickname);
-const nickname = ref('nickname');
+const nickname = ref('');
+const originalNickname = ref('');
+
+onMounted(async () => {
+  try {
+    const userData = await userApi.getMe();
+    nickname.value = userData.nickname;
+    originalNickname.value = userData.nickname;
+  } catch (error) {
+    console.error('사용자 정보 로드 실패:', error);
+    showLoadErrorAlert.value = true;
+  }
+});
 
 const marketing = ref({ agreed: true });
+const originalMarketing = ref({ agreed: true });
+
+const showErrorAlert = ref(false);
+const errorMessage = ref('');
+const showSuccessAlert = ref(false);
+const showLoadErrorAlert = ref(false);
+
+const handleLoadErrorConfirm = () => {
+  showLoadErrorAlert.value = false;
+  emit('back');
+};
+
+const handleSubmit = async () => {
+  const promises = [];
+  
+  if (nickname.value !== originalNickname.value) {
+    promises.push(userApi.updateNickname(nickname.value));
+  }
+  
+  if (marketing.value.agreed !== originalMarketing.value.agreed) {
+    promises.push(userApi.toggleMarketingAgreement());
+  }
+  
+  if (promises.length === 0) {
+    return;
+  }
+   
+  try {
+    await Promise.all(promises);
+    originalNickname.value = nickname.value;
+    originalMarketing.value.agreed = marketing.value.agreed;
+    showSuccessAlert.value = true;
+  } catch (error) {
+    console.error('수정 실패:', error)
+    if (error.response?.data?.code) {
+      const errorCode = error.response.data.code;
+      switch (errorCode) {
+        case 'INVALID_NICKNAME':
+          errorMessage.value = '부적절한 단어가 포함된 닉네임입니다.';
+          break;
+        case 'NICKNAME_DUPLICATE':
+          errorMessage.value = '이미 사용 중인 닉네임입니다.';
+          break;
+        case 'NICKNAME_MAX_COUNT_REACHED':
+          errorMessage.value = '닉네임 변경 횟수를 모두 사용했습니다. (최대 3회)';
+          break;
+        case 'UNAUTHORIZED':
+          errorMessage.value = '인증이 필요합니다.';
+          break;
+        default:
+          errorMessage.value = '수정에 실패했습니다.\n다시 시도해주세요.';
+      }
+    } else {
+      errorMessage.value = '수정에 실패했습니다.\n다시 시도해주세요.';
+    }
+    
+    showErrorAlert.value = true;
+  }
+};
 
 const openTerms = (label) => {
   if (label === '개인정보처리방침') {
