@@ -1,7 +1,6 @@
 import { createWebHistory, createRouter } from 'vue-router'
 import RenderMap from '@/components/RenderMap.vue'
-import SocialRedirectKakao from '@/components/socialRedirect/SocialRedirectKakao.vue';
-import SocialRedirectGoogle from '@/components/socialRedirect/SocialRedirectGoogle.vue';
+import SocialRedirect from '@/components/socialRedirect/SocialRedirect.vue';
 
 const routes = [
 	{
@@ -12,12 +11,12 @@ const routes = [
 	{
 		path: '/social-redirect-kakao',
 		name: 'SocialRedirectKakao',
-		component: SocialRedirectKakao,
+		component: SocialRedirect,
 	},
 	{
 		path: '/social-redirect-google',
 		name: 'SocialRedirectGoogle',
-		component: SocialRedirectGoogle,
+		component: SocialRedirect,
 	},
 ]
 
