@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { userApi } from '@/api/user';
+import { ACCESS_TOKEN_NAME } from '@/constant/user';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -38,9 +39,9 @@ export const useAuthStore = defineStore('auth', {
     setAccessToken(token) {
       this.accessToken = token;
       if (token) {
-        localStorage.setItem('accessToken', token);
+        localStorage.setItem(ACCESS_TOKEN_NAME, token);
       } else {
-        localStorage.removeItem('accessToken');
+        localStorage.removeItem(ACCESS_TOKEN_NAME);
       }
     },
 
@@ -94,7 +95,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async initFromStorage() {
-      const token = localStorage.getItem('accessToken');
+      const token = localStorage.getItem(ACCESS_TOKEN_NAME);
       if (!token) return;
 
       this.accessToken = token;
