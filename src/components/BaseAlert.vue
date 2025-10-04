@@ -1,9 +1,10 @@
 <template>
   <div class="base_alert_backdrop">
-    <div class="base_alert_popup">
-      <p class="popup_title">{{ title }}</p>
-      <p class="popup_description"><slot></slot></p>
-
+    <div class="base_alert_popup" :style="{ height: props.height }">
+      <p v-if="title" class="popup_title">{{ title }}</p>
+      <p class="popup_description">
+        <slot></slot>
+      </p>
       <div v-if="showTwoButtons" class="button_group">
         <button class="cancel_button" @click="$emit('cancel')">
           {{ cancelText }}
@@ -12,7 +13,6 @@
           {{ confirmText }}
         </button>
       </div>
-
       <button v-else class="confirm_button" @click="$emit('confirm')">
         {{ confirmText }}
       </button>
@@ -22,10 +22,10 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue';
-defineProps({
+const props = defineProps({
   title: {
     type: String,
-    required: true,
+    default: '',
   },
   showTwoButtons: {
     type: Boolean,
@@ -38,6 +38,10 @@ defineProps({
   cancelText: {
     type: String,
     default: '닫기',
+  },
+  height: {
+    type: String,
+    default: '378px',
   },
 });
 defineEmits(['confirm']);
@@ -87,6 +91,7 @@ defineEmits(['confirm']);
   border: none;
   cursor: pointer;
 }
+
 .cancel_button {
   background: #b6a9e7;
   color: #000;
@@ -98,6 +103,7 @@ defineEmits(['confirm']);
   border: none;
   cursor: pointer;
 }
+
 .button_group {
   display: flex;
   gap: 12px;
