@@ -33,7 +33,7 @@
         <div class="detail_content_wrap">
           <p class="detail_content">{{ props.article?.content || '내용이 없습니다.' }}</p>
           <div class="detail_icon_wrap">
-            <button class="detail_icon_button" @click="togglePostLike">
+            <button class="detail_icon_button" @click="handleBoardLike">
               <img
                 :src="isPostLiked ? require('@/assets/commentHeartIconOn.svg') : require('@/assets/commentHeartIconOff.svg')"
                 alt="like" />
@@ -133,7 +133,8 @@ import BaseAlertPopup from '@/components/BaseAlert.vue';
 import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
 import CommunityPostReportForm from '@/components/communityPopup/CommunityPostReportForm.vue';
 import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
-import { createComment, getCommentsByBoardId, toggleCommentLike } from '@/api/boards';
+import { likeBoard } from '@/api/boards';
+import { createComment, getCommentsByBoardId, likeComment } from '@/api/comments';
 
 defineEmits(['close']);
 
@@ -170,7 +171,6 @@ const commentsPage = ref(1);
 const likedComments = ref(new Set());
 const myNickname = '붉은핀';
 
-// 신고
 const openReportPopup = (type, id) => {
   reportTarget.value = { type, id };
   showReportPopup.value = true;
@@ -183,16 +183,22 @@ const onReportComplete = (type, id) => {
   else if (type === 'comment') reportedComments.value.add(id);
 };
 
-// 좋아요
-const togglePostLike = () => {
-  isPostLiked.value = !isPostLiked.value;
-  showLikePopup.value = true;
+const handleBoardLike = async () => {
+  try {
+    const response = await likeBoard(props.article?.boardId);
+    if (response?.data) {
+      isPostLiked.value = response.data.isLiked;
+      showLikePopup.value = true;
+    }
+  } catch (error) {
+    console.error('게시글 좋아요 실패:', error);
+  }
 };
 
 const handleCommentLike = async (commentId) => {
   console.log('handleCommentLike', commentId);
   try {
-    const response = await toggleCommentLike(commentId);
+    const response = await likeComment(commentId);
     if (response?.data) {
       const { isLiked, likeCount } = response.data;
       const comment = comments.value.find(c => c.id === commentId);
