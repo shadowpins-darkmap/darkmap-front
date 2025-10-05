@@ -37,11 +37,13 @@ body,
   padding: 0;
   box-sizing: border-box;
 }
+
 button {
   background-color: transparent;
   border: none;
   cursor: pointer;
 }
+
 a,
 img,
 fieldset {
@@ -50,11 +52,13 @@ fieldset {
   outline: 1;
   border: none;
 }
+
 ul,
 ol,
 li {
   list-style: none;
 }
+
 textarea {
   resize: none;
 }
@@ -71,7 +75,8 @@ mark {
 /* 한 줄 생략 (...) */
 .ellipsis__1 {
   display: -webkit-box !important;
-  -webkit-line-clamp: 1; /* 줄 수를 여기서 조절 */
+  -webkit-line-clamp: 1;
+  /* 줄 수를 여기서 조절 */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -80,10 +85,11 @@ mark {
 /* 여러 줄 생략 (...) — 기본 두 줄 */
 .ellipsis__2 {
   display: -webkit-box !important;
-  -webkit-line-clamp: 2; /* 줄 수를 여기서 조절 */
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  word-break: break-word;
 }
 
 /* scroll reset 전역 커스텀 스크롤 */
@@ -97,22 +103,27 @@ mark {
   padding: 24px 0;
   padding-right: 6px;
 }
+
 /* 스크롤바 막대 설정*/
 .scroll_area::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
+
 .scroll_area::-webkit-scrollbar:hover {
   width: 10px;
   height: 10px;
 }
+
 .scroll_area::-webkit-scrollbar-button {
   display: none;
 }
+
 .scroll_area::-webkit-scrollbar-thumb {
   background-color: #ffefeb;
   border-radius: 6px;
 }
+
 /* 스크롤바 뒷 배경 설정*/
 .scroll_area::-webkit-scrollbar-track {
   background-color: rgba(255, 239, 235, 0.65);

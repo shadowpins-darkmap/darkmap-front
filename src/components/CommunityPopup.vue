@@ -72,7 +72,7 @@
               <span>다크플레이스 등록</span>
               <span class="point_color">{{
                 auth.approvedReportCount ?? 0
-                }}</span>
+              }}</span>
             </li>
           </ul>
           <p class="tap_count_info" v-if="currentTab === '내 게시글'">
@@ -131,7 +131,7 @@
                   </span>
                   <span class="ellipsis__2 alarm_contents">{{
                     item.title
-                  }}</span>
+                    }}</span>
                 </button>
               </li>
             </template>
@@ -149,7 +149,7 @@
                   </span>
                   <span class="ellipsis__2 alarm_contents">{{
                     item.comment
-                  }}</span>
+                    }}</span>
                 </button>
               </li>
             </template>
@@ -168,7 +168,7 @@
           </p>
           <!-- 게시글 슬라이더 -->
           <div class="BaseCommunity__card">
-            <CarouselWrap :onCardClick="(card) => handleCarouselClick(card)" />
+            <CarouselWrap :onCardClick="handleCarouselClick" />
           </div>
 
           <!-- 로그인 유도 영역 -->
@@ -236,7 +236,7 @@
 
     <!-- 광장 커뮤니티  SlidePanel -->
     <SlidePanel :width="'510px'" :visible="isListPanelOpen" @close="isListPanelOpen = false">
-      <CommunityListPanel @close="handleListPanelClose" @openDetail="isListPanelOpen = true" />
+      <CommunityListPanel @close="handleListPanelClose" />
     </SlidePanel>
 
     <!-- 사이트 이용약관 -->
@@ -458,8 +458,12 @@ const handlePanelClose = () => {
 };
 
 const handleCarouselClick = (card) => {
-  console.log('카드 클릭됨!', card);
-  if (!auth.isLoggedIn) showLoginAlert.value = true;
+  if (!auth.isLoggedIn) {
+    showLoginAlert.value = true;
+  } else {
+    selectedArticleDetail.value = card;
+    isArticleDetailOpen.value = true;
+  }
 };
 
 const handleCommunityMove = () => {
