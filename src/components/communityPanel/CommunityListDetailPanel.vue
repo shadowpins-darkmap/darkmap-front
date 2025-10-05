@@ -3,7 +3,6 @@
     <button class="slider_colse_button" @click="$emit('close')">
       <img src="@/assets/detailCloseArrow.svg" alt="slider close icon" width="36" height="36" />
     </button>
-
     <strong class="detail_title">{{ props.article?.title }}</strong>
 
     <div class="profile_img_wrap">
@@ -152,7 +151,6 @@ const formatTime = (dateString) => {
   return new Date(dateString).toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit', hour12: true });
 };
 
-// 상태
 const comment = ref('');
 const showDeletePopup = ref(false);
 const showLikePopup = ref(false);
@@ -196,7 +194,6 @@ const handleBoardLike = async () => {
 };
 
 const handleCommentLike = async (commentId) => {
-  console.log('handleCommentLike', commentId);
   try {
     const response = await likeComment(commentId);
     if (response?.data) {
@@ -273,12 +270,10 @@ const deleteComment = (id) => {
   showDeletePopup.value = true;
 };
 
-// 페이지네이션
 const paginatedComments = computed(() => {
   const start = (commentsPage.value - 1) * commentsPerPage;
   return comments.value.slice(start, start + commentsPerPage);
 });
-console.log(paginatedComments, 'paginatedComments');
 const commentsTotalPages = computed(() => Math.ceil(comments.value.length / commentsPerPage));
 
 const changeCommentPage = (page) => {

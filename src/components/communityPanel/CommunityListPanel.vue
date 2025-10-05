@@ -4,26 +4,20 @@
       <img src="@/assets/sliderCloseIcon.svg" alt="slider close icon" width="36" height="36" />
     </button>
     <strong class="community__hot_title">🔥 지금 가장 뜨거운 글이에요!</strong>
-    <!-- 게시글 슬라이더 -->
     <div class="community__card_wrap">
       <div class="community__card">
-        <CarouselWrap :green="true" :items-to-show="1.66" :gap="0" />
+        <CarouselWrap :green="true" :items-to-show="1.66" :gap="0" :onCardClick="openDetail" />
       </div>
     </div>
-
-    <!-- 리스트 솔팅 탭 -->
     <GradientScroll :width="'350px'" :height="'55px'" gradient-color="rgba(0,0,0,1)">
       <ul class="sort_list_wrap">
         <li v-for="(cat, i) in categories" :key="i" class="sort_list" :class="{ on: selectedCategory === cat }">
-          <button class="sort_list_button" @click="selectedCategory = cat">
+          <button class="sort_list_button" @click="handleCategoryChange(cat)">
             <span>{{ cat }}</span>
           </button>
         </li>
       </ul>
     </GradientScroll>
-
-    <!-- 광장 게시글 리스트 -->
-
     <ul class="community_list_wrap">
       <GradientScroll :width="'100%'" :height="'100%'" gradient-color="rgba(0,0,0,1)" direction="vertical">
         <li class="community_list" v-for="item in currentItems" :key="item.id">
@@ -31,7 +25,7 @@
             <span class="community_list_profile">
               <img src="@/assets/profileDefault.svg" alt="profile default image" width="40" height="40" />
             </span>
-            <strong class="community_list_nickname">{{ item.nickname }}</strong>
+            <strong class="community_list_nickname">{{ item.authorNickname }}</strong>
             <span class="community_list_contents">
               <span class="list_contents_tag">
                 <img src="@/assets/tagBulletIcon.svg" alt="tag bullet icon" width="8" height="8" />
@@ -41,9 +35,9 @@
                 {{ item.title }}
               </span>
               <span class="list_contents_conut_wrap">
-                <span class="comment_count">댓글 {{ item.comments }}</span>
-                <span class="like_count">좋아요 {{ item.likes }}</span>
-                <span class="views_count">조회 {{ item.views }}</span>
+                <span class="comment_count">댓글 {{ item.commentCount }}</span>
+                <span class="like_count">좋아요 {{ item.likeCount }}</span>
+                <span class="views_count">조회 {{ item.viewCount }}</span>
               </span>
             </span>
           </button>
@@ -68,21 +62,22 @@
 
   <!-- 팝업  -->
   <CommonPopup :visible="isWritePopupOpen" @close="isWritePopupOpen = false">
-    <CommunityWriteForm />
+    <CommunityWriteForm @close="isWritePopupOpen = false" />
   </CommonPopup>
   <CommonPopup :visible="isReportPopupOpen" @close="isReportPopupOpen = false">
     <CommunityReportForm />
   </CommonPopup>
 
   <!-- SlidePanel s -->
-  <SlidePanel :width="'510px'" :visible="isPanel2depsOpen" :right="'510px'" @close="isPanel2depsOpen = false">
-    <CommunityListDetailPanel :post="selectedPost" @close="isPanel2depsOpen = false" />
+  <SlidePanel :width="'510px'" :visible="isDetailPanelOpen" :right="'510px'" @close="isDetailPanelOpen = false">
+    <CommunityListDetailPanel :article="selectedPost" @close="isDetailPanelOpen = false" />
   </SlidePanel>
 </template>
 
 <script setup>
-// emits: close, openDetail
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, defineEmits } from 'vue';
+
+defineEmits(['close', 'openDetail']);
 import CarouselWrap from '@/components/carousel/CarouselWrap.vue';
 import GradientScroll from '@/components/gradientScroll/GradientScroll.vue';
 import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
@@ -96,20 +91,20 @@ import { getRecentBoards } from '@/api/boards';
 const categories = ['전체', '공지', '제보', '기억', '고민', '질문', '미분류'];
 const selectedCategory = ref('전체');
 const selectedPost = ref(null);
-
-//  페이지네이션 상태
 const currentPage = ref(1);
 const itemsPerPage = 6;
-// 상세 페이지 슬라이드
-const isPanel2depsOpen = ref(false);
-
-// 글쓰기 팝업
+const isDetailPanelOpen = ref(false);
 const isWritePopupOpen = ref(false);
 const isReportPopupOpen = ref(false);
 
 const openDetail = (item) => {
   selectedPost.value = item;
-  isPanel2depsOpen.value = true;
+  isDetailPanelOpen.value = true;
+};
+
+const handleCategoryChange = (category) => {
+  selectedCategory.value = category;
+  currentPage.value = 1;
 };
 
 
@@ -131,7 +126,7 @@ const loadRecentBoards = async () => {
   }
 };
 
-const totalPages = computed(() => Math.ceil(postList.value.length / itemsPerPage));
+const totalPages = computed(() => Math.ceil(filteredPosts.value.length / itemsPerPage));
 
 const pageNumbers = computed(() => {
   const max = 5;
@@ -142,9 +137,16 @@ const pageNumbers = computed(() => {
   );
 });
 
+const filteredPosts = computed(() => {
+  if (selectedCategory.value === '전체') {
+    return postList.value;
+  }
+  return postList.value.filter(post => post.category === selectedCategory.value);
+});
+
 const currentItems = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
-  return postList.value.slice(start, start + itemsPerPage);
+  return filteredPosts.value.slice(start, start + itemsPerPage);
 });
 
 const pageChange = (page) => {
@@ -302,6 +304,7 @@ onMounted(() => {
   flex-direction: column;
   text-align: left;
   gap: 2px;
+  flex: 1;
 }
 
 .list_contents_tag {
@@ -312,6 +315,8 @@ onMounted(() => {
   color: #fff;
   font-size: 12px;
   font-weight: bold;
+  line-height: 1.4;
+  width: 280px;
   min-height: 30px;
 }
 
@@ -320,6 +325,8 @@ onMounted(() => {
   display: flex;
   flex-direction: row-reverse;
   gap: 6px;
+  margin-left: auto;
+  align-self: flex-end;
 }
 
 .list_contents_conut_wrap>span {
