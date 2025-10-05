@@ -192,7 +192,7 @@ export const getMyLikedBoards = async (pageOptions = {}) => {
   }
 };
 
-export const createBoardReport = async (
+export const reportBoard = async (
   boardId,
   reportData,
   attachmentFile = null,
@@ -201,7 +201,6 @@ export const createBoardReport = async (
     const formData = new FormData();
 
     const params = {
-      boardId,
       reportType: reportData.reportType,
       reason: reportData.reason,
       additionalInfo: reportData.additionalInfo || '',
