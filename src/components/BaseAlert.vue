@@ -41,7 +41,6 @@ const props = defineProps({
   },
   height: {
     type: String,
-    default: '378px',
   },
 });
 defineEmits(['confirm']);

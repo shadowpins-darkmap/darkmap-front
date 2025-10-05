@@ -137,7 +137,7 @@ export const useAuthStore = defineStore('auth', {
       this.setNotifications(data);
     },
 
-    async fetchMyBoards(params) {
+    async getMyBoards(params) {
       const data = await userApi.getMyBoards(params);
       this.setMyBoards(data);
     },
@@ -154,7 +154,7 @@ export const useAuthStore = defineStore('auth', {
           this.fetchUserProfile(),
           this.fetchProfile(),
           this.fetchNotifications(),
-          this.fetchMyBoards(),
+          this.getMyBoards(),
           this.fetchMyComments(),
         ]);
         return userData;

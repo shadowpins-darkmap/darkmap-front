@@ -131,7 +131,7 @@
                   </span>
                   <span class="ellipsis__2 alarm_contents">{{
                     item.title
-                    }}</span>
+                  }}</span>
                 </button>
               </li>
             </template>
@@ -149,7 +149,7 @@
                   </span>
                   <span class="ellipsis__2 alarm_contents">{{
                     item.comment
-                    }}</span>
+                  }}</span>
                 </button>
               </li>
             </template>
@@ -244,13 +244,19 @@
       :left="'0'">
       <TermsSidePanel @close="isTermsPanelOpen = false" @open-terms-panel="isTermsPanelOpen = true" />
     </SlidePanel>
+
+    <!-- 게시글 상세 -->
+    <SlidePanel :width="'510px'" :visible="isArticleDetailOpen" @close="handleArticleDetailClose">
+      <CommunityListDetailPanel :article="selectedArticleDetail" @close="handleArticleDetailClose" />
+    </SlidePanel>
+
   </div>
   <!-- 팝업  -->
   <CommonPopup :visible="showAlarmPopup" @close="showAlarmPopup = false">
     <!-- 알람 리스트 영역 -->
     <section class="alarm">
       <AlarmListBase :items="currentItems" :currentTab="currentTab" :currentPage="currentPage"
-        :itemsPerPage="itemsPerPage" />
+        :itemsPerPage="itemsPerPage" @openArticleDetail="handleOpenArticleDetail" />
       <PaginationWrap :currentPage="currentPage" :pageNumbers="pageNumbers" @page-change="pageChange" @prev="clickPrev"
         @next="clickNext" />
     </section>
@@ -275,6 +281,7 @@ import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
 import CommunityInfoPanel from '@/components/communityPanel/CommunityInfoPanel.vue';
 import CommunityInfo2depsPanel from '@/components/communityPanel/CommunityInfo2depsPanel.vue';
 import CommunityListPanel from '@/components/communityPanel/CommunityListPanel.vue';
+import CommunityListDetailPanel from '@/components/communityPanel/CommunityListDetailPanel.vue';
 import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
 import LoginPopup from '@/components/auth/LoginPopup.vue';
@@ -307,6 +314,9 @@ const isPanel2depsOpen = ref(false);
 const isListPanelOpen = ref(false);
 const isListPanel2depsOpen = ref(false);
 const isTermsPanelOpen = ref(false);
+const isArticleDetailOpen = ref(false);
+const selectedArticleDetail = ref(null);
+
 
 /* --------- 아코디언 / 인삿말 --------- */
 const openSection = ref('mypage');
@@ -335,7 +345,7 @@ const loadInitialData = async () => {
     if (auth.isLoggedIn) {
       await Promise.all([
         auth.fetchNotifications(),
-        auth.fetchMyBoards(),
+        auth.getMyBoards(),
         auth.fetchMyComments()
       ]);
     }
@@ -369,8 +379,8 @@ watch(
 );
 
 /* --------- 더미 데이터 (UI 확인용) --------- */
-const alarmList = computed(() => auth.notifications?.data?.newComments || []);
-const myPostList = computed(() => auth.myBoards?.data?.boards || []);
+const alarmList = computed(() => auth.notifications?.newComments || []);
+const myPostList = computed(() => auth.myBoards?.boards || []);
 const myCommentList = computed(() => auth.myComments || []);
 
 /* --------- 유틸 --------- */
@@ -456,6 +466,19 @@ const handleCommunityMove = () => {
   if (!auth.isLoggedIn) showLoginAlert.value = true;
   isListPanelOpen.value = true;
 };
+
+const handleOpenArticleDetail = (article) => {
+  selectedArticleDetail.value = article;
+  showAlarmPopup.value = false;
+  isArticleDetailOpen.value = true;
+};
+
+const handleArticleDetailClose = () => {
+  isArticleDetailOpen.value = false;
+  selectedArticleDetail.value = null;
+};
+
+
 </script>
 
 <style scoped lang="scss">

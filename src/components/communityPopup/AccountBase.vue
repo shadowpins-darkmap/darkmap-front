@@ -1,33 +1,16 @@
 <template>
   <div class="account_wrap">
     <button class="popup_back_button" @click="$emit('back')">
-      <img
-        src="@/assets/popupBack.svg"
-        alt="slider close icon"
-        width="36"
-        height="36"
-      />
+      <img src="@/assets/popupBack.svg" alt="slider close icon" width="36" height="36" />
     </button>
     <div class="account_profile_img">
-      <img
-        src="@/assets/accountProfileImg.svg"
-        class="account_img"
-        alt="account profile img"
-        width="94"
-        height="94"
-      />
+      <img src="@/assets/accountProfileImg.svg" class="account_img" alt="account profile img" width="94" height="94" />
     </div>
 
     <div class="account_profile_wrap">
       <div>
         <label class="form_label" for="nickname">닉네임</label>
-        <input
-          id="nickname"
-          type="text"
-          class="form_input"
-          placeholder="닉네임 입력"
-          v-model="nickname"
-        />
+        <input id="nickname" type="text" class="form_input" placeholder="닉네임 입력" v-model="nickname" />
       </div>
       <!-- 약관 동의 -->
       <div class="terms_section">
@@ -46,19 +29,13 @@
           <button class="term_label" @click="openTerms('마케팅 및 광고 수신')">
             마케팅 및 광고 수신
           </button>
-          <span :class="[marketing.agreed ? 'term_state' : 'term_state_off']"
-            >부동의
+          <span :class="[marketing.agreed ? 'term_state' : 'term_state_off']">부동의
           </span>
-          <label
-            class="toggle_switch"
-            :class="{ 'optional-on': marketing.agreed }"
-          >
+          <label class="toggle_switch" :class="{ 'optional-on': marketing.agreed }">
             <input type="checkbox" v-model="marketing.agreed" />
             <span class="slider"></span>
           </label>
-          <span :class="[marketing.agreed ? 'term_state_on' : 'term_state']"
-            >동의</span
-          >
+          <span :class="[marketing.agreed ? 'term_state_on' : 'term_state']">동의</span>
         </div>
       </div>
 
@@ -66,21 +43,11 @@
       <div class="account_status">
         <p class="terms_title">계정 상태</p>
         <button class="account_action" @click="onLogout">
-          <img
-            width="30px"
-            height="30px"
-            src="@/assets/accountLogout.svg"
-            alt="delete"
-          />
+          <img width="30px" height="30px" src="@/assets/accountLogout.svg" alt="delete" />
           <span>로그아웃</span>
         </button>
         <button class="account_action">
-          <img
-            width="30px"
-            height="30px"
-            src="@/assets/accountDelete.svg"
-            alt="delete"
-          />
+          <img width="30px" height="30px" src="@/assets/accountDelete.svg" alt="delete" />
           <span>탈퇴하기</span>
         </button>
       </div>
@@ -89,31 +56,16 @@
       <button class="submit_btn" @click="handleSubmit">수정완료</button>
     </div>
   </div>
-  
-  <BaseAlertPopup
-    v-if="showErrorAlert"
-    @confirm="showErrorAlert = false"
-    title="프로필 수정 실패"
-    confirmText="확인"
-  >
+
+  <BaseAlertPopup v-if="showErrorAlert" @confirm="showErrorAlert = false" title="프로필 수정 실패" confirmText="확인">
     <p>{{ errorMessage }}</p>
   </BaseAlertPopup>
-  
-  <BaseAlertPopup
-    v-if="showSuccessAlert"
-    @confirm="showSuccessAlert = false"
-    title="프로필 수정 완료"
-    confirmText="확인"
-  >
+
+  <BaseAlertPopup v-if="showSuccessAlert" @confirm="showSuccessAlert = false" title="프로필 수정 완료" confirmText="확인">
     <p>프로필 수정을 완료했습니다.</p>
   </BaseAlertPopup>
-  
-  <BaseAlertPopup
-    v-if="showLoadErrorAlert"
-    @confirm="handleLoadErrorConfirm"
-    title="프로필 로드 실패"
-    confirmText="확인"
-  >
+
+  <BaseAlertPopup v-if="showLoadErrorAlert" @confirm="handleLoadErrorConfirm" title="프로필 로드 실패" confirmText="확인">
     <p>프로필 불러오기에 실패했습니다.</p>
   </BaseAlertPopup>
 </template>
@@ -164,19 +116,19 @@ const handleLoadErrorConfirm = () => {
 
 const handleSubmit = async () => {
   const promises = [];
-  
+
   if (nickname.value !== originalNickname.value) {
     promises.push(userApi.updateNickname(nickname.value));
   }
-  
+
   if (marketing.value.agreed !== originalMarketing.value.agreed) {
-    promises.push(userApi.toggleMarketingAgreement());
+    promises.push(userApi.updateMarketingAgreement());
   }
-  
+
   if (promises.length === 0) {
     return;
   }
-   
+
   try {
     await Promise.all(promises);
     originalNickname.value = nickname.value;
@@ -205,7 +157,7 @@ const handleSubmit = async () => {
     } else {
       errorMessage.value = '수정에 실패했습니다.\n다시 시도해주세요.';
     }
-    
+
     showErrorAlert.value = true;
   }
 };
@@ -233,6 +185,7 @@ const openTerms = (label) => {
   color: white;
   font-size: 20px;
 }
+
 .form_input {
   display: flex;
   width: 260px;
@@ -241,6 +194,7 @@ const openTerms = (label) => {
   border: 2px solid #f1cfc8;
   font-size: 14px;
 }
+
 .form_input::placeholder {
   color: #c7c7cc;
 }
@@ -253,6 +207,7 @@ const openTerms = (label) => {
   color: #fff;
   position: relative;
 }
+
 .popup_back_button {
   position: absolute;
   top: -50px;
@@ -277,6 +232,7 @@ const openTerms = (label) => {
   font-weight: bold;
   font-size: 18px;
 }
+
 .form_input {
   width: 100%;
   padding: 12px;
@@ -292,17 +248,20 @@ const openTerms = (label) => {
   display: flex;
   flex-direction: column;
 }
+
 .terms_title {
   font-weight: bold;
   font-size: 18px;
   margin-bottom: 12px;
 }
+
 .term_item {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 10px;
 }
+
 .term_label {
   font-size: 16px;
   text-decoration: underline;
@@ -310,19 +269,23 @@ const openTerms = (label) => {
   color: #fff;
   text-align: left;
 }
+
 .term_state {
   font-size: 13px;
 }
+
 .term_state_on {
   font-size: 13px;
   color: #ff99e5;
   font-weight: 500;
 }
+
 .term_state_off {
   font-size: 13px;
   color: #ababab;
   font-weight: 500;
 }
+
 /* 계정 상태 */
 .account_status {
   display: flex;
@@ -337,7 +300,8 @@ const openTerms = (label) => {
   gap: 8px;
   align-self: flex-end;
 }
-.account_action > span {
+
+.account_action>span {
   font-size: 16px;
   text-decoration: underline;
   color: #fff;
@@ -352,11 +316,13 @@ const openTerms = (label) => {
   width: 34px;
   height: 15px;
 }
+
 .toggle_switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
+
 .slider {
   position: absolute;
   cursor: pointer;
@@ -368,6 +334,7 @@ const openTerms = (label) => {
   border-radius: 20px;
   transition: 0.4s;
 }
+
 .slider::before {
   position: absolute;
   content: '';
@@ -379,10 +346,12 @@ const openTerms = (label) => {
   border-radius: 13px;
   transition: 0.4s;
 }
-.toggle_switch input:checked + .slider {
+
+.toggle_switch input:checked+.slider {
   background-color: #ff99e5;
 }
-.toggle_switch input:checked + .slider::before {
+
+.toggle_switch input:checked+.slider::before {
   transform: translateX(15px);
 }
 
