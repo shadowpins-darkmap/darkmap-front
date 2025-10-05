@@ -36,7 +36,7 @@ export const userApi = {
     return data;
   },
 
-  async toggleMarketingAgreement() {
+  async updateMarketingAgreement() {
     const { data } = await api.put('/api/v1/member/marketing-agreement');
     return data;
   },

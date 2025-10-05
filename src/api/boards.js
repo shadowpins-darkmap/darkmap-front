@@ -1,6 +1,5 @@
 import api from '@/lib/api';
 
-// 게시글 작성
 export const createBoard = async (formData) => {
   try {
     const response = await api.post('/api/v1/boards', formData);
@@ -11,7 +10,7 @@ export const createBoard = async (formData) => {
   }
 };
 
-export const getArticleById = async (boardId) => {
+export const getBoardById = async (boardId) => {
   try {
     const response = await api.get(`/api/v1/boards/${boardId}`);
     return response.data;
@@ -21,7 +20,16 @@ export const getArticleById = async (boardId) => {
   }
 };
 
-// 게시글 수정
+export const likeBoard = async (boardId) => {
+  try {
+    const response = await api.post(`/api/v1/boards/${boardId}/like`);
+    return response.data;
+  } catch (error) {
+    console.error('게시글 좋아요 실패:', error);
+    throw error;
+  }
+};
+
 export const updateBoard = async (boardId, formData) => {
   try {
     const response = await api.put(`/api/v1/boards/${boardId}`, formData);
@@ -32,7 +40,6 @@ export const updateBoard = async (boardId, formData) => {
   }
 };
 
-// 게시글 삭제
 export const deleteBoard = async (boardId) => {
   try {
     const response = await api.delete(`/api/v1/boards/${boardId}`);
@@ -43,8 +50,7 @@ export const deleteBoard = async (boardId) => {
   }
 };
 
-// 게시글 목록 조회 (검색 포함)
-export const fetchBoards = async (searchOptions = {}, pageOptions = {}) => {
+export const getBoards = async (searchOptions = {}, pageOptions = {}) => {
   try {
     const params = {
       keyword: searchOptions.keyword || '',
@@ -63,19 +69,7 @@ export const fetchBoards = async (searchOptions = {}, pageOptions = {}) => {
   }
 };
 
-// 게시글 상세 조회
-export const fetchBoardDetail = async (boardId) => {
-  try {
-    const response = await api.get(`/api/v1/boards/${boardId}`);
-    return response.data;
-  } catch (error) {
-    console.error('게시글 상세 조회 실패:', error);
-    throw error;
-  }
-};
-
-// 최근 게시글 조회
-export const fetchRecentBoards = async (limit = 10) => {
+export const getRecentBoards = async (limit = 10) => {
   try {
     const response = await api.get('/api/v1/boards/recent', {
       params: { limit },
@@ -87,8 +81,7 @@ export const fetchRecentBoards = async (limit = 10) => {
   }
 };
 
-// 인기 게시글 조회
-export const fetchPopularBoards = async (limit = 10) => {
+export const getPopularBoards = async (limit = 10) => {
   try {
     const response = await api.get('/api/v1/boards/popular', {
       params: { limit },
@@ -100,8 +93,7 @@ export const fetchPopularBoards = async (limit = 10) => {
   }
 };
 
-// 내가 작성한 게시글 조회
-export const fetchMyBoards = async (pageOptions = {}) => {
+export const getMyBoards = async (pageOptions = {}) => {
   try {
     const params = {
       page: pageOptions.page || 0,
@@ -118,8 +110,7 @@ export const fetchMyBoards = async (pageOptions = {}) => {
   }
 };
 
-// 게시글 카운트 조회
-export const fetchBoardCount = async () => {
+export const getBoardCount = async () => {
   try {
     const response = await api.get('/api/v1/boards/count');
     return response.data;
@@ -129,8 +120,7 @@ export const fetchBoardCount = async () => {
   }
 };
 
-// 좋아요 상태 조회
-export const fetchLikeStatus = async (boardId) => {
+export const getLikeStatus = async (boardId) => {
   try {
     const response = await api.get(`/api/v1/boards/${boardId}/like/status`);
     return response.data;
@@ -140,8 +130,7 @@ export const fetchLikeStatus = async (boardId) => {
   }
 };
 
-// 지금 가장 뜨거운 글
-export const fetchRecentPopularByLikes = async (
+export const getRecentPopularByLikes = async (
   days = 7,
   minLikes = 1,
   pageOptions = {},
@@ -166,8 +155,7 @@ export const fetchRecentPopularByLikes = async (
   }
 };
 
-// 최소 설정한 좋아요 수 이상의 글
-export const fetchPopularByLikes = async (minLikes = 1, pageOptions = {}) => {
+export const getPopularByLikes = async (minLikes = 1, pageOptions = {}) => {
   try {
     const params = {
       minLikes,
@@ -187,8 +175,7 @@ export const fetchPopularByLikes = async (minLikes = 1, pageOptions = {}) => {
   }
 };
 
-// 내가 좋아요한 게시글 조회
-export const fetchMyLikedBoards = async (pageOptions = {}) => {
+export const getMyLikedBoards = async (pageOptions = {}) => {
   try {
     const params = {
       page: pageOptions.page || 0,
@@ -205,8 +192,7 @@ export const fetchMyLikedBoards = async (pageOptions = {}) => {
   }
 };
 
-// 게시글 신고
-export const reportBoard = async (
+export const createBoardReport = async (
   boardId,
   reportData,
   attachmentFile = null,
@@ -237,88 +223,12 @@ export const reportBoard = async (
   }
 };
 
-// 게시글 신고 여부 확인
-export const checkBoardReport = async (boardId) => {
+export const getBoardReportStatus = async (boardId) => {
   try {
     const response = await api.get(`/api/v1/boards/${boardId}/reports/check`);
     return response.data;
   } catch (error) {
     console.error('게시글 신고 확인 실패:', error);
     throw error;
-  }
-};
-
-export const createComment = async (boardId, content) => {
-  try {
-    const response = await api.post(`/api/v1/comments`, {
-      boardId,
-      content,
-    });
-    return response.data;
-  } catch (error) {
-    console.error('댓글 작성 실패:', error);
-    return null;
-  }
-};
-
-export const getCommentsByBoardId = async (boardId, page = 0, size = 10) => {
-  try {
-    const response = await api.get(`/api/v1/comments/board/${boardId}`, {
-      params: {
-        page,
-        size,
-        sortBy: 'createdAt',
-        direction: 'DESC',
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('댓글 조회 실패:', error);
-    return null;
-  }
-};
-
-export const toggleCommentLike = async (commentId) => {
-  try {
-    const response = await api.post(`/api/v1/comments/${commentId}/like`);
-    return response.data;
-  } catch (error) {
-    if (error.response?.status === 403) {
-      throw new Error('자신의 댓글에 좋아요를 누를 수 없습니다.');
-    }
-    console.error('댓글 좋아요 실패:', error);
-    throw error;
-  }
-};
-
-export const reportComment = async (commentId, reportData) => {
-  try {
-    const params = {
-      reportType: reportData.reportType,
-      reason: reportData.reason,
-      additionalInfo: reportData.additionalInfo || '',
-    };
-
-    const response = await api.post(
-      `/api/v1/comments/${commentId}/reports`,
-      null,
-      { params },
-    );
-    return response.data;
-  } catch (error) {
-    console.error('댓글 신고 실패:', error);
-    return null;
-  }
-};
-
-export const checkCommentReport = async (commentId) => {
-  try {
-    const response = await api.get(
-      `/api/v1/comments/${commentId}/reports/check`,
-    );
-    return response.data;
-  } catch (error) {
-    console.error('댓글 신고 확인 실패:', error);
-    return null;
   }
 };

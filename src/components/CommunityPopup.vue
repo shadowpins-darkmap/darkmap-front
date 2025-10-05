@@ -345,7 +345,7 @@ const loadInitialData = async () => {
     if (auth.isLoggedIn) {
       await Promise.all([
         auth.fetchNotifications(),
-        auth.fetchMyBoards(),
+        auth.getMyBoards(),
         auth.fetchMyComments()
       ]);
     }
