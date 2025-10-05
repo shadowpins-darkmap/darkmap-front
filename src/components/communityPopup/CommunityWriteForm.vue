@@ -73,8 +73,14 @@ const submitPost = async () => {
 
     const response = await createBoard(formData);
 
-    showSuccessAlert.value = true;
+    title.value = '';
+    content.value = '';
+    imageFile.value = null;
+    previewUrl.value = '';
+    selectedCategory.value = categories[0];
+
     emit('submit', response.data);
+    emit('close');
 
   } catch (error) {
     console.error('게시글 작성 실패:', {
@@ -95,9 +101,11 @@ const submitPost = async () => {
   display: flex;
   flex-direction: column;
 }
-.form_wrap > *:first-child {
+
+.form_wrap>*:first-child {
   margin-bottom: 16px;
 }
+
 .input_title,
 .input_content {
   width: 100%;
@@ -107,10 +115,12 @@ const submitPost = async () => {
   border: none;
   font-size: 14px;
 }
+
 .input_content {
   height: 120px;
   resize: none;
 }
+
 .submit_button {
   background: black;
   color: white;
