@@ -1,144 +1,177 @@
 <template>
   <div class="slider_wrap">
     <button class="slider_colse_button" @click="$emit('close')">
-      <img
-        src="@/assets/sliderCloseIcon.svg"
-        alt="slider close icon"
-        width="36"
-        height="36"
-      />
+      <img src="@/assets/sliderCloseIcon.svg" alt="slider close icon" width="36" height="36" />
     </button>
     <!-- 검색 인풋 -->
     <div class="search_top_input_wrap">
-      <input
-        v-model="keyword"
-        type="text"
-        placeholder="내가 사는 지역의 이름을 한 번 검색해보세요."
-        class="search_top_input"
-        @keyup.enter="handleSearch"
-      />
+      <input v-model="keyword" type="text" placeholder="내가 사는 지역의 이름을 한 번 검색해보세요." class="search_top_input"
+        @keyup.enter="handleSearch" />
       <button class="search_top_button" @click="handleSearch">
-        <img
-          src="@/assets/iconSearch.svg"
-          alt="search"
-          width="24"
-          height="24"
-        />
+        <img src="@/assets/iconSearch.svg" alt="search" width="24" height="24" />
       </button>
       <p class="search_guide">
         띄어쓰기 공백을 포함해서 정확한 키워드를 입력해주세요!
       </p>
     </div>
     <!-- 리스트 솔팅 탭 -->
-    <GradientScroll
-      :width="'350px'"
-      :height="'75px'"
-      gradient-color="rgba(0,0,0,1)"
-    >
+    <GradientScroll :width="'350px'" :height="'75px'" gradient-color="rgba(0,0,0,1)">
       <ul class="sort_list_wrap">
-        <li
-          v-for="(cat, i) in categories"
-          :key="i"
-          class="sort_list"
-          :class="{ on: selectedCategory === cat }"
-        >
+        <li v-for="(cat, i) in categories" :key="i" class="sort_list" :class="{ on: selectedCategory === cat }">
           <button class="sort_list_button" @click="selectedCategory = cat">
             <span>{{ cat }}</span>
           </button>
         </li>
       </ul>
     </GradientScroll>
-    <strong class="search_title">총 {{ nn }}건의 검색결과가 있습니다. </strong>
+    <strong v-if="keyword && (hasSearched || loading)" class="search_title">
+      {{ loading ? '검색중입니다.' : `총 ${totalElements}건의 검색결과가 있습니다.` }}
+    </strong>
 
     <!-- 검색된 게시글 리스트 -->
-    <GradientScroll
-      :width="'100%'"
-      :height="'100%'"
-      direction="vertical"
-      gradient-color="rgba(0,0,0,1)"
-    >
+    <GradientScroll :width="'100%'" :height="'100%'" direction="vertical" gradient-color="rgba(0,0,0,1)">
       <div class="search_scroll_area">
         <ul class="search_list_wrap">
-          <li class="search_list" v-for="item in currentItems" :key="item.id">
+          <li class="search_list" v-for="item in currentItems" :key="item.boardId">
             <button class="search_list_button" @click="openDetail(item)">
               <span class="search_list_contents">
                 <span class="tag_button_wrap">
                   <span class="search_list_tag">
-                    {{ item.tag }}
+                    {{ item.category }}
                   </span>
                   <span class="search_list_arrow">
-                    <img
-                      src="@/assets/slideCardArrowGreen.svg"
-                      class="search_list_arrow_icon"
-                      alt="search list arrow icon"
-                      width="18"
-                      height="18"
-                    />
+                    <img src="@/assets/slideCardArrowGreen.svg" class="search_list_arrow_icon"
+                      alt="search list arrow icon" width="18" height="18" />
                   </span>
                 </span>
                 <!-- 제목 하이라이팅 -->
-                <span
-                  class="ellipsis__1 search_list_contents_title"
-                  v-html="highlightKeyword(item.title)"
-                ></span>
+                <span class="ellipsis__1 search_list_contents_title" v-html="highlightKeyword(item.title)"></span>
 
                 <!-- 내용 하이라이팅 -->
-                <span
-                  class="ellipsis__1 search_list_contents_detail"
-                  v-html="highlightKeyword(item.detail)"
-                ></span>
+                <span class="ellipsis__1 search_list_contents_detail"
+                  v-html="highlightKeyword(item.content || '')"></span>
               </span>
             </button>
           </li>
         </ul>
-        <PaginationWrap
-          v-if="postList.length > itemsPerPage"
-          :currentPage="currentPage"
-          :pageNumbers="pageNumbers"
-          @page-change="pageChange"
-          @prev="clickPrev"
-          @next="clickNext"
-        />
+        <PaginationWrap v-if="totalElements > itemsPerPage" :currentPage="currentPage" :pageNumbers="pageNumbers"
+          @page-change="pageChange" @prev="clickPrev" @next="clickNext" />
       </div>
     </GradientScroll>
   </div>
-
-  <!-- SlidePanels -->
-  <SlidePanel
-    :width="'510px'"
-    :visible="isPanel2depsOpen"
-    @close="isPanel2depsOpen = false"
-    :left="'510px'"
-    :right="'auto'"
-  >
-    <CommunityListDetailPanel
-      :post="selectedPost"
-      @close="isPanel2depsOpen = false"
-    />
+  <SlidePanel :width="'510px'" :visible="isPanel2depsOpen" @close="isPanel2depsOpen = false" :left="'510px'"
+    :right="'auto'">
+    <CommunityListDetailPanel :post="selectedPost" @close="isPanel2depsOpen = false" />
   </SlidePanel>
 </template>
 
 <script setup>
-// emits: close, openDetail
-import { ref, computed } from 'vue';
+import { ref, computed, watch, defineProps } from 'vue';
+import { boardsApi } from '@/api/boards';
+import { useNewsListStore } from '@/store/newsListStore';
 import GradientScroll from '@/components/gradientScroll/GradientScroll.vue';
 import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
 import CommunityListDetailPanel from '@/components/communityPanel/CommunityListDetailPanel.vue';
-
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
+
+const props = defineProps({
+  selectedArticle: {
+    type: Object,
+    default: null
+  }
+});
 
 const categories = ['전체', '뉴스', '커뮤니티'];
 const selectedCategory = ref('전체');
+const newsStore = useNewsListStore();
+
+watch(selectedCategory, async () => {
+  if (selectedCategory.value === '뉴스') {
+    if (newsStore.articles.length === 0) {
+      await newsStore.loadArticles();
+    }
+    if (keyword.value.trim()) handleSearch();
+  } else if (selectedCategory.value === '커뮤니티' && keyword.value.trim()) {
+    handleSearch();
+  } else if (selectedCategory.value === '전체' && keyword.value.trim()) {
+    handleSearch();
+  }
+});
 const selectedPost = ref(null);
 const keyword = ref('');
+const postList = ref([]);
+const loading = ref(false);
+const totalElements = ref(0);
+const hasSearched = ref(false);
 
-const handleSearch = () => {
-  if (keyword.value.trim()) {
-    // 검색 실행 로직 (emit 또는 라우팅 등)
-    console.log('검색:', keyword.value);
+const handleSearch = async () => {
+  if (!keyword.value.trim() && selectedCategory.value === '전체') return;
+
+  loading.value = true;
+  hasSearched.value = true;
+  try {
+    if (selectedCategory.value === '뉴스') {
+      if (newsStore.articles.length === 0) {
+        await newsStore.loadArticles();
+      }
+      const filteredArticles = keyword.value.trim()
+        ? newsStore.articles.filter(article =>
+          article.title.toLowerCase().includes(keyword.value.toLowerCase()) ||
+          article.address.toLowerCase().includes(keyword.value.toLowerCase())
+        )
+        : newsStore.articles;
+      postList.value = filteredArticles;
+      totalElements.value = filteredArticles.length;
+    } else if (selectedCategory.value === '커뮤니티') {
+      const params = {
+        page: currentPage.value - 1,
+        size: itemsPerPage,
+        sort: 'createdAt,desc'
+      };
+
+      if (keyword.value.trim()) {
+        params.keyword = keyword.value;
+        params.searchType = 'TITLE';
+        params.category = 'FREE';
+      }
+
+      const { data } = await boardsApi.getBoards(params);
+      postList.value = Array.isArray(data?.boards) ? data.boards : [];
+      totalElements.value = postList.value.length;
+    } else if (selectedCategory.value === '전체') {
+      if (!keyword.value.trim()) return;
+
+      if (newsStore.articles.length === 0) {
+        await newsStore.loadArticles();
+      }
+
+      const filteredNews = newsStore.articles.filter(article =>
+        article.title.toLowerCase().includes(keyword.value.toLowerCase()) ||
+        article.address.toLowerCase().includes(keyword.value.toLowerCase())
+      );
+
+      const { data } = await boardsApi.getBoards({
+        keyword: keyword.value,
+        searchType: 'TITLE',
+        category: 'FREE',
+        page: 0,
+        size: 100,
+        sort: 'createdAt,desc'
+      });
+      const communityPosts = Array.isArray(data?.boards) ? data.boards : [];
+
+      postList.value = [...filteredNews, ...communityPosts];
+      totalElements.value = postList.value.length;
+    }
+  } catch (error) {
+    console.error('검색 실패:', error);
+    postList.value = [];
+    totalElements.value = 0;
+  } finally {
+    loading.value = false;
   }
 };
-// 하이라이트 처리
+
 const highlightKeyword = (text) => {
   if (!keyword.value) return text;
   const escapedKeyword = keyword.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -146,32 +179,35 @@ const highlightKeyword = (text) => {
   return text.replace(regex, '<mark class="highlight">$1</mark>');
 };
 
-//  페이지네이션 상태
 const currentPage = ref(1);
 const itemsPerPage = 10;
-// 상세 페이지 슬라이드
 const isPanel2depsOpen = ref(false);
 
-const openDetail = (item) => {
-  selectedPost.value = item;
-  isPanel2depsOpen.value = true;
+const openDetail = async (item) => {
+  if (item.url) {
+    window.open(item.url, '_blank');
+    return;
+  }
+
+  try {
+    const { data } = await boardsApi.getBoardById(item.boardId);
+    selectedPost.value = data;
+    isPanel2depsOpen.value = true;
+  } catch (error) {
+    console.error('게시글 상세 조회 실패:', error);
+    selectedPost.value = item;
+    isPanel2depsOpen.value = true;
+  }
 };
 
-// 더미 데이터 TODO
-const postList = Array.from({ length: 40 }, (_, i) => ({
-  id: i + 1,
-  nickname: `검은 태양의 핀 ${i + 1}`,
-  tag: '기억',
-  title: `면목동 이사 고민 중인데 연관검색어가 면목동 살인이 ${i + 1}번 게시글 번 게시글`,
-  detail: `안녕하세요. 동네에 살면서 이런 ${i + 1}번 글을 쓰게 될 줄은 몰랐는데, 요즘 너무 불안해서 용기 내어 남깁니다. 저는 ○○아파트 사는 30대 직장인 여성입니다. 게시글`,
-  comments: Math.floor(Math.random() * 200),
-  likes: Math.floor(Math.random() * 20),
-  views: Math.floor(Math.random() * 1000),
-  userLiked: false,
-  userReport: false,
-}));
+watch(() => props.selectedPost, (post) => {
+  if (post) {
+    selectedPost.value = post;
+    isPanel2depsOpen.value = true;
+  }
+}, { immediate: true });
 
-const totalPages = computed(() => Math.ceil(postList.length / itemsPerPage));
+const totalPages = computed(() => Math.ceil(totalElements.value / itemsPerPage));
 
 const pageNumbers = computed(() => {
   const max = 5;
@@ -182,13 +218,11 @@ const pageNumbers = computed(() => {
   );
 });
 
-const currentItems = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  return postList.slice(start, start + itemsPerPage);
-});
+const currentItems = computed(() => postList.value);
 
 const pageChange = (page) => {
   currentPage.value = page;
+  handleSearch();
 };
 
 const clickPrev = () => {
@@ -209,11 +243,13 @@ const clickNext = () => {
   display: flex;
   flex-direction: column;
 }
+
 .slider_colse_button {
   width: 100%;
   display: flex;
   justify-content: flex-end;
 }
+
 .slider_title {
   font-weight: bold;
   font-size: 32px;
@@ -221,6 +257,7 @@ const clickNext = () => {
   padding-top: 40px;
   padding-bottom: 60px;
 }
+
 /* 검색 인풋 */
 .search_top_input_wrap {
   position: relative;
@@ -273,7 +310,6 @@ const clickNext = () => {
   padding: 20px 0;
 }
 
-// 리스트 솔팅 탭
 .sort_list_wrap {
   display: flex;
   flex-direction: row;
@@ -296,24 +332,29 @@ const clickNext = () => {
   font-weight: 600;
   font-size: 14px;
 }
-.sort_list.on > .sort_list_button {
+
+.sort_list.on>.sort_list_button {
   background-color: #00ffc2;
   font-family: 'Roboto';
   color: #000;
 }
+
 // 광장 게시글 리스트
 .search_scroll_area {
   margin: 20px 0;
 }
+
 .search_list_wrap {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
+
 .search_list {
   display: flex;
   width: 100%;
 }
+
 .search_list_contents_title {
   color: #fff;
   font-size: 16px;
@@ -322,11 +363,13 @@ const clickNext = () => {
   margin-top: 14px;
   margin-bottom: 12px;
 }
+
 .search_list_contents_detail {
   color: #fff;
   font-size: 12px;
   min-height: 15px;
 }
+
 .tag_button_wrap {
   display: flex;
   justify-content: space-between;
@@ -345,6 +388,7 @@ const clickNext = () => {
   height: 22px;
   border-radius: 22px;
 }
+
 .search_list_button {
   display: flex;
   flex-direction: column;
