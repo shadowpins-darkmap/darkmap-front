@@ -2,7 +2,7 @@
 import { defineProps, ref, onMounted } from 'vue';
 import 'vue3-carousel/carousel.css';
 import { Carousel, Slide } from 'vue3-carousel';
-import { getPopularBoards } from '@/api/boards';
+import { boardsApi } from '@/api/boards';
 
 const cards = ref([]);
 const loading = ref(false);
@@ -10,7 +10,7 @@ const loading = ref(false);
 const loadPopularBoards = async () => {
   try {
     loading.value = true;
-    const response = await getPopularBoards(5);
+    const response = await boardsApi.getPopularBoards(5);
     if (response && response.data) {
       cards.value = response.data.map(board => ({
         id: board.id,
