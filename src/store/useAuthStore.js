@@ -59,10 +59,13 @@ export const useAuthStore = defineStore('auth', {
       this.message = profileData.message;
     },
 
-    setNotifications(data) {
-      this.notifications = data.content;
-      this.notificationsPage = data.pageable.pageNumber;
-      this.notificationsTotalPages = data.totalPages;
+    setNotifications(notificationsData) {
+      this.notifications = notificationsData.data;
+      this.notificationsPage = notificationsData.currentPage || 1;
+      this.notificationsTotalPages =
+        Math.ceil(
+          notificationsData.totalElements / notificationsData.pageSize,
+        ) || 0;
     },
 
     setMyBoards(response) {

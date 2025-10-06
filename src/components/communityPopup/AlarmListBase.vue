@@ -74,7 +74,7 @@ const getListClass = (index) => {
 };
 
 const handleItemClick = (item) => {
-  if (props.currentTab === '내 게시글') {
+  if (props.currentTab === '내 게시글' || props.currentTab === '내 댓글') {
     selectedArticle.value = item;
     showMoveToPostAlert.value = true;
   }
@@ -82,7 +82,8 @@ const handleItemClick = (item) => {
 
 const handleMoveToPost = async () => {
   try {
-    const response = await getBoardById(selectedArticle.value.boardId);
+    const boardId = props.currentTab === '내 댓글' ? selectedArticle.value.board.boardId : selectedArticle.value.boardId;
+    const response = await getBoardById(boardId);
     const article = response.data;
     selectedArticle.value = article;
     showMoveToPostAlert.value = false;
