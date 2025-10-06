@@ -3,7 +3,7 @@
     <button class="slider_colse_button" @click="$emit('close')">
       <img src="@/assets/detailCloseArrow.svg" alt="slider close icon" width="36" height="36" />
     </button>
-    <strong class="detail_title">{{ props.article?.title }}</strong>
+    <strong class="detail_title">{{ props.post?.title }}</strong>
 
     <div class="profile_img_wrap">
       <div class="profile_detail_img_box">
@@ -11,16 +11,16 @@
       </div>
 
       <div class="detail_top_profile">
-        <span class="detail_nickname">{{ props.article?.authorNickname }} </span>
+        <span class="detail_nickname">{{ props.post?.authorNickname }} </span>
         <span class="detail_count_wrap">
           <span class="detail_count">
-            <span class="detail_comment">댓글 {{ props.article?.commentCount }}</span>
-            <span class="detail_likes">좋아요 {{ props.article?.likeCount }}</span>
-            <span class="detail_view">조회수 {{ props.article?.viewCount }}</span>
+            <span class="detail_comment">댓글 {{ props.post?.commentCount }}</span>
+            <span class="detail_likes">좋아요 {{ props.post?.likeCount }}</span>
+            <span class="detail_view">조회수 {{ props.post?.viewCount }}</span>
           </span>
           <span class="detail_count">
-            <span>{{ formatTime(props.article?.createdAt) }}</span>
-            <span>{{ formatDate(props.article?.createdAt) }}</span>
+            <span>{{ formatTime(props.post?.createdAt) }}</span>
+            <span>{{ formatDate(props.post?.createdAt) }}</span>
           </span>
         </span>
       </div>
@@ -30,7 +30,7 @@
       gradient-color="rgba(64,64,64,1.5)">
       <div class="detail_scroll_wrap">
         <div class="detail_content_wrap">
-          <p class="detail_content">{{ props.article?.content || '내용이 없습니다.' }}</p>
+          <p class="detail_content">{{ props.post?.content || '내용이 없습니다.' }}</p>
           <div class="detail_icon_wrap">
             <button class="detail_icon_button" @click="handleBoardLike">
               <img
@@ -38,7 +38,7 @@
                 alt="like" />
               <span class="detail_icon_text">이 글을 추천해요</span>
             </button>
-            <button class="detail_icon_button" @click="openReportPopup('post', props.article?.boardId)">
+            <button class="detail_icon_button" @click="openReportPopup('post', props.post?.boardId)">
               <img
                 :src="isPostReport ? require('@/assets/commentReportIconOn.svg') : require('@/assets/commentReportIconOff.svg')"
                 alt="report" />
@@ -138,8 +138,11 @@ import { createComment, getCommentsByBoardId, likeComment } from '@/api/comments
 defineEmits(['close']);
 
 const props = defineProps({
-  article: { type: Object, required: true },
+  post: { type: Object, required: true },
 });
+
+console.log(props.post, '<<< props.post in CommunityListDetailPanel');
+console.log(props.post?.title, 'props.post?.title');
 
 const formatDate = (dateString) => {
   if (!dateString) return '';
@@ -159,9 +162,9 @@ const showReportSuccesePopup = ref(false);
 const showReportPopup = ref(false);
 const showSelfLikePopup = ref(false);
 const reportTarget = ref({ type: '', id: null });
-const isPostReport = ref(props.article?.reportedStatus ?? false);
+const isPostReport = ref(props.post?.reportedStatus ?? false);
 const reportedComments = ref(new Set());
-const isPostLiked = ref(props.article?.isLiked ?? false);
+const isPostLiked = ref(props.post?.isLiked ?? false);
 const commentInputHeight = ref(20);
 const comments = ref([]);
 const commentsPerPage = 10;
@@ -183,7 +186,7 @@ const onReportComplete = (type, id) => {
 
 const handleBoardLike = async () => {
   try {
-    const response = await likeBoard(props.article?.boardId);
+    const response = await likeBoard(props.post?.boardId);
     if (response?.data) {
       isPostLiked.value = response.data.isLiked;
       showLikePopup.value = true;
@@ -242,9 +245,9 @@ const handleEnter = (e) => {
 };
 
 const loadComments = async () => {
-  if (!props.article?.boardId) return;
+  if (!props.post?.boardId) return;
   try {
-    const response = await getCommentsByBoardId(props.article.boardId);
+    const response = await getCommentsByBoardId(props.post.boardId);
     if (response?.data) comments.value = response.data;
   } catch (error) {
     console.error('댓글 목록 로드 실패:', error);
@@ -254,7 +257,7 @@ const loadComments = async () => {
 const submitComment = async () => {
   if (!comment.value.trim()) return;
   try {
-    const response = await createComment(props.article?.boardId, comment.value);
+    const response = await createComment(props.post?.boardId, comment.value);
     if (response) {
       showCommentPopup.value = true;
       comment.value = '';
