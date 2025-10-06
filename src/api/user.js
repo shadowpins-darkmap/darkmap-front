@@ -15,21 +15,21 @@ export const userApi = {
     await api.post('/api/v1/auth/logout');
   },
 
-  async getNotifications({ page = 0, size = 10, hours = 48 } = {}) {
+  async getNotifications({ page = 1, size = 10, hours = 48 } = {}) {
     const { data } = await api.get('/api/v1/users/notifications', {
       params: { page, size, hours },
     });
     return data;
   },
 
-  async getMyBoards({ page = 0, size = 10 } = {}) {
+  async getMyBoards({ page = 1, size = 10 } = {}) {
     const { data } = await api.get('/api/v1/boards/my', {
       params: { page, size },
     });
     return data;
   },
 
-  async getMyComments({ page = 0, size = 10 } = {}) {
+  async getMyComments({ page = 1, size = 10 } = {}) {
     const { data } = await api.get('/api/v1/comments/my', {
       params: { page, size },
     });

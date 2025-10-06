@@ -60,19 +60,19 @@
             <li class="icon_list">
               <img src="@/assets/iconListComment.svg" class="my_list_icon" alt="my list icon" width="16" height="16" />
               <span>새 댓글</span>
-              <span class="point_color">{{ auth.newCommentsCount ?? 0 }}</span>
+              <span class="point_color">{{ auth.notifications?.summary?.newCommentsCount ?? 0 }}</span>
             </li>
             <li class="icon_list">
               <img src="@/assets/iconListLike.svg" class="my_list_icon" alt="my list icon" width="16" height="16" />
               <span>새 좋아요</span>
-              <span class="point_color">{{ auth.newLikesCount ?? 0 }}</span>
+              <span class="point_color">{{ auth.notifications?.summary?.newLikesCount ?? 0 }}</span>
             </li>
             <li class="icon_list">
               <img src="@/assets/iconListMarker.svg" class="my_list_icon" alt="my list icon" width="16" height="16" />
               <span>다크플레이스 등록</span>
               <span class="point_color">{{
                 auth.approvedReportCount ?? 0
-              }}</span>
+                }}</span>
             </li>
           </ul>
           <p class="tap_count_info" v-if="currentTab === '내 게시글'">
@@ -81,7 +81,7 @@
           </p>
           <p class="tap_count_info" v-if="currentTab === '내 댓글'">
             현재까지 총
-            <span class="point_color">{{ auth.myCommentCount ?? 0 }}</span>건의 댓글을 작성했어요.
+            <span class="point_color">{{ auth.myComments?.length ?? 0 }}</span>건의 댓글을 작성했어요.
           </p>
           <TabButtons v-model="currentTab" :tabs="tabOptions" />
 
@@ -105,13 +105,14 @@
           <ul class="alarm_list_wrap" v-if="currentTab === '알림'">
             <template v-if="alarmList.length > 0">
               <li class="alarm_list" v-for="item in alarmList.slice(0, 3)" :key="item.id">
-                <button class="alarm_list_button">
+                <button class="alarm_list_button" @click="handleOpenArticleDetail(item)">
                   <span class="alarm_list_icon">
-                    <img :src="getIcon(item.tag)" alt="alarm icon" width="24" height="24" />
+                    <img :src="getIcon(item.type)" alt="alarm icon" width="24" height="24" />
                   </span>
                   <span class="ellipsis__2 alarm_contents">
-                    {{
-                      `${item.nickname}님이 ${item.tag} '${item.title}'을(를) 남겼습니다.`
+                    {{ item.type === 'comment'
+                      ? `${item.nickname}님이 댓글 '${item.title}'을(를) 남겼습니다.`
+                      : `${item.nickname}님이 좋아요 '${item.title}'을(를) 남겼습니다.`
                     }}
                   </span>
                 </button>
@@ -131,7 +132,7 @@
                   </span>
                   <span class="ellipsis__2 alarm_contents">{{
                     item.title
-                    }}</span>
+                  }}</span>
                 </button>
               </li>
             </template>
@@ -149,7 +150,7 @@
                   </span>
                   <span class="ellipsis__2 alarm_contents">{{
                     item.comment
-                    }}</span>
+                  }}</span>
                 </button>
               </li>
             </template>
@@ -378,17 +379,41 @@ watch(
   { immediate: true },
 );
 
-/* --------- 더미 데이터 (UI 확인용) --------- */
-const alarmList = computed(() => auth.notifications?.newComments || []);
+const alarmList = computed(() => {
+  if (!auth.notifications) return [];
+  const comments = auth.notifications.newComments?.map(item => ({
+    id: item.commentId,
+    type: 'comment',
+    nickname: item.commenterNickname,
+    title: item.boardTitle,
+    content: item.content,
+    createdAt: item.createdAt,
+    boardId: item.boardId
+  })) || [];
+
+  const likes = auth.notifications.newLikes?.map(item => ({
+    id: item.likeId,
+    type: 'like',
+    nickname: item.likerNickname,
+    title: item.boardTitle,
+    content: '',
+    createdAt: item.createdAt,
+    boardId: item.boardId
+  })) || [];
+
+  const result = [...comments, ...likes].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  return result;
+});
+
 const myPostList = computed(() => auth.myBoards?.boards || []);
 const myCommentList = computed(() => auth.myComments || []);
 
 /* --------- 유틸 --------- */
-const getIcon = (tag) => {
-  switch (tag) {
-    case '댓글':
+const getIcon = (type) => {
+  switch (type) {
+    case 'comment':
       return iconComment;
-    case '좋아요':
+    case 'like':
       return iconLike;
     case '등록':
       return iconMarker;
@@ -423,7 +448,6 @@ const pageNumbers = computed(() => {
 const currentItems = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
   const end = start + itemsPerPage;
-
   if (currentTab.value === '알림') return alarmList.value.slice(start, end);
   if (currentTab.value === '내 게시글')
     return myPostList.value.slice(start, end);
