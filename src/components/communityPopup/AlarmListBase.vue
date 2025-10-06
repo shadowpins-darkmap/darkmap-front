@@ -24,14 +24,14 @@
     <p>해당 글의 페이지로 이동할까요?</p>
   </BaseAlertPopup>
   <SlidePanel :width="'510px'" :visible="isArticleDetailOpen" @close="isArticleDetailOpen = false">
-    <CommunityListDetailPanel :article="selectedArticle" @close="handleListPanelClose"
+    <CommunityListDetailPanel :post="selectedArticle" @close="handleListPanelClose"
       @openDetail="isArticleDetailOpen = true" />
   </SlidePanel>
 </template>
 
 <script setup>
 import { ref, defineProps } from 'vue';
-import { getBoardById } from '@/api/boards';
+import { boardsApi } from '@/api/boards';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
 import iconComment from '@/assets/alarmComment.svg';
@@ -74,16 +74,22 @@ const getListClass = (index) => {
 };
 
 const handleItemClick = (item) => {
-  if (props.currentTab === '내 게시글' || props.currentTab === '내 댓글') {
-    selectedArticle.value = item;
-    showMoveToPostAlert.value = true;
-  }
+  selectedArticle.value = item;
+  showMoveToPostAlert.value = true;
 };
 
 const handleMoveToPost = async () => {
   try {
-    const boardId = props.currentTab === '내 댓글' ? selectedArticle.value.board.boardId : selectedArticle.value.boardId;
-    const response = await getBoardById(boardId);
+    let boardId;
+    if (props.currentTab === '내 댓글') {
+      boardId = selectedArticle.value.board.boardId;
+    } else if (props.currentTab === '알림') {
+      boardId = selectedArticle.value.boardId;
+    } else {
+      boardId = selectedArticle.value.boardId;
+    }
+
+    const response = await boardsApi.getBoardById(boardId);
     const article = response.data;
     selectedArticle.value = article;
     showMoveToPostAlert.value = false;

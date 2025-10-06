@@ -25,7 +25,7 @@ import BaseDropdown from '@/components/BaseDropdown.vue';
 import BaseInput from '@/components/communityPopup/BaseInput.vue';
 import BaseTextarea from '@/components/communityPopup/BaseTextarea.vue';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
-import { createBoard } from '@/api/boards';
+import { boardsApi } from '@/api/boards';
 
 const categories = ['기억', '고민', '질문', '미분류'];
 const selectedCategory = ref(categories[0]);
@@ -71,7 +71,7 @@ const submitPost = async () => {
       formData.append('image', imageFile.value);
     }
 
-    const response = await createBoard(formData);
+    const response = await boardsApi.createBoard(formData);
 
     title.value = '';
     content.value = '';

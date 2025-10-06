@@ -72,7 +72,7 @@
               <span>다크플레이스 등록</span>
               <span class="point_color">{{
                 auth.approvedReportCount ?? 0
-                }}</span>
+              }}</span>
             </li>
           </ul>
           <p class="tap_count_info" v-if="currentTab === '내 게시글'">
@@ -126,13 +126,13 @@
           <ul class="alarm_list_wrap" v-if="currentTab === '내 게시글'">
             <template v-if="myPostList.length > 0">
               <li class="alarm_list" v-for="item in myPostList.slice(0, 3)" :key="item.id">
-                <button class="alarm_list_button">
+                <button class="alarm_list_button" @click="handleOpenArticleDetail(item)">
                   <span class="alarm_list_icon">
                     <img src="@/assets/profileDefault.svg" alt="profile default image" width="40" height="40" />
                   </span>
                   <span class="ellipsis__2 alarm_contents">{{
                     item.title
-                  }}</span>
+                    }}</span>
                 </button>
               </li>
             </template>
@@ -144,13 +144,13 @@
           <ul class="alarm_list_wrap" v-if="currentTab === '내 댓글'">
             <template v-if="myCommentList.length > 0">
               <li class="alarm_list" v-for="item in myCommentList.slice(0, 3)" :key="item.id">
-                <button class="alarm_list_button">
+                <button class="alarm_list_button" @click="handleOpenArticleDetail(item)">
                   <span class="alarm_list_icon">
                     <img src="@/assets/profileDefault.svg" alt="profile default image" width="40" height="40" />
                   </span>
                   <span class="ellipsis__2 alarm_contents">{{
                     item.comment
-                  }}</span>
+                    }}</span>
                 </button>
               </li>
             </template>
@@ -248,7 +248,7 @@
 
     <!-- 게시글 상세 -->
     <SlidePanel :width="'510px'" :visible="isArticleDetailOpen" @close="handleArticleDetailClose">
-      <CommunityListDetailPanel :article="selectedArticleDetail" @close="handleArticleDetailClose" />
+      <CommunityListDetailPanel :post="selectedArticleDetail" @close="handleArticleDetailClose" />
     </SlidePanel>
 
   </div>

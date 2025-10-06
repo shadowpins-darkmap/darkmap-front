@@ -70,7 +70,7 @@
 
   <!-- SlidePanel s -->
   <SlidePanel :width="'510px'" :visible="isDetailPanelOpen" :right="'510px'" @close="isDetailPanelOpen = false">
-    <CommunityListDetailPanel :article="selectedPost" @close="isDetailPanelOpen = false" />
+    <CommunityListDetailPanel :post="selectedPost" @close="isDetailPanelOpen = false" />
   </SlidePanel>
 </template>
 
