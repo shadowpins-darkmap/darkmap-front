@@ -132,7 +132,7 @@ import BaseAlertPopup from '@/components/BaseAlert.vue';
 import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
 import CommunityPostReportForm from '@/components/communityPopup/CommunityPostReportForm.vue';
 import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
-import { likeBoard } from '@/api/boards';
+import { boardsApi } from '@/api/boards';
 import { createComment, getCommentsByBoardId, likeComment } from '@/api/comments';
 
 defineEmits(['close']);
@@ -140,9 +140,6 @@ defineEmits(['close']);
 const props = defineProps({
   post: { type: Object, required: true },
 });
-
-console.log(props.post, '<<< props.post in CommunityListDetailPanel');
-console.log(props.post?.title, 'props.post?.title');
 
 const formatDate = (dateString) => {
   if (!dateString) return '';
@@ -186,7 +183,7 @@ const onReportComplete = (type, id) => {
 
 const handleBoardLike = async () => {
   try {
-    const response = await likeBoard(props.post?.boardId);
+    const response = await boardsApi.likeBoard(props.post?.boardId);
     if (response?.data) {
       isPostLiked.value = response.data.isLiked;
       showLikePopup.value = true;

@@ -1,141 +1,61 @@
 import api from '@/lib/api';
 
-export const createBoard = async (formData) => {
-  try {
-    const response = await api.post('/api/v1/boards', formData);
-    return response.data;
-  } catch (error) {
-    console.error('게시글 작성 실패:', error);
-    throw error;
-  }
-};
+export const boardsApi = {
+  async createBoard(formData) {
+    const { data } = await api.post('/api/v1/boards', formData);
+    return data;
+  },
 
-export const getBoardById = async (boardId) => {
-  try {
-    const response = await api.get(`/api/v1/boards/${boardId}`);
-    return response.data;
-  } catch (error) {
-    console.error('게시글 조회 실패:', error);
-    throw error;
-  }
-};
+  async getBoardById(boardId) {
+    const { data } = await api.get(`/api/v1/boards/${boardId}`);
+    return data;
+  },
 
-export const likeBoard = async (boardId) => {
-  try {
-    const response = await api.post(`/api/v1/boards/${boardId}/like`);
-    return response.data;
-  } catch (error) {
-    console.error('게시글 좋아요 실패:', error);
-    throw error;
-  }
-};
+  async likeBoard(boardId) {
+    const { data } = await api.post(`/api/v1/boards/${boardId}/like`);
+    return data;
+  },
 
-export const updateBoard = async (boardId, formData) => {
-  try {
-    const response = await api.put(`/api/v1/boards/${boardId}`, formData);
-    return response.data;
-  } catch (error) {
-    console.error('게시글 수정 실패:', error);
-    throw error;
-  }
-};
+  async updateBoard(boardId, formData) {
+    const { data } = await api.put(`/api/v1/boards/${boardId}`, formData);
+    return data;
+  },
 
-export const deleteBoard = async (boardId) => {
-  try {
-    const response = await api.delete(`/api/v1/boards/${boardId}`);
-    return response.data;
-  } catch (error) {
-    console.error('게시글 삭제 실패:', error);
-    throw error;
-  }
-};
+  async deleteBoard(boardId) {
+    const { data } = await api.delete(`/api/v1/boards/${boardId}`);
+    return data;
+  },
 
-export const getBoards = async (searchOptions = {}, pageOptions = {}) => {
-  try {
-    const params = {
-      keyword: searchOptions.keyword || '',
-      searchType: searchOptions.searchType || 'TITLE',
-      category: searchOptions.category || 'FREE',
-      page: pageOptions.page || 0,
-      size: pageOptions.size || 10,
-      sort: `${pageOptions.sortBy || 'createdAt'},${pageOptions.direction || 'desc'}`,
-    };
+  async getBoards(params = {}) {
+    const { data } = await api.get('/api/v1/boards', { params });
+    return data;
+  },
 
-    const response = await api.get('/api/v1/boards', { params });
-    return response.data;
-  } catch (error) {
-    console.error('게시글 목록 조회 실패:', error);
-    throw error;
-  }
-};
-
-export const getRecentBoards = async (limit = 10) => {
-  try {
-    const response = await api.get('/api/v1/boards/recent', {
+  async getRecentBoards(limit = 10) {
+    const { data } = await api.get('/api/v1/boards/recent', {
       params: { limit },
     });
-    return response.data;
-  } catch (error) {
-    console.error('최근 게시글 조회 실패:', error);
-    throw error;
-  }
-};
+    return data;
+  },
 
-export const getPopularBoards = async (limit = 10) => {
-  try {
-    const response = await api.get('/api/v1/boards/popular', {
+  async getPopularBoards(limit = 10) {
+    const { data } = await api.get('/api/v1/boards/popular', {
       params: { limit },
     });
-    return response.data;
-  } catch (error) {
-    console.error('인기 게시글 조회 실패:', error);
-    throw error;
-  }
-};
+    return data;
+  },
 
-export const getMyBoards = async (pageOptions = {}) => {
-  try {
-    const params = {
-      page: pageOptions.page || 0,
-      size: pageOptions.size || 100,
-      sortBy: pageOptions.sortBy || 'createdAt',
-      direction: pageOptions.direction || 'DESC',
-    };
+  async getBoardCount() {
+    const { data } = await api.get('/api/v1/boards/count');
+    return data;
+  },
 
-    const response = await api.get('/api/v1/boards/my', { params });
-    return response.data;
-  } catch (error) {
-    console.error('내 게시글 조회 실패:', error);
-    throw error;
-  }
-};
+  async getLikeStatus(boardId) {
+    const { data } = await api.get(`/api/v1/boards/${boardId}/like/status`);
+    return data;
+  },
 
-export const getBoardCount = async () => {
-  try {
-    const response = await api.get('/api/v1/boards/count');
-    return response.data;
-  } catch (error) {
-    console.error('게시글 카운트 로딩 실패:', error);
-    throw error;
-  }
-};
-
-export const getLikeStatus = async (boardId) => {
-  try {
-    const response = await api.get(`/api/v1/boards/${boardId}/like/status`);
-    return response.data;
-  } catch (error) {
-    console.error('좋아요 상태 조회 실패:', error);
-    throw error;
-  }
-};
-
-export const getRecentPopularByLikes = async (
-  days = 7,
-  minLikes = 1,
-  pageOptions = {},
-) => {
-  try {
+  async getRecentPopularByLikes(days = 7, minLikes = 1, pageOptions = {}) {
     const params = {
       days,
       minLikes,
@@ -144,19 +64,13 @@ export const getRecentPopularByLikes = async (
       sortBy: pageOptions.sortBy || 'createdAt',
       direction: pageOptions.direction || 'DESC',
     };
-
-    const response = await api.get('/api/v1/boards/recent-popular-by-likes', {
+    const { data } = await api.get('/api/v1/boards/recent-popular-by-likes', {
       params,
     });
-    return response.data;
-  } catch (error) {
-    console.error('인기 게시글 조회 실패:', error);
-    throw error;
-  }
-};
+    return data;
+  },
 
-export const getPopularByLikes = async (minLikes = 1, pageOptions = {}) => {
-  try {
+  async getPopularByLikes(minLikes = 1, pageOptions = {}) {
     const params = {
       minLikes,
       page: pageOptions.page || 0,
@@ -164,70 +78,43 @@ export const getPopularByLikes = async (minLikes = 1, pageOptions = {}) => {
       sortBy: pageOptions.sortBy || 'likes',
       direction: pageOptions.direction || 'DESC',
     };
-
-    const response = await api.get('/api/v1/boards/popular-by-likes', {
+    const { data } = await api.get('/api/v1/boards/popular-by-likes', {
       params,
     });
-    return response.data;
-  } catch (error) {
-    console.error('좋아요수 기준 인기 게시글 조회 실패:', error);
-    throw error;
-  }
-};
+    return data;
+  },
 
-export const getMyLikedBoards = async (pageOptions = {}) => {
-  try {
+  async getMyLikedBoards(pageOptions = {}) {
     const params = {
       page: pageOptions.page || 0,
       size: pageOptions.size || 100,
       sortBy: pageOptions.sortBy || 'createdAt',
       direction: pageOptions.direction || 'DESC',
     };
+    const { data } = await api.get('/api/v1/boards/likes/my', { params });
+    return data;
+  },
 
-    const response = await api.get('/api/v1/boards/likes/my', { params });
-    return response.data;
-  } catch (error) {
-    console.error('내가 좋아요한 게시글 조회 실패:', error);
-    throw error;
-  }
-};
-
-export const reportBoard = async (
-  boardId,
-  reportData,
-  attachmentFile = null,
-) => {
-  try {
+  async reportBoard(boardId, reportData, attachmentFile = null) {
     const formData = new FormData();
-
     const params = {
       reportType: reportData.reportType,
       reason: reportData.reason,
       additionalInfo: reportData.additionalInfo || '',
     };
-
     if (attachmentFile) {
       formData.append('attachmentFile', attachmentFile);
     }
-
-    const response = await api.post(
+    const { data } = await api.post(
       `/api/v1/boards/${boardId}/reports`,
       formData,
       { params },
     );
-    return response.data;
-  } catch (error) {
-    console.error('게시글 신고 실패:', error);
-    throw error;
-  }
-};
+    return data;
+  },
 
-export const getBoardReportStatus = async (boardId) => {
-  try {
-    const response = await api.get(`/api/v1/boards/${boardId}/reports/check`);
-    return response.data;
-  } catch (error) {
-    console.error('게시글 신고 확인 실패:', error);
-    throw error;
-  }
+  async getBoardReportStatus(boardId) {
+    const { data } = await api.get(`/api/v1/boards/${boardId}/reports/check`);
+    return data;
+  },
 };

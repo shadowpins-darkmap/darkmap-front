@@ -31,7 +31,7 @@
 
 <script setup>
 import { ref, defineProps } from 'vue';
-import { getBoardById } from '@/api/boards';
+import { boardsApi } from '@/api/boards';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
 import iconComment from '@/assets/alarmComment.svg';
@@ -88,8 +88,8 @@ const handleMoveToPost = async () => {
     } else {
       boardId = selectedArticle.value.boardId;
     }
-    
-    const response = await getBoardById(boardId);
+
+    const response = await boardsApi.getBoardById(boardId);
     const article = response.data;
     selectedArticle.value = article;
     showMoveToPostAlert.value = false;
