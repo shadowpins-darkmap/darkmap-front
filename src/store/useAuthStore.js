@@ -81,9 +81,8 @@ export const useAuthStore = defineStore('auth', {
       this.commentsTotalPages = data.totalPages;
     },
 
-    // 상태 초기화
     clearUserData() {
-      this.accessToken = null;
+      this.setAccessToken(null);
       this.email = null;
       this.nickname = null;
       this.id = null;
