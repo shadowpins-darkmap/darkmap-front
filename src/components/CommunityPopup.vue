@@ -72,7 +72,7 @@
               <span>다크플레이스 등록</span>
               <span class="point_color">{{
                 auth.approvedReportCount ?? 0
-              }}</span>
+                }}</span>
             </li>
           </ul>
           <p class="tap_count_info" v-if="currentTab === '내 게시글'">
@@ -132,7 +132,7 @@
                   </span>
                   <span class="ellipsis__2 alarm_contents">{{
                     item.title
-                    }}</span>
+                  }}</span>
                 </button>
               </li>
             </template>
@@ -150,7 +150,7 @@
                   </span>
                   <span class="ellipsis__2 alarm_contents">{{
                     item.comment
-                    }}</span>
+                  }}</span>
                 </button>
               </li>
             </template>
@@ -263,8 +263,14 @@
     </section>
   </CommonPopup>
   <CommonPopup :visible="showLoginPopup" @close="showLoginPopup = false">
-    <LoginPopup></LoginPopup>
+    <LoginPopup @login-success="handleLoginSuccess" @close="showLoginPopup = false"></LoginPopup>
   </CommonPopup>
+  <BaseAlertPopup v-if="showWelcomeAlert" @confirm="handleWelcomeConfirm" confirmText="확인" height="169px">
+    <p style="margin-top: 6px;">{{ loginUserData.nickname }}님 다시 오셨네요! <br /> {{ loginUserData.loginCount }}번째 투어에요.</p>
+  </BaseAlertPopup>
+  <NicknameStep v-if="showNicknameStep" :nickname="loginUserData.nickname" @submit="handleNicknameSubmit" />
+  <FirstVisitStep v-if="showFirstVisitStep" :nickname="loginUserData.nickname" @confirm="handleFirstVisitConfirm" />
+  <MarketingConsentStep v-if="showMarketingStep" @agree="handleMarketingAgree" @skip="handleMarketingSkip" />
   <BaseAlertPopup v-if="showLoginAlert" @cancel="showLoginAlert = false" @confirm="
     () => {
       showLoginPopup = true;
@@ -287,6 +293,9 @@ import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
 import LoginPopup from '@/components/auth/LoginPopup.vue';
 import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
+import NicknameStep from '@/components/onboarding/NicknameStep.vue';
+import FirstVisitStep from '@/components/onboarding/FirstVisitStep.vue';
+import MarketingConsentStep from '@/components/onboarding/MarketingConsentStep.vue';
 import TermsSidePanel from '@/components/commonPanel/TermsSidePanel.vue';
 import AlarmListBase from '@/components/communityPopup/AlarmListBase.vue';
 import AccountBase from '@/components/communityPopup/AccountBase.vue';
@@ -309,6 +318,12 @@ const showLoginAlert = ref(false);
 const showLoginPopup = ref(false);
 const showAlarmPopup = ref(false);
 const showAccountSection = ref(false);
+
+const showWelcomeAlert = ref(false);
+const showNicknameStep = ref(false);
+const showFirstVisitStep = ref(false);
+const showMarketingStep = ref(false);
+const loginUserData = ref({ nickname: '', loginCount: 0 });
 
 const isPanelOpen = ref(false);
 const isPanel2depsOpen = ref(false);
@@ -506,6 +521,40 @@ const handleArticleDetailClose = () => {
   selectedArticleDetail.value = null;
 };
 
+const handleLoginSuccess = (userData) => {
+  showLoginPopup.value = false;
+  loginUserData.value = userData;
+  if (userData.loginCount >= 2) {
+    showWelcomeAlert.value = true;
+  } else {
+    showNicknameStep.value = true;
+  }
+};
+
+window.handleLoginSuccessGlobal = handleLoginSuccess;
+
+const handleWelcomeConfirm = () => {
+  showWelcomeAlert.value = false;
+};
+
+const handleNicknameSubmit = (newNickname) => {
+  loginUserData.value.nickname = newNickname;
+  showNicknameStep.value = false;
+  showFirstVisitStep.value = true;
+};
+
+const handleFirstVisitConfirm = () => {
+  showFirstVisitStep.value = false;
+  showMarketingStep.value = true;
+};
+
+const handleMarketingAgree = () => {
+  showMarketingStep.value = false;
+};
+
+const handleMarketingSkip = () => {
+  showMarketingStep.value = false;
+};
 
 </script>
 
