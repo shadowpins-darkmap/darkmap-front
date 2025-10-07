@@ -3,12 +3,9 @@
     <p>로그인 처리 중...</p>
   </div>
 </template>
-
 <script setup>
+import { BASE_URL } from '@/constant/url';
 import { onMounted } from 'vue';
-
-// TODO: 배포 주소 메인 도메인으로 변경필요
-const PARENT_ORIGIN = 'https://darkmap-pi.vercel.app';
 
 onMounted(() => {
   const params = new URLSearchParams(window.location.search);
@@ -22,7 +19,7 @@ onMounted(() => {
           type: 'SOCIAL_LOGIN_RESULT',
           success: false,
         },
-        PARENT_ORIGIN
+        BASE_URL
       );
     }
     window.close();
@@ -38,7 +35,7 @@ onMounted(() => {
         success: true,
         accessToken,
       },
-      PARENT_ORIGIN
+      BASE_URL
     );
   }
 
