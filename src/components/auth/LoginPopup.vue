@@ -20,13 +20,12 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, ref, defineEmits } from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
 import { useAuthStore } from '@/store/useAuthStore';
 import { userApi } from '@/api/user';
 import { debounce } from 'lodash';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
 
-const emit = defineEmits(['close', 'login-success']);
 const auth = useAuthStore();
 
 let popupRef = null;
@@ -35,7 +34,9 @@ const showLoginFailAlert = ref(false);
 
 const checkPopupClosed = async () => {
   const interval = setInterval(async () => {
-    if (popupRef && popupRef.closed) {
+    let isClosed = false;
+    isClosed = popupRef && popupRef.closed;
+    if (isClosed) {
       clearInterval(interval);
 
       const accessToken = localStorage.getItem('accessToken');
@@ -44,7 +45,7 @@ const checkPopupClosed = async () => {
         try {
           auth.loginWithTokens(accessToken);
           const userData = await userApi.getMe();
-          emit('login-success', { nickname: userData.nickname, loginCount: userData.loginCount });
+          auth.setUserInfo(userData);
 
           if (window.handleLoginSuccessGlobal) {
             window.handleLoginSuccessGlobal({ nickname: userData.nickname, loginCount: userData.loginCount });

@@ -72,7 +72,7 @@
               <span>다크플레이스 등록</span>
               <span class="point_color">{{
                 auth.approvedReportCount ?? 0
-                }}</span>
+              }}</span>
             </li>
           </ul>
           <p class="tap_count_info" v-if="currentTab === '내 게시글'">
@@ -132,7 +132,7 @@
                   </span>
                   <span class="ellipsis__2 alarm_contents">{{
                     item.title
-                  }}</span>
+                    }}</span>
                 </button>
               </li>
             </template>
@@ -150,7 +150,7 @@
                   </span>
                   <span class="ellipsis__2 alarm_contents">{{
                     item.comment
-                  }}</span>
+                    }}</span>
                 </button>
               </li>
             </template>
@@ -360,9 +360,15 @@ const loadInitialData = async () => {
 
     if (auth.isLoggedIn) {
       await Promise.all([
-        auth.fetchNotifications(),
-        auth.getMyBoards(),
-        auth.fetchMyComments()
+        auth.fetchNotifications().catch(err => {
+          console.error('알림 API 실패:', err);
+        }),
+        auth.getMyBoards().catch(err => {
+          console.error('내 게시글 API 실패:', err);
+        }),
+        auth.fetchMyComments().catch(err => {
+          console.error('내 댓글 API 실패:', err);
+        })
       ]);
     }
   } catch (error) {
@@ -373,26 +379,6 @@ onBeforeUnmount(() => {
   if (bubbleTimer) clearInterval(bubbleTimer);
 });
 
-/* --------- 로그인 후 반응 --------- */
-watch(
-  () => auth.isLoggedIn,
-  (loggedIn) => {
-    if (loggedIn) {
-      // 로그인 팝업 닫기
-      showLoginPopup.value = false;
-
-      console.log('auth.isLoggedIn -------', auth.isLoggedIn);
-      console.log('auth.nickname -------', auth.nickname);
-      console.log('auth.profile -------', auth.profile);
-      console.log('auth.notifications -------', auth.notifications);
-      console.log('auth.myBoards -------', auth.boardsTotalElements);
-      console.log('auth.myComments -------', auth.myComments);
-      // 사용자 정보가 없으면 최초로 불러오기(스토어에 fetchAll 구현)
-      // if (!auth.profile) auth.fetchProfile();
-    }
-  },
-  { immediate: true },
-);
 
 const alarmList = computed(() => {
   if (!auth.notifications) return [];
@@ -524,6 +510,8 @@ const handleArticleDetailClose = () => {
 const handleLoginSuccess = (userData) => {
   showLoginPopup.value = false;
   loginUserData.value = userData;
+
+  if (showWelcomeAlert.value) return;
   if (userData.loginCount >= 2) {
     showWelcomeAlert.value = true;
   } else {
@@ -533,8 +521,9 @@ const handleLoginSuccess = (userData) => {
 
 window.handleLoginSuccessGlobal = handleLoginSuccess;
 
-const handleWelcomeConfirm = () => {
+const handleWelcomeConfirm = async () => {
   showWelcomeAlert.value = false;
+  await loadInitialData();
 };
 
 const handleNicknameSubmit = (newNickname) => {
