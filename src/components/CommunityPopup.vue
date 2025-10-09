@@ -263,8 +263,14 @@
     </section>
   </CommonPopup>
   <CommonPopup :visible="showLoginPopup" @close="showLoginPopup = false">
-    <LoginPopup></LoginPopup>
+    <LoginPopup @login-success="handleLoginSuccess" @close="showLoginPopup = false"></LoginPopup>
   </CommonPopup>
+  <BaseAlertPopup v-if="showWelcomeAlert" @confirm="handleWelcomeConfirm" confirmText="확인" height="169px">
+    <p style="margin-top: 6px;">{{ loginUserData.nickname }}님 다시 오셨네요! <br /> {{ loginUserData.loginCount }}번째 투어에요.</p>
+  </BaseAlertPopup>
+  <NicknameStep v-if="showNicknameStep" :nickname="loginUserData.nickname" @submit="handleNicknameSubmit" />
+  <FirstVisitStep v-if="showFirstVisitStep" :nickname="loginUserData.nickname" @confirm="handleFirstVisitConfirm" />
+  <MarketingConsentStep v-if="showMarketingStep" @agree="handleMarketingAgree" @skip="handleMarketingSkip" />
   <BaseAlertPopup v-if="showLoginAlert" @cancel="showLoginAlert = false" @confirm="
     () => {
       showLoginPopup = true;
@@ -287,6 +293,9 @@ import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
 import LoginPopup from '@/components/auth/LoginPopup.vue';
 import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
+import NicknameStep from '@/components/onboarding/NicknameStep.vue';
+import FirstVisitStep from '@/components/onboarding/FirstVisitStep.vue';
+import MarketingConsentStep from '@/components/onboarding/MarketingConsentStep.vue';
 import TermsSidePanel from '@/components/commonPanel/TermsSidePanel.vue';
 import AlarmListBase from '@/components/communityPopup/AlarmListBase.vue';
 import AccountBase from '@/components/communityPopup/AccountBase.vue';
@@ -309,6 +318,12 @@ const showLoginAlert = ref(false);
 const showLoginPopup = ref(false);
 const showAlarmPopup = ref(false);
 const showAccountSection = ref(false);
+
+const showWelcomeAlert = ref(false);
+const showNicknameStep = ref(false);
+const showFirstVisitStep = ref(false);
+const showMarketingStep = ref(false);
+const loginUserData = ref({ nickname: '', loginCount: 0 });
 
 const isPanelOpen = ref(false);
 const isPanel2depsOpen = ref(false);
@@ -345,9 +360,15 @@ const loadInitialData = async () => {
 
     if (auth.isLoggedIn) {
       await Promise.all([
-        auth.fetchNotifications(),
-        auth.getMyBoards(),
-        auth.fetchMyComments()
+        auth.fetchNotifications().catch(err => {
+          console.error('알림 API 실패:', err);
+        }),
+        auth.getMyBoards().catch(err => {
+          console.error('내 게시글 API 실패:', err);
+        }),
+        auth.fetchMyComments().catch(err => {
+          console.error('내 댓글 API 실패:', err);
+        })
       ]);
     }
   } catch (error) {
@@ -358,26 +379,6 @@ onBeforeUnmount(() => {
   if (bubbleTimer) clearInterval(bubbleTimer);
 });
 
-/* --------- 로그인 후 반응 --------- */
-watch(
-  () => auth.isLoggedIn,
-  (loggedIn) => {
-    if (loggedIn) {
-      // 로그인 팝업 닫기
-      showLoginPopup.value = false;
-
-      console.log('auth.isLoggedIn -------', auth.isLoggedIn);
-      console.log('auth.nickname -------', auth.nickname);
-      console.log('auth.profile -------', auth.profile);
-      console.log('auth.notifications -------', auth.notifications);
-      console.log('auth.myBoards -------', auth.boardsTotalElements);
-      console.log('auth.myComments -------', auth.myComments);
-      // 사용자 정보가 없으면 최초로 불러오기(스토어에 fetchAll 구현)
-      // if (!auth.profile) auth.fetchProfile();
-    }
-  },
-  { immediate: true },
-);
 
 const alarmList = computed(() => {
   if (!auth.notifications) return [];
@@ -506,6 +507,43 @@ const handleArticleDetailClose = () => {
   selectedArticleDetail.value = null;
 };
 
+const handleLoginSuccess = (userData) => {
+  showLoginPopup.value = false;
+  loginUserData.value = userData;
+
+  if (showWelcomeAlert.value) return;
+  if (userData.loginCount >= 2) {
+    showWelcomeAlert.value = true;
+  } else {
+    showNicknameStep.value = true;
+  }
+};
+
+window.handleLoginSuccessGlobal = handleLoginSuccess;
+
+const handleWelcomeConfirm = async () => {
+  showWelcomeAlert.value = false;
+  await loadInitialData();
+};
+
+const handleNicknameSubmit = (newNickname) => {
+  loginUserData.value.nickname = newNickname;
+  showNicknameStep.value = false;
+  showFirstVisitStep.value = true;
+};
+
+const handleFirstVisitConfirm = () => {
+  showFirstVisitStep.value = false;
+  showMarketingStep.value = true;
+};
+
+const handleMarketingAgree = () => {
+  showMarketingStep.value = false;
+};
+
+const handleMarketingSkip = () => {
+  showMarketingStep.value = false;
+};
 
 </script>
 

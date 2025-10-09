@@ -86,7 +86,7 @@ import CommunityWriteForm from '@/components/communityPopup/CommunityWriteForm.v
 import CommunityReportForm from '@/components/communityPopup/CommunityReportForm.vue';
 import CommunityListDetailPanel from '@/components/communityPanel/CommunityListDetailPanel.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
-import { getRecentBoards } from '@/api/boards';
+import { boardsApi } from '@/api/boards';
 
 const categories = ['전체', '공지', '제보', '기억', '고민', '질문', '미분류'];
 const selectedCategory = ref('전체');
@@ -114,7 +114,7 @@ const loading = ref(false);
 const loadRecentBoards = async () => {
   try {
     loading.value = true;
-    const boards = await getRecentBoards(10);
+    const boards = await boardsApi.getRecentBoards(10);
     if (boards) {
       postList.value = boards.data;
     }

@@ -36,6 +36,12 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
+    requireAuth() {
+      if (!this.accessToken) {
+        return false;
+      }
+      return true;
+    },
     setAccessToken(token) {
       this.accessToken = token;
       if (token) {
@@ -81,9 +87,8 @@ export const useAuthStore = defineStore('auth', {
       this.commentsTotalPages = data.totalPages;
     },
 
-    // 상태 초기화
     clearUserData() {
-      this.accessToken = null;
+      this.setAccessToken(null);
       this.email = null;
       this.nickname = null;
       this.id = null;
@@ -102,55 +107,62 @@ export const useAuthStore = defineStore('auth', {
       if (!token) return;
 
       this.accessToken = token;
-      try {
-        await this.fetchAllUserData();
-      } catch (e) {
-        console.error('토큰 복원 실패:', e);
-        // await this.logout();
+    },
+
+    loginWithTokens(accessToken, userData = null) {
+      this.setAccessToken(accessToken);
+      if (userData) {
+        this.setUserInfo(userData);
       }
     },
 
-    loginWithTokens(accessToken) {
-      this.setAccessToken(accessToken);
-    },
-
     async logout() {
+      this.clearUserData();
       try {
         await userApi.logout();
       } catch (e) {
         console.error('로그아웃 API 실패:', e);
       }
-      this.clearUserData();
     },
 
     async fetchUserProfile() {
+      if (!this.requireAuth()) return;
       const data = await userApi.getMe();
       this.setUserInfo(data);
       return data;
     },
 
     async fetchProfile() {
+      if (!this.requireAuth()) return;
       const data = await userApi.getProfile();
       this.setProfile(data);
       return data;
     },
 
     async fetchNotifications(params) {
+      if (!this.requireAuth()) return;
       const data = await userApi.getNotifications(params);
       this.setNotifications(data);
+      return data;
     },
 
     async getMyBoards(params) {
+      if (!this.requireAuth()) return;
       const data = await userApi.getMyBoards(params);
       this.setMyBoards(data);
+      return data;
     },
 
     async fetchMyComments(params) {
+      if (!this.requireAuth()) return;
       const data = await userApi.getMyComments(params);
       this.setMyComments(data);
+      return data;
     },
 
     async fetchAllUserData() {
+      if (!this.requireAuth()) return;
+
       this.loading = true;
       try {
         const [userData] = await Promise.all([

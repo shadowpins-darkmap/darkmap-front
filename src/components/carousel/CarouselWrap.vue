@@ -2,7 +2,8 @@
 import { defineProps, ref, onMounted } from 'vue';
 import 'vue3-carousel/carousel.css';
 import { Carousel, Slide } from 'vue3-carousel';
-import { getPopularBoards } from '@/api/boards';
+import { boardsApi } from '@/api/boards';
+import { formatDate } from '@/utils/date';
 
 const cards = ref([]);
 const loading = ref(false);
@@ -10,7 +11,7 @@ const loading = ref(false);
 const loadPopularBoards = async () => {
   try {
     loading.value = true;
-    const response = await getPopularBoards(5);
+    const response = await boardsApi.getPopularBoards(5);
     if (response && response.data) {
       cards.value = response.data.map(board => ({
         id: board.id,
@@ -19,7 +20,7 @@ const loadPopularBoards = async () => {
         category: board.category || '기본',
         title: board.title,
         content: board.content || '',
-        authorNickname: board.nickname || '익명',
+        user: board.nickname || '익명',
         createdAt: board.createdAt,
         viewCount: board.viewCount || 0,
         likeCount: board.likeCount || 0,
@@ -67,7 +68,7 @@ const carouselConfig = {
     <Slide v-for="card in cards" :key="card.id">
       <div class="slide_wrap" :class="{ green: props.green }" @click="props.onCardClick && props.onCardClick(card)">
         <div class="slide_card">
-          <span class="slide_card_tag">{{ card.tag }}</span>
+          <span class="slide_card_tag">{{ card.category }}</span>
           <span class="slide_card_arrow">
             <img :src="props.green
               ? require('@/assets/slideCardArrowGreen.svg')
@@ -86,7 +87,7 @@ const carouselConfig = {
         </div>
         <div class="slide_card lines">
           <span class="ellipsis__2 card_bottom_text user">{{ card.user }}</span>
-          <span class="card_bottom_text data">{{ card.data }}</span>
+          <span class="card_bottom_text data">{{ formatDate(card.createdAt) }}</span>
           <span class="card_bottom_text count">조회수 {{ card.viewCount }}</span>
           <button class="card_bottom_button card_bottom_text">
             <span> {{ card.likeCount }}</span>
