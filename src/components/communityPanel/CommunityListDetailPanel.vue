@@ -186,12 +186,24 @@ const onReportComplete = (type, id) => {
   else if (type === 'comment') reportedComments.value.add(id);
 };
 
+const updatePostInfo = async () => {
+  try {
+    const updatedPost = await boardsApi.getBoardById(props.post?.boardId);
+    if (updatedPost?.data) {
+      Object.assign(props.post, updatedPost.data);
+    }
+  } catch (error) {
+    console.error('게시글 정보 업데이트 실패:', error);
+  }
+};
+
 const handleBoardLike = async () => {
   try {
     const response = await boardsApi.likeBoard(props.post?.boardId);
     if (response?.data) {
       isPostLiked.value = response.data.isLiked;
       showLikePopup.value = true;
+      await updatePostInfo();
     }
   } catch (error) {
     console.error('게시글 좋아요 실패:', error);
@@ -222,7 +234,6 @@ const handleCommentLike = async (commentId) => {
   }
 };
 
-// 댓글 입력
 const updateLength = () => {
   if (comment.value.length > 490) comment.value = comment.value.slice(0, 490);
   const textarea = document.getElementById('comment_text');
@@ -268,6 +279,7 @@ const submitComment = async () => {
       showCommentPopup.value = true;
       comment.value = '';
       await loadComments();
+      await updatePostInfo();
     }
   } catch (error) {
     console.error('댓글 등록 실패:', error);
