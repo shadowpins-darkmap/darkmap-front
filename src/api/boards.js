@@ -11,6 +11,13 @@ export const boardsApi = {
     return data;
   },
 
+  async searchBoardByKeyword(keyword, page = 0) {
+    const { data } = await api.get('/api/v1/search/all', {
+      params: { keyword, page },
+    });
+    return data;
+  },
+
   async likeBoard(boardId) {
     const { data } = await api.post(`/api/v1/boards/${boardId}/like`);
     return data;
