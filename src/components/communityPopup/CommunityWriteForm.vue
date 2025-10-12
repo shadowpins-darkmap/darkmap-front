@@ -26,7 +26,9 @@ import BaseInput from '@/components/communityPopup/BaseInput.vue';
 import BaseTextarea from '@/components/communityPopup/BaseTextarea.vue';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
 import { boardsApi } from '@/api/boards';
+import { useAuthStore } from '@/store/useAuthStore';
 
+const auth = useAuthStore();
 const categories = ['기억', '고민', '질문', '미분류'];
 const selectedCategory = ref(categories[0]);
 const title = ref('');
@@ -72,6 +74,8 @@ const submitPost = async () => {
     }
 
     const response = await boardsApi.createBoard(formData);
+
+    await auth.getMyBoards();
 
     title.value = '';
     content.value = '';

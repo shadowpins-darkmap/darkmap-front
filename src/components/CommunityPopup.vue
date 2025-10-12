@@ -60,12 +60,12 @@
             <li class="icon_list">
               <img src="@/assets/iconListComment.svg" class="my_list_icon" alt="my list icon" width="16" height="16" />
               <span>새 댓글</span>
-              <span class="point_color">{{ auth.notifications?.summary?.newCommentsCount ?? 0 }}</span>
+              <span class="point_color">{{ auth.notifications?.newComments?.length ?? 0 }}</span>
             </li>
             <li class="icon_list">
               <img src="@/assets/iconListLike.svg" class="my_list_icon" alt="my list icon" width="16" height="16" />
               <span>새 좋아요</span>
-              <span class="point_color">{{ auth.notifications?.summary?.newLikesCount ?? 0 }}</span>
+              <span class="point_color">{{ auth.notifications?.newLikes?.length ?? 0 }}</span>
             </li>
             <li class="icon_list">
               <img src="@/assets/iconListMarker.svg" class="my_list_icon" alt="my list icon" width="16" height="16" />
