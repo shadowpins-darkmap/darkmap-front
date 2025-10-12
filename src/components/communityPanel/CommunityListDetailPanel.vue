@@ -75,7 +75,7 @@
                       alt="report" />
                   </button>
                   <button v-if="comment.authorNickname === auth.nickname" class="icon_button"
-                    @click="deleteComment(comment.commentId)">
+                    @click="handleDeleteComment(comment.commentId)">
                     <img src="@/assets/commentDeleteIcon.svg" alt="delete" />
                   </button>
                 </span>
@@ -136,7 +136,7 @@ import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
 import CommunityPostReportForm from '@/components/communityPopup/CommunityPostReportForm.vue';
 import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
 import { boardsApi } from '@/api/boards';
-import { createComment, getCommentsByBoardId, likeComment } from '@/api/comments';
+import { createComment, getCommentsByBoardId, likeComment, deleteComment } from '@/api/comments';
 import { useAuthStore } from '@/store/useAuthStore';
 
 defineEmits(['close']);
@@ -274,9 +274,14 @@ const submitComment = async () => {
   }
 };
 
-const deleteComment = (id) => {
-  comments.value = comments.value.filter((c) => c.id !== id);
-  showDeletePopup.value = true;
+const handleDeleteComment = async (commentId) => {
+  try {
+    await deleteComment(commentId);
+    await loadComments();
+    showDeletePopup.value = true;
+  } catch (error) {
+    console.error('댓글 삭제 실패:', error);
+  }
 };
 
 const paginatedComments = computed(() => {

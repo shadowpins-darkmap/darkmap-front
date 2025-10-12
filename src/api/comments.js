@@ -43,6 +43,16 @@ export const likeComment = async (commentId) => {
   }
 };
 
+export const deleteComment = async (commentId) => {
+  try {
+    const response = await api.delete(`/api/v1/comments/${commentId}`);
+    return response.data;
+  } catch (error) {
+    console.error('댓글 삭제 실패:', error);
+    throw error;
+  }
+};
+
 export const reportComment = async (commentId, reportData) => {
   try {
     const params = {
