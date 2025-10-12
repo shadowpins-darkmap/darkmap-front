@@ -32,12 +32,12 @@
     <GradientScroll :width="'100%'" :height="'100%'" direction="vertical" gradient-color="rgba(0,0,0,1)">
       <div class="search_scroll_area">
         <ul class="search_list_wrap">
-          <li class="search_list" v-for="item in currentItems" :key="item.boardId">
+          <li class="search_list" v-for="item in currentItems" :key="item.id">
             <button class="search_list_button" @click="openDetail(item)">
               <span class="search_list_contents">
                 <span class="tag_button_wrap">
                   <span class="search_list_tag">
-                    {{ item.category }}
+                    {{ item.resultType === 'ARTICLE' ? (item.crimeType || '뉴스') : (item.category || '커뮤니티') }}
                   </span>
                   <span class="search_list_arrow">
                     <img src="@/assets/slideCardArrowGreen.svg" class="search_list_arrow_icon"
@@ -54,8 +54,9 @@
             </button>
           </li>
         </ul>
-        <PaginationWrap v-if="totalElements > itemsPerPage" :currentPage="currentPage" :pageNumbers="pageNumbers"
-          @page-change="pageChange" @prev="clickPrev" @next="clickNext" />
+        <PaginationWrap v-if="totalElements > 10" :currentPage="currentPage + 1"
+          :pageNumbers="pageNumbers.map(p => p + 1)" @page-change="(page) => pageChange(page - 1)" @prev="clickPrev"
+          @next="clickNext" />
       </div>
     </GradientScroll>
   </div>
@@ -63,16 +64,19 @@
     :right="'auto'">
     <CommunityListDetailPanel :post="selectedPost" @close="isPanel2depsOpen = false" />
   </SlidePanel>
+  <BaseAlertPopup v-if="showErrorPopup" @confirm="showErrorPopup = false" confirmText="확인">
+    <p>서버에 문제가 발생했습니다.<br />잠시 후 다시 시도해주세요.</p>
+  </BaseAlertPopup>
 </template>
 
 <script setup>
 import { ref, computed, watch, defineProps } from 'vue';
 import { boardsApi } from '@/api/boards';
-import { useNewsListStore } from '@/store/newsListStore';
 import GradientScroll from '@/components/gradientScroll/GradientScroll.vue';
 import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
 import CommunityListDetailPanel from '@/components/communityPanel/CommunityListDetailPanel.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
+import BaseAlertPopup from '@/components/BaseAlert.vue';
 
 const props = defineProps({
   selectedArticle: {
@@ -83,90 +87,41 @@ const props = defineProps({
 
 const categories = ['전체', '뉴스', '커뮤니티'];
 const selectedCategory = ref('전체');
-const newsStore = useNewsListStore();
 
-watch(selectedCategory, async () => {
-  if (selectedCategory.value === '뉴스') {
-    if (newsStore.articles.length === 0) {
-      await newsStore.loadArticles();
-    }
-    if (keyword.value.trim()) handleSearch();
-  } else if (selectedCategory.value === '커뮤니티' && keyword.value.trim()) {
-    handleSearch();
-  } else if (selectedCategory.value === '전체' && keyword.value.trim()) {
-    handleSearch();
-  }
+watch(selectedCategory, () => {
+  currentPage.value = 0;
 });
 const selectedPost = ref(null);
 const keyword = ref('');
-const postList = ref([]);
+const allSearchResults = ref([]);
+const apiTotalElements = ref(0);
 const loading = ref(false);
-const totalElements = ref(0);
 const hasSearched = ref(false);
+const showErrorPopup = ref(false);
+let searchTimeout = null;
 
 const handleSearch = async () => {
-  if (!keyword.value.trim() && selectedCategory.value === '전체') return;
+  if (!keyword.value.trim()) return;
+
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+  }
+
+  if (loading.value) return;
 
   loading.value = true;
   hasSearched.value = true;
+  currentPage.value = 0;
+
   try {
-    if (selectedCategory.value === '뉴스') {
-      if (newsStore.articles.length === 0) {
-        await newsStore.loadArticles();
-      }
-      const filteredArticles = keyword.value.trim()
-        ? newsStore.articles.filter(article =>
-          article.title.toLowerCase().includes(keyword.value.toLowerCase()) ||
-          article.address.toLowerCase().includes(keyword.value.toLowerCase())
-        )
-        : newsStore.articles;
-      postList.value = filteredArticles;
-      totalElements.value = filteredArticles.length;
-    } else if (selectedCategory.value === '커뮤니티') {
-      const params = {
-        page: currentPage.value - 1,
-        size: itemsPerPage,
-        sort: 'createdAt,desc'
-      };
-
-      if (keyword.value.trim()) {
-        params.keyword = keyword.value;
-        params.searchType = 'TITLE';
-        params.category = 'FREE';
-      }
-
-      const { data } = await boardsApi.getBoards(params);
-      postList.value = Array.isArray(data?.boards) ? data.boards : [];
-      totalElements.value = postList.value.length;
-    } else if (selectedCategory.value === '전체') {
-      if (!keyword.value.trim()) return;
-
-      if (newsStore.articles.length === 0) {
-        await newsStore.loadArticles();
-      }
-
-      const filteredNews = newsStore.articles.filter(article =>
-        article.title.toLowerCase().includes(keyword.value.toLowerCase()) ||
-        article.address.toLowerCase().includes(keyword.value.toLowerCase())
-      );
-
-      const { data } = await boardsApi.getBoards({
-        keyword: keyword.value,
-        searchType: 'TITLE',
-        category: 'FREE',
-        page: 0,
-        size: 100,
-        sort: 'createdAt,desc'
-      });
-      const communityPosts = Array.isArray(data?.boards) ? data.boards : [];
-
-      postList.value = [...filteredNews, ...communityPosts];
-      totalElements.value = postList.value.length;
-    }
+    const data = await boardsApi.searchBoardByKeyword(keyword.value, 0);
+    allSearchResults.value = Array.isArray(data?.content) ? data.content : [];
+    apiTotalElements.value = data?.totalElements || 0;
   } catch (error) {
     console.error('검색 실패:', error);
-    postList.value = [];
-    totalElements.value = 0;
+    allSearchResults.value = [];
+    apiTotalElements.value = 0;
+    showErrorPopup.value = true;
   } finally {
     loading.value = false;
   }
@@ -179,24 +134,26 @@ const highlightKeyword = (text) => {
   return text.replace(regex, '<mark class="highlight">$1</mark>');
 };
 
-const currentPage = ref(1);
+const currentPage = ref(0);
 const itemsPerPage = 10;
 const isPanel2depsOpen = ref(false);
 
 const openDetail = async (item) => {
-  if (item.url) {
+  if (item.resultType === 'ARTICLE' && item.url) {
     window.open(item.url, '_blank');
     return;
   }
 
-  try {
-    const { data } = await boardsApi.getBoardById(item.boardId);
-    selectedPost.value = data;
-    isPanel2depsOpen.value = true;
-  } catch (error) {
-    console.error('게시글 상세 조회 실패:', error);
-    selectedPost.value = item;
-    isPanel2depsOpen.value = true;
+  if (item.resultType === 'BOARD') {
+    try {
+      const { data } = await boardsApi.getBoardById(item.id);
+      selectedPost.value = data;
+      isPanel2depsOpen.value = true;
+    } catch (error) {
+      console.error('게시글 상세 조회 실패:', error);
+      selectedPost.value = item;
+      isPanel2depsOpen.value = true;
+    }
   }
 };
 
@@ -207,30 +164,74 @@ watch(() => props.selectedPost, (post) => {
   }
 }, { immediate: true });
 
+const filteredResults = computed(() => {
+  if (selectedCategory.value === '뉴스') {
+    return allSearchResults.value.filter(item => item.resultType === 'ARTICLE');
+  } else if (selectedCategory.value === '커뮤니티') {
+    return allSearchResults.value.filter(item => item.resultType === 'BOARD');
+  }
+  return allSearchResults.value;
+});
+
+const totalElements = computed(() => apiTotalElements.value);
+
 const totalPages = computed(() => Math.ceil(totalElements.value / itemsPerPage));
 
 const pageNumbers = computed(() => {
   const max = 5;
-  const start = Math.floor((currentPage.value - 1) / max) * max + 1;
+  const start = Math.floor(currentPage.value / max) * max;
   return Array.from(
-    { length: Math.min(max, totalPages.value - start + 1) },
+    { length: Math.min(max, totalPages.value - start) },
     (_, i) => start + i,
   );
 });
 
-const currentItems = computed(() => postList.value);
+const currentItems = computed(() => {
+  return filteredResults.value;
+});
 
-const pageChange = (page) => {
+const loadPage = async (page) => {
+  if (loading.value) return;
+
+  loading.value = true;
+  try {
+    const data = await boardsApi.searchBoardByKeyword(keyword.value, page);
+    allSearchResults.value = Array.isArray(data?.content) ? data.content : [];
+  } catch (error) {
+    console.error('페이지 로딩 실패:', error);
+    showErrorPopup.value = true;
+  } finally {
+    loading.value = false;
+  }
+};
+
+const scrollToTop = () => {
+  const scrollArea = document.querySelector('.search_scroll_area');
+  if (scrollArea) {
+    scrollArea.scrollTop = 0;
+  }
+};
+
+const pageChange = async (page) => {
   currentPage.value = page;
-  handleSearch();
+  await loadPage(page);
+  scrollToTop();
 };
 
-const clickPrev = () => {
-  if (currentPage.value > 1) currentPage.value--;
+const clickPrev = async () => {
+  if (currentPage.value > 0) {
+    currentPage.value--;
+    await loadPage(currentPage.value);
+    scrollToTop();
+  }
 };
 
-const clickNext = () => {
-  if (currentPage.value < totalPages.value) currentPage.value++;
+const clickNext = async () => {
+  if (currentPage.value < totalPages.value - 1) {
+    currentPage.value++;
+    await loadPage(currentPage.value);
+    scrollToTop();
+  }
 };
 </script>
 
@@ -391,6 +392,7 @@ const clickNext = () => {
 
 .search_list_button {
   display: flex;
+  width: 100%;
   flex-direction: column;
   flex: 1 1 auto;
   padding: 15px;
@@ -401,6 +403,10 @@ const clickNext = () => {
   border-radius: 8px;
   flex-wrap: wrap;
   text-align: left;
+}
+
+.search_list_contents {
+  width: 100%;
 }
 
 .list_contents_tag {
