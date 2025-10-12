@@ -83,8 +83,8 @@ const submitPost = async () => {
     previewUrl.value = '';
     selectedCategory.value = categories[0];
 
+    showSuccessAlert.value = true;
     emit('submit', response.data);
-    emit('close');
 
   } catch (error) {
     console.error('게시글 작성 실패:', {
