@@ -15,7 +15,7 @@ const mapDiv = ref(null);
 const isLoading = ref(false);
 
 const loader = new Loader({
-  apiKey: process.env.VUE_APP_API_KEY,
+  apiKey: process.env.VUE_APP_GOOGLE_MAP_API_KEY,
   version: 'weekly',
 });
 
@@ -252,6 +252,8 @@ onMounted(async () => {
       onClusterClick: onClickCluster,
     });
     filteredArticles.value = [...articles.value];
+  } catch (error) {
+    console.error('Google Maps 로딩 실패:', error);
   } finally {
     isLoading.value = false;
   }

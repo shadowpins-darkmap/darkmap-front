@@ -52,7 +52,7 @@
             <li v-for="comment in paginatedComments" :key="comment.commentId" class="comments_item">
               <div class="comment_profile">
                 <img src="@/assets/profileDefault.svg" alt="profile" width="40" height="40" />
-                <span class="comment_nickname">{{ comment.nickname }}</span>
+                <span class="comment_nickname">{{ comment.authorNickname }}</span>
               </div>
               <div class="comment_bubble_wrap">
                 <span class="comment_data_wrap">
@@ -74,8 +74,8 @@
                       :src="reportedComments.has(comment.commentId) ? require('@/assets/commentReportIconOn.svg') : require('@/assets/commentReportIconOff.svg')"
                       alt="report" />
                   </button>
-                  <button v-if="comment.nickname === myNickname" class="icon_button"
-                    @click="deleteComment(comment.commentId)">
+                  <button v-if="comment.authorNickname === auth.nickname" class="icon_button"
+                    @click="handleDeleteComment(comment.commentId)">
                     <img src="@/assets/commentDeleteIcon.svg" alt="delete" />
                   </button>
                 </span>
@@ -120,6 +120,9 @@
   <BaseAlertPopup v-if="showSelfLikePopup" @confirm="showSelfLikePopup = false">
     <p>본인의 댓글에 좋아요를 누를 수 없습니다.</p>
   </BaseAlertPopup>
+  <BaseAlertPopup v-if="showCommentLoadErrorPopup" @confirm="showCommentLoadErrorPopup = false">
+    <p>댓글 불러오기에 실패했습니다.<br />다시 시도해주세요.</p>
+  </BaseAlertPopup>
   <CommonPopup :visible="showReportPopup" @close="showReportPopup = false">
     <CommunityPostReportForm :type="reportTarget.type" :id="reportTarget.id" @report-complete="onReportComplete" />
   </CommonPopup>
@@ -133,7 +136,8 @@ import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
 import CommunityPostReportForm from '@/components/communityPopup/CommunityPostReportForm.vue';
 import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
 import { boardsApi } from '@/api/boards';
-import { createComment, getCommentsByBoardId, likeComment } from '@/api/comments';
+import { createComment, getCommentsByBoardId, likeComment, deleteComment } from '@/api/comments';
+import { useAuthStore } from '@/store/useAuthStore';
 
 defineEmits(['close']);
 
@@ -158,6 +162,7 @@ const showCommentPopup = ref(false);
 const showReportSuccesePopup = ref(false);
 const showReportPopup = ref(false);
 const showSelfLikePopup = ref(false);
+const showCommentLoadErrorPopup = ref(false);
 const reportTarget = ref({ type: '', id: null });
 const isPostReport = ref(props.post?.reportedStatus ?? false);
 const reportedComments = ref(new Set());
@@ -167,7 +172,7 @@ const comments = ref([]);
 const commentsPerPage = 10;
 const commentsPage = ref(1);
 const likedComments = ref(new Set());
-const myNickname = '붉은핀';
+const auth = useAuthStore();
 
 const openReportPopup = (type, id) => {
   reportTarget.value = { type, id };
@@ -181,12 +186,24 @@ const onReportComplete = (type, id) => {
   else if (type === 'comment') reportedComments.value.add(id);
 };
 
+const updatePostInfo = async () => {
+  try {
+    const updatedPost = await boardsApi.getBoardById(props.post?.boardId);
+    if (updatedPost?.data) {
+      Object.assign(props.post, updatedPost.data);
+    }
+  } catch (error) {
+    console.error('게시글 정보 업데이트 실패:', error);
+  }
+};
+
 const handleBoardLike = async () => {
   try {
     const response = await boardsApi.likeBoard(props.post?.boardId);
     if (response?.data) {
       isPostLiked.value = response.data.isLiked;
       showLikePopup.value = true;
+      await updatePostInfo();
     }
   } catch (error) {
     console.error('게시글 좋아요 실패:', error);
@@ -201,6 +218,7 @@ const handleCommentLike = async (commentId) => {
       const comment = comments.value.find(c => c.id === commentId);
       if (comment) {
         comment.likes = likeCount;
+        comment.isLiked = isLiked;
       }
       if (isLiked) {
         likedComments.value.add(commentId);
@@ -216,7 +234,6 @@ const handleCommentLike = async (commentId) => {
   }
 };
 
-// 댓글 입력
 const updateLength = () => {
   if (comment.value.length > 490) comment.value = comment.value.slice(0, 490);
   const textarea = document.getElementById('comment_text');
@@ -245,9 +262,12 @@ const loadComments = async () => {
   if (!props.post?.boardId) return;
   try {
     const response = await getCommentsByBoardId(props.post.boardId);
-    if (response?.data) comments.value = response.data;
+    if (response?.data) {
+      comments.value = response.data;
+    }
   } catch (error) {
     console.error('댓글 목록 로드 실패:', error);
+    showCommentLoadErrorPopup.value = true;
   }
 };
 
@@ -259,15 +279,21 @@ const submitComment = async () => {
       showCommentPopup.value = true;
       comment.value = '';
       await loadComments();
+      await updatePostInfo();
     }
   } catch (error) {
     console.error('댓글 등록 실패:', error);
   }
 };
 
-const deleteComment = (id) => {
-  comments.value = comments.value.filter((c) => c.id !== id);
-  showDeletePopup.value = true;
+const handleDeleteComment = async (commentId) => {
+  try {
+    await deleteComment(commentId);
+    await loadComments();
+    showDeletePopup.value = true;
+  } catch (error) {
+    console.error('댓글 삭제 실패:', error);
+  }
 };
 
 const paginatedComments = computed(() => {

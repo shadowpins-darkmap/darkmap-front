@@ -131,6 +131,10 @@ const handleSubmit = async () => {
 
   try {
     await Promise.all(promises);
+    if (nickname.value !== originalNickname.value) {
+      auth.nickname = nickname.value;
+    }
+
     originalNickname.value = nickname.value;
     originalMarketing.value.agreed = marketing.value.agreed;
     showSuccessAlert.value = true;

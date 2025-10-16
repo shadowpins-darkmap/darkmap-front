@@ -62,7 +62,7 @@
 
   <!-- 팝업  -->
   <CommonPopup :visible="isWritePopupOpen" @close="isWritePopupOpen = false">
-    <CommunityWriteForm @close="isWritePopupOpen = false" />
+    <CommunityWriteForm @close="isWritePopupOpen = false" @submit="handleWriteComplete" />
   </CommonPopup>
   <CommonPopup :visible="isReportPopupOpen" @close="isReportPopupOpen = false">
     <CommunityReportForm />
@@ -159,6 +159,10 @@ const clickPrev = () => {
 
 const clickNext = () => {
   if (currentPage.value < totalPages.value) currentPage.value++;
+};
+
+const handleWriteComplete = () => {
+  loadRecentBoards();
 };
 
 onMounted(() => {

@@ -9,10 +9,14 @@
         <span class="ellipsis__2 alarm_contents">
           {{
             props.currentTab === '알림'
-              ? `${item.nickname}님이 ${item.tag} '${item.title}'을(를) 남겼습니다.`
+              ? item.type === 'comment'
+                ? `${item.nickname}님이 "${item.title}"글에 "${item.content}" 댓글을 남겼습니다.`
+                : item.type === 'like'
+                  ? `${item.nickname}님이 "${item.title}"글을 추천했습니다.`
+                  : `${item.nickname}님이 제보하신 ${item.title}의 사건이 다크플레이스로 등록되었습니다.`
               : props.currentTab === '내 게시글'
                 ? item.title
-                : item.comment
+                : item.content
           }}
         </span>
       </button>

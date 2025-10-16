@@ -60,19 +60,19 @@
             <li class="icon_list">
               <img src="@/assets/iconListComment.svg" class="my_list_icon" alt="my list icon" width="16" height="16" />
               <span>새 댓글</span>
-              <span class="point_color">{{ auth.notifications?.summary?.newCommentsCount ?? 0 }}</span>
+              <span class="point_color">{{ auth.notifications?.newComments?.length ?? 0 }}</span>
             </li>
             <li class="icon_list">
               <img src="@/assets/iconListLike.svg" class="my_list_icon" alt="my list icon" width="16" height="16" />
               <span>새 좋아요</span>
-              <span class="point_color">{{ auth.notifications?.summary?.newLikesCount ?? 0 }}</span>
+              <span class="point_color">{{ auth.notifications?.newLikes?.length ?? 0 }}</span>
             </li>
             <li class="icon_list">
               <img src="@/assets/iconListMarker.svg" class="my_list_icon" alt="my list icon" width="16" height="16" />
               <span>다크플레이스 등록</span>
               <span class="point_color">{{
                 auth.approvedReportCount ?? 0
-              }}</span>
+                }}</span>
             </li>
           </ul>
           <p class="tap_count_info" v-if="currentTab === '내 게시글'">
@@ -100,8 +100,6 @@
               전체보기
             </button>
           </template>
-          <!-- 알림 -->
-
           <ul class="alarm_list_wrap" v-if="currentTab === '알림'">
             <template v-if="alarmList.length > 0">
               <li class="alarm_list" v-for="item in alarmList.slice(0, 3)" :key="item.id">
@@ -111,8 +109,10 @@
                   </span>
                   <span class="ellipsis__2 alarm_contents">
                     {{ item.type === 'comment'
-                      ? `${item.nickname}님이 댓글 '${item.title}'을(를) 남겼습니다.`
-                      : `${item.nickname}님이 좋아요 '${item.title}'을(를) 남겼습니다.`
+                      ? `${item.nickname}님이 "${item.title}"글에 "${item.content}" 댓글을 남겼습니다.`
+                      : item.type === 'like'
+                        ? `${item.nickname}님이 "${item.title}"글을 추천했습니다.`
+                        : `${item.nickname}님이 제보하신 ${item.title}의 사건이 다크플레이스로 등록되었습니다.`
                     }}
                   </span>
                 </button>
@@ -132,7 +132,7 @@
                   </span>
                   <span class="ellipsis__2 alarm_contents">{{
                     item.title
-                    }}</span>
+                  }}</span>
                 </button>
               </li>
             </template>
@@ -149,8 +149,8 @@
                     <img src="@/assets/profileDefault.svg" alt="profile default image" width="40" height="40" />
                   </span>
                   <span class="ellipsis__2 alarm_contents">{{
-                    item.comment
-                    }}</span>
+                    item.content
+                  }}</span>
                 </button>
               </li>
             </template>
