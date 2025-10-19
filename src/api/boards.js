@@ -6,6 +6,11 @@ export const boardsApi = {
     return data;
   },
 
+  async createIncidentReport(formData) {
+    const { data } = await api.post('/api/v1/incidentReport/reports', formData);
+    return data;
+  },
+
   async getBoardById(boardId) {
     const { data } = await api.get(`/api/v1/boards/${boardId}`);
     return data;
