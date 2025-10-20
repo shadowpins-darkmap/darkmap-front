@@ -1,6 +1,5 @@
 <template>
   <div class="form_wrap">
-    <!-- 신고 유형 선택 단계 -->
     <div v-if="step === 1" class="report_step_box">
       <strong class="form_title">신고의 유형을 먼저 선택해주세요</strong>
       <ul class="report_type_list">
@@ -13,11 +12,8 @@
         </li>
       </ul>
     </div>
-
-    <!-- 상세 작성 단계 -->
     <div v-else-if="step === 2" class="report_step_box">
       <strong class="form_title">신고내용을 작성해주세요</strong>
-
       <BaseTextarea v-model="description" placeholder="자신이 알고있거나 직간접적으로 경험한 사건의 경위 내용을 간략히 설명해주세요."
         :id="'write_contents'" :height="'300px'" />
       <BaseInput v-model="image" type="file" label="이미지" :id="'write_image'"
@@ -29,13 +25,11 @@
     <button v-if="step === 1" class="submit_button" :disabled="!selectedType" @click="step = 2">
       다음
     </button>
-
     <button v-else class="submit_button" :disabled="!selectedType || !description || loading" @click="submitReport">
       제보
     </button>
   </div>
-
-  <BaseAlertPopup v-if="showPopup" title="신고를 완료했습니다." @confirm="showPopup = false">
+  <BaseAlertPopup v-if="showSuccessPopup" title="신고를 완료했습니다." @confirm="handleSuccessConfirm">
     <p>
       사이트 운영진의 검토가 끝나면<br />등록하신 이메일로 관련 조치를 알려드려요<br />해당 안내는 3~14일정도 소요될 수 있습니다
     </p>
@@ -48,11 +42,11 @@
 </template>
 
 <script setup>
-import { ref, defineProps } from 'vue';
+import { ref, defineProps, defineEmits } from 'vue';
 import BaseInput from '@/components/communityPopup/BaseInput.vue';
 import BaseTextarea from '@/components/communityPopup/BaseTextarea.vue';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
-import { reportBoard } from '@/api/boards';
+import { boardsApi } from '@/api/boards';
 
 const props = defineProps({
   type: {
@@ -70,6 +64,7 @@ const selectedType = ref('');
 const description = ref('');
 const imageFile = ref(null);
 const previewUrl = ref('');
+const emit = defineEmits(['close', 'report-complete']);
 
 const reportTypes = [
   {
@@ -113,8 +108,12 @@ const handleImage = (event) => {
   }
 };
 
+const handleSuccessConfirm = () => {
+  emit('report-complete', props.type, props.id);
+  emit('close');
+};
 
-const showPopup = ref(false);
+const showSuccessPopup = ref(false);
 const showErrorPopup = ref(false);
 const errorMessage = ref('');
 const loading = ref(false);
@@ -130,8 +129,8 @@ const submitReport = async () => {
       reason: description.value,
     };
 
-    await reportBoard(props.id, reportData, imageFile.value);
-    showPopup.value = true;
+    await boardsApi.reportBoard(props.id, reportData, imageFile.value);
+    showSuccessPopup.value = true;
     step.value = 1;
     selectedType.value = '';
     description.value = '';
@@ -139,13 +138,8 @@ const submitReport = async () => {
     previewUrl.value = '';
 
   } catch (error) {
-    console.error('제보 실패:', error);
     const message = error.response?.data?.message;
-    if (message === '신고 사유는 최소 10자 이상 입력해주세요.') {
-      errorMessage.value = message;
-    } else {
-      errorMessage.value = '신고 중 오류가 발생했습니다.';
-    }
+    errorMessage.value = message || '신고 중 오류가 발생했습니다.';
     showErrorPopup.value = true;
   } finally {
     loading.value = false;
