@@ -123,8 +123,9 @@
   <BaseAlertPopup v-if="showCommentLoadErrorPopup" @confirm="showCommentLoadErrorPopup = false">
     <p>댓글 불러오기에 실패했습니다.<br />다시 시도해주세요.</p>
   </BaseAlertPopup>
-  <CommonPopup :visible="showReportPopup" @close="showReportPopup = false">
-    <CommunityPostReportForm :type="reportTarget.type" :id="reportTarget.id" @report-complete="onReportComplete" />
+  <CommonPopup :visible="showReportPopup" @close="closeReportPopup">
+    <CommunityPostReportForm :type="reportTarget.type" :id="reportTarget.id" @close="closeReportPopup"
+      @report-complete="onReportComplete" />
   </CommonPopup>
 </template>
 
@@ -179,9 +180,12 @@ const openReportPopup = (type, id) => {
   showReportPopup.value = true;
 };
 
+const closeReportPopup = () => {
+  showReportPopup.value = false;
+};
+
 const onReportComplete = (type, id) => {
   showReportPopup.value = false;
-  showReportSuccesePopup.value = true;
   if (type === 'post') isPostReport.value = true;
   else if (type === 'comment') reportedComments.value.add(id);
 };
