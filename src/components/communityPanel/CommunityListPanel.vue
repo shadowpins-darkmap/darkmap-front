@@ -114,7 +114,7 @@ const loading = ref(false);
 const loadRecentBoards = async () => {
   try {
     loading.value = true;
-    const boards = await boardsApi.getRecentBoards(10);
+    const boards = await boardsApi.getRecentBoards(50);
     if (boards) {
       postList.value = boards.data;
     }

@@ -14,7 +14,7 @@
     </button>
   </div>
 
-  <BaseAlertPopup v-if="showPopup" title="제보를 완료했습니다." @confirm="showPopup = false">
+  <BaseAlertPopup v-if="showSuccessAlert" title="제보를 완료했습니다." @confirm="handleSuccessConfirm" confirmText="확인">
     <p>
       사이트 운영진의 검토후 장소가 등록되면<br />등록하신 이메일로 알려드려요
     </p>
@@ -39,14 +39,14 @@ import BaseAlertPopup from '@/components/BaseAlert.vue';
 import { boardsApi } from '@/api/boards';
 
 const categories = ['바바리맨', '폭행', '헌팅', '미행', '그 외'];
-const selectedCategory = ref(categories[0]);
+const selectedCategory = ref('');
 const title = ref('');
 const location = ref('');
 const content = ref('');
 const imageFile = ref(null);
 const previewUrl = ref('');
 const url = ref('');
-const showPopup = ref(false);
+const showSuccessAlert = ref(false);
 const showValidationPopup = ref(false);
 const showErrorPopup = ref(false);
 const showImageErrorPopup = ref(false);
@@ -65,19 +65,14 @@ const handleCategorySelect = (item) => {
   selectedCategory.value = item;
   title.value = item;
 };
-const emit = defineEmits(['submit']);
-const loading = ref(false);
 
-const getReportType = (category) => {
-  const typeMap = {
-    '바바리맨': 'HARASSMENT',
-    '폭행': 'CRIME',
-    '헌팅': 'HARASSMENT',
-    '미행': 'HARASSMENT',
-    '그 외': 'OTHER'
-  };
-  return typeMap[category] || 'OTHER';
+const handleSuccessConfirm = () => {
+  showSuccessAlert.value = false;
+  emit('close');
 };
+
+const emit = defineEmits(['submit', 'close']);
+const loading = ref(false);
 
 const submitPost = async () => {
   if (!selectedCategory.value || !location.value || !content.value) {
@@ -89,23 +84,21 @@ const submitPost = async () => {
     loading.value = true;
 
     const formData = new FormData();
-    formData.append('title', '');
-    formData.append('category', 'INCIDENTREPORT');
-    formData.append('reportType', getReportType(selectedCategory.value));
+    formData.append('reportType', selectedCategory.value);
     formData.append('reportLocation', location.value);
     formData.append('content', content.value);
 
     if (url.value) formData.append('newsUrl', url.value);
     if (imageFile.value) formData.append('imageFile', imageFile.value);
 
-    await boardsApi.createBoard(formData);
+    await boardsApi.createIncidentReport(formData);
 
     emit('submit', {
       category: selectedCategory.value,
       title: title.value,
       content: content.value,
     });
-    showPopup.value = true;
+    showSuccessAlert.value = true;
   } catch (error) {
     console.error('제보 실패:', error);
     showErrorPopup.value = true;
