@@ -3,7 +3,7 @@
     <li v-for="(item, index) in props.items" :key="item.boardId" class="alarm_list" :class="getListClass(index)">
       <button class="alarm_list_button" @click="handleItemClick(item)">
         <span class="alarm_list_icon">
-          <img v-if="props.currentTab == '알림'" :src="getIcon(item.tag)" alt="alarm list icon" width="24" height="24" />
+          <img v-if="props.currentTab == '알림'" :src="getIcon(item.type)" alt="alarm list icon" width="24" height="24" />
           <img v-else src="@/assets/profileDefault.svg" alt="profile icon" width="40" height="40" />
         </span>
         <span class="ellipsis__2 alarm_contents">
@@ -52,11 +52,11 @@ const props = defineProps({
 
 const getIcon = (tag) => {
   switch (tag) {
-    case '댓글':
+    case 'comment':
       return iconComment;
-    case '좋아요':
+    case 'like':
       return iconLike;
-    case '등록':
+    case 'place':
       return iconMarker;
     default:
       return iconComment;
