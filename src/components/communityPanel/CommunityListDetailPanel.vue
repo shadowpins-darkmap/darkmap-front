@@ -130,7 +130,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits, nextTick, computed } from 'vue';
+import { ref, defineProps, defineEmits, nextTick, computed, watch } from 'vue';
 import GradientScroll from '@/components/gradientScroll/GradientScroll.vue';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
 import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
@@ -310,7 +310,26 @@ const changeCommentPage = (page) => {
   commentsPage.value = page;
 };
 
-loadComments();
+watch(
+  () => props.post?.boardId,
+  async (newId) => {
+    comments.value = [];
+    if (!newId) {
+      return;
+    }
+
+    commentsPage.value = 1;
+    reportedComments.value = new Set();
+    likedComments.value = new Set();
+    comment.value = '';
+    isPostLiked.value = props.post?.isLiked ?? false;
+    isPostReport.value = props.post?.reportedStatus ?? false;
+
+    await loadComments();
+  },
+  { immediate: true }
+);
+
 </script>
 
 <style scoped lang="scss">
