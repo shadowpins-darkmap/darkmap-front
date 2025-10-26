@@ -66,6 +66,16 @@ const handleCategorySelect = (item) => {
   title.value = item;
 };
 
+const resetForm = () => {
+  selectedCategory.value = '';
+  title.value = '';
+  location.value = '';
+  content.value = '';
+  imageFile.value = null;
+  previewUrl.value = '';
+  url.value = '';
+};
+
 const handleSuccessConfirm = () => {
   showSuccessAlert.value = false;
   emit('close');
@@ -98,6 +108,7 @@ const submitPost = async () => {
       title: title.value,
       content: content.value,
     });
+    resetForm();
     showSuccessAlert.value = true;
   } catch (error) {
     console.error('제보 실패:', error);
