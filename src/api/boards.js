@@ -43,9 +43,16 @@ export const boardsApi = {
     return data;
   },
 
-  async getRecentBoards(limit = 10) {
+  async getRecentBoards(pageOptions = {}) {
+    const params = {
+      page: 1,
+      size: 20,
+      sortBy: 'createdAt',
+      direction: 'DESC',
+      ...pageOptions,
+    };
     const { data } = await api.get('/api/v1/boards/recent', {
-      params: { limit },
+      params,
     });
     return data;
   },
