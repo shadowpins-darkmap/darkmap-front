@@ -20,7 +20,7 @@
     </GradientScroll>
     <ul class="community_list_wrap">
       <GradientScroll :width="'100%'" :height="'100%'" gradient-color="rgba(0,0,0,1)" direction="vertical">
-        <li class="community_list" v-for="item in currentItems" :key="item.id">
+        <li class="community_list" v-for="item in currentItems" :key="item.boardId ?? item.id">
           <button class="community_list_button" @click="openDetail(item)">
             <span class="community_list_profile">
               <img src="@/assets/profileDefault.svg" alt="profile default image" width="40" height="40" />
@@ -91,11 +91,21 @@ import { boardsApi } from '@/api/boards';
 const categories = ['전체', '공지', '제보', '기억', '고민', '질문', '미분류'];
 const selectedCategory = ref('전체');
 const selectedPost = ref(null);
+const defaultPageSize = 10;
 const currentPage = ref(1);
-const itemsPerPage = 6;
 const isDetailPanelOpen = ref(false);
 const isWritePopupOpen = ref(false);
 const isReportPopupOpen = ref(false);
+const pageInfo = ref({
+  currentPage: 0,
+  pageSize: defaultPageSize,
+  totalElements: 0,
+  totalPages: 0,
+  hasNext: false,
+  hasPrevious: false,
+  isFirst: true,
+  isLast: false,
+});
 
 const openDetail = (item) => {
   selectedPost.value = item;
@@ -110,29 +120,79 @@ const handleCategoryChange = (category) => {
 
 const postList = ref([]);
 const loading = ref(false);
+const pageSize = computed(() => pageInfo.value.pageSize || defaultPageSize);
 
-const loadRecentBoards = async () => {
+const loadRecentBoards = async (page = 0) => {
   try {
     loading.value = true;
-    const boards = await boardsApi.getRecentBoards(50);
-    if (boards) {
-      postList.value = boards.data;
+    const response = await boardsApi.getRecentBoards({
+      page: page + 1,
+      size: pageSize.value,
+      sortBy: 'createdAt',
+      direction: 'DESC',
+    });
+    if (response) {
+      const responseData = response.data || {};
+      const boards = responseData.boards || [];
+      const info = responseData.pageInfo || {};
+      const current = typeof info.currentPage === 'number' ? info.currentPage : page;
+      const size = typeof info.pageSize === 'number' ? info.pageSize : pageSize.value;
+      const totalElements =
+        typeof info.totalElements === 'number' ? info.totalElements : boards.length;
+      const totalPages =
+        typeof info.totalPages === 'number'
+          ? info.totalPages
+          : size > 0
+            ? Math.ceil(totalElements / size)
+            : 0;
+      const hasNext =
+        typeof info.hasNext === 'boolean' ? info.hasNext : current + 1 < totalPages;
+      const hasPrevious =
+        typeof info.hasPrevious === 'boolean' ? info.hasPrevious : current > 0;
+      const isFirst = typeof info.isFirst === 'boolean' ? info.isFirst : current === 0;
+      const isLast = typeof info.isLast === 'boolean' ? info.isLast : !hasNext;
+
+      postList.value = boards;
+      pageInfo.value = {
+        currentPage: current,
+        pageSize: size,
+        totalElements,
+        totalPages,
+        hasNext,
+        hasPrevious,
+        isFirst,
+        isLast,
+      };
+      currentPage.value = current + 1;
     }
   } catch (error) {
     console.error('게시글 로딩 실패:', error);
     postList.value = [];
+    pageInfo.value = {
+      currentPage: 0,
+      pageSize: defaultPageSize,
+      totalElements: 0,
+      totalPages: 0,
+      hasNext: false,
+      hasPrevious: false,
+      isFirst: true,
+      isLast: false,
+    };
+    currentPage.value = 1;
   } finally {
     loading.value = false;
   }
 };
 
-const totalPages = computed(() => Math.ceil(filteredPosts.value.length / itemsPerPage));
-
 const pageNumbers = computed(() => {
+  const total = pageInfo.value.totalPages || 0;
+  if (total === 0) {
+    return [];
+  }
   const max = 5;
   const start = Math.floor((currentPage.value - 1) / max) * max + 1;
   return Array.from(
-    { length: Math.min(max, totalPages.value - start + 1) },
+    { length: Math.min(max, total - start + 1) },
     (_, i) => start + i,
   );
 });
@@ -145,24 +205,34 @@ const filteredPosts = computed(() => {
 });
 
 const currentItems = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  return filteredPosts.value.slice(start, start + itemsPerPage);
+  return filteredPosts.value;
 });
 
 const pageChange = (page) => {
-  currentPage.value = page;
+  if (page < 1 || page === currentPage.value) {
+    return;
+  }
+  const target = page - 1;
+  if (target === pageInfo.value.currentPage || target < 0) {
+    return;
+  }
+  loadRecentBoards(target);
 };
 
 const clickPrev = () => {
-  if (currentPage.value > 1) currentPage.value--;
+  if (pageInfo.value.hasPrevious) {
+    loadRecentBoards(pageInfo.value.currentPage - 1);
+  }
 };
 
 const clickNext = () => {
-  if (currentPage.value < totalPages.value) currentPage.value++;
+  if (pageInfo.value.hasNext) {
+    loadRecentBoards(pageInfo.value.currentPage + 1);
+  }
 };
 
 const handleWriteComplete = () => {
-  loadRecentBoards();
+  loadRecentBoards(0);
 };
 
 onMounted(() => {
