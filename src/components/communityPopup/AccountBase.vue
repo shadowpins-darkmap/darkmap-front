@@ -139,29 +139,13 @@ const handleSubmit = async () => {
     originalMarketing.value.agreed = marketing.value.agreed;
     showSuccessAlert.value = true;
   } catch (error) {
-    console.error('수정 실패:', error)
-    if (error.response?.data?.code) {
-      const errorCode = error.response.data.code;
-      switch (errorCode) {
-        case 'INVALID_NICKNAME':
-          errorMessage.value = '부적절한 단어가 포함된 닉네임입니다.';
-          break;
-        case 'NICKNAME_DUPLICATE':
-          errorMessage.value = '이미 사용 중인 닉네임입니다.';
-          break;
-        case 'NICKNAME_MAX_COUNT_REACHED':
-          errorMessage.value = '닉네임 변경 횟수를 모두 사용했습니다. (최대 3회)';
-          break;
-        case 'UNAUTHORIZED':
-          errorMessage.value = '인증이 필요합니다.';
-          break;
-        default:
-          errorMessage.value = '수정에 실패했습니다.\n다시 시도해주세요.';
-      }
-    } else {
-      errorMessage.value = '수정에 실패했습니다.\n다시 시도해주세요.';
-    }
-
+    console.error('수정 실패:', error);
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.errorMessage ||
+      error?.message ||
+      '프로필 수정 중 오류가 발생했습니다.';
+    errorMessage.value = message;
     showErrorAlert.value = true;
   }
 };
