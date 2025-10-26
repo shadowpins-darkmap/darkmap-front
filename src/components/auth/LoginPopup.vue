@@ -81,6 +81,7 @@ const handleSocialLogin = debounce((provider) => {
 
 
 onBeforeUnmount(() => {
+  console.log('test')
   if (popupRef && !popupRef.closed) {
     popupRef.close();
   }
