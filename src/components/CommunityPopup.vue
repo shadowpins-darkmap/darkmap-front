@@ -462,8 +462,24 @@ const clickPrev = () => currentPage.value > 1 && currentPage.value--;
 const clickNext = () =>
   currentPage.value < totalPages.value && currentPage.value++;
 
+watch(currentTab, async (next) => {
+  currentPage.value = 1;
+  if (next === '내 댓글' && auth.isLoggedIn && !auth.myCommentsLoaded) {
+    try {
+      await auth.fetchMyComments();
+    } catch (err) {
+      console.error('내 댓글 API 실패:', err);
+    }
+  }
+});
+
 watch(showAlarmPopup, (v) => {
   if (!v) currentPage.value = 1;
+  if (v && currentTab.value === '내 댓글' && auth.isLoggedIn && !auth.myCommentsLoaded) {
+    auth.fetchMyComments().catch(err => {
+      console.error('내 댓글 API 실패:', err);
+    });
+  }
 });
 
 /* --------- 버튼 핸들러 --------- */

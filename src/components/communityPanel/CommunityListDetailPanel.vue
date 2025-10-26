@@ -284,6 +284,9 @@ const submitComment = async () => {
       comment.value = '';
       await loadComments();
       await updatePostInfo();
+      if (auth.isLoggedIn) {
+        await auth.fetchMyComments({}, { force: true });
+      }
     }
   } catch (error) {
     console.error('댓글 등록 실패:', error);
@@ -295,6 +298,9 @@ const handleDeleteComment = async (commentId) => {
     await deleteComment(commentId);
     await loadComments();
     showDeletePopup.value = true;
+    if (auth.isLoggedIn) {
+      await auth.fetchMyComments({}, { force: true });
+    }
   } catch (error) {
     console.error('댓글 삭제 실패:', error);
   }

@@ -29,6 +29,8 @@ export const useAuthStore = defineStore('auth', {
     myComments: [],
     commentsPage: 0,
     commentsTotalPages: 0,
+    myCommentsLoaded: false,
+    myCommentsLoading: false,
   }),
 
   getters: {
@@ -81,10 +83,14 @@ export const useAuthStore = defineStore('auth', {
       this.boardsTotalElements = response.data?.pageInfo?.totalElements || 0;
     },
 
-    setMyComments(data) {
-      this.myComments = data.content;
-      this.commentsPage = data.pageable.pageNumber;
-      this.commentsTotalPages = data.totalPages;
+    setMyComments(response) {
+      this.myComments = response?.data || [];
+      this.commentsPage =
+        response?.pageInfo?.currentPage ?? (this.myComments.length ? 1 : 0);
+      this.commentsTotalPages =
+        response?.pageInfo?.totalPages ?? (this.myComments.length ? 1 : 0);
+      this.myCommentsLoaded = true;
+      this.myCommentsLoading = false;
     },
 
     clearUserData() {
@@ -100,6 +106,8 @@ export const useAuthStore = defineStore('auth', {
       this.notifications = [];
       this.myBoards = [];
       this.myComments = [];
+      this.myCommentsLoaded = false;
+      this.myCommentsLoading = false;
     },
 
     async initFromStorage() {
@@ -153,11 +161,22 @@ export const useAuthStore = defineStore('auth', {
       return data;
     },
 
-    async fetchMyComments(params) {
+    async fetchMyComments(params = {}, { force = false } = {}) {
       if (!this.requireAuth()) return;
-      const data = await userApi.getMyComments(params);
-      this.setMyComments(data);
-      return data;
+      const skipCache =
+        !force &&
+        this.myCommentsLoaded &&
+        (!params || Object.keys(params).length === 0);
+      if (skipCache) return { data: this.myComments };
+      this.myCommentsLoading = true;
+      try {
+        const data = await userApi.getMyComments(params);
+        this.setMyComments(data);
+        return data;
+      } catch (error) {
+        this.myCommentsLoading = false;
+        throw error;
+      }
     },
 
     async fetchAllUserData() {
@@ -170,7 +189,6 @@ export const useAuthStore = defineStore('auth', {
           this.fetchProfile(),
           this.fetchNotifications(),
           this.getMyBoards(),
-          this.fetchMyComments(),
         ]);
         return userData;
       } finally {
