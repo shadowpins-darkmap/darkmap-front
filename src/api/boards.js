@@ -16,7 +16,7 @@ export const boardsApi = {
     return data;
   },
 
-  async searchBoardByKeyword(keyword, page = 0) {
+  async searchBoardByKeyword(keyword, page = 1) {
     const { data } = await api.get('/api/v1/search/all', {
       params: { keyword, page },
     });

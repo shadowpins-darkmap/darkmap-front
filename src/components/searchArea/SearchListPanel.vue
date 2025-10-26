@@ -114,7 +114,7 @@ const handleSearch = async () => {
   currentPage.value = 0;
 
   try {
-    const data = await boardsApi.searchBoardByKeyword(keyword.value, 0);
+    const data = await boardsApi.searchBoardByKeyword(keyword.value, 1);
     allSearchResults.value = Array.isArray(data?.content) ? data.content : [];
     apiTotalElements.value = data?.totalElements || 0;
   } catch (error) {
@@ -195,7 +195,7 @@ const loadPage = async (page) => {
 
   loading.value = true;
   try {
-    const data = await boardsApi.searchBoardByKeyword(keyword.value, page);
+    const data = await boardsApi.searchBoardByKeyword(keyword.value, page + 1);
     allSearchResults.value = Array.isArray(data?.content) ? data.content : [];
   } catch (error) {
     console.error('페이지 로딩 실패:', error);

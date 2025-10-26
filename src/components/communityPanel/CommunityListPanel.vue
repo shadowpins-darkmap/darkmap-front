@@ -64,8 +64,8 @@
   <CommonPopup :visible="isWritePopupOpen" @close="isWritePopupOpen = false">
     <CommunityWriteForm @close="isWritePopupOpen = false" @submit="handleWriteComplete" />
   </CommonPopup>
-  <CommonPopup :visible="isReportPopupOpen" @close="isReportPopupOpen = false">
-    <CommunityReportForm />
+  <CommonPopup :visible="isReportPopupOpen" @close="handleReportClose">
+    <CommunityReportForm @close="handleReportClose" />
   </CommonPopup>
 
   <!-- SlidePanel s -->
@@ -233,6 +233,10 @@ const clickNext = () => {
 
 const handleWriteComplete = () => {
   loadRecentBoards(0);
+};
+
+const handleReportClose = () => {
+  isReportPopupOpen.value = false;
 };
 
 onMounted(() => {
