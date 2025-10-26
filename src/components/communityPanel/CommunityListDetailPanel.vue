@@ -482,11 +482,15 @@ watch(
   background-color: #292929;
   border-radius: 6px;
   padding: 20px;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .comment_content {
   line-height: 1.4;
   font-size: 14px;
+  word-break: break-word;
 }
 
 .comment_icons {
