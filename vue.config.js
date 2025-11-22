@@ -1,7 +1,6 @@
 const { defineConfig } = require('@vue/cli-service');
 const path = require('path');
 
-console.log('VUE_APP_TARGET_URL:', process.env.VUE_APP_TARGET_URL);
 module.exports = defineConfig({
   transpileDependencies: true,
 
@@ -15,7 +14,7 @@ module.exports = defineConfig({
   devServer: {
     proxy: {
       '/api': {
-        target: process.env.VUE_APP_TARGET_URL,
+        target: 'https://api.kdark.weareshadowpins.com',
         changeOrigin: true,
         cookieDomainRewrite: {
           '.weareshadowpins.com': 'localhost',
