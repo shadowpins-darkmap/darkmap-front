@@ -10,9 +10,11 @@ import { onMounted } from 'vue';
 onMounted(() => {
   const params = new URLSearchParams(window.location.search);
   const success = params.get('success') === 'true';
-  const accessToken = params.get('token');
-
-  if (!success || !accessToken) {
+  console.log('Social login redirect loaded with success:', {
+    params,
+    success,
+  });
+  if (!success) {
     if (window.opener) {
       window.opener.postMessage(
         {
@@ -26,14 +28,11 @@ onMounted(() => {
     return;
   }
 
-  localStorage.setItem('accessToken', accessToken);
-
   if (window.opener) {
     window.opener.postMessage(
       {
         type: 'SOCIAL_LOGIN_RESULT',
         success: true,
-        accessToken,
       },
       BASE_URL
     );
@@ -41,6 +40,6 @@ onMounted(() => {
 
   setTimeout(() => {
     window.close();
-  }, 300);
+  }, 3000000000);
 });
 </script>

@@ -1,10 +1,9 @@
 import { defineStore } from 'pinia';
 import { userApi } from '@/api/user';
-import { ACCESS_TOKEN_NAME } from '@/constant/user';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    accessToken: null,
+    isAuthenticated: false,
     loading: false,
 
     email: null,
@@ -34,22 +33,20 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    isLoggedIn: (s) => !!s.accessToken,
+    isLoggedIn: (s) => s.isAuthenticated,
   },
 
   actions: {
     requireAuth() {
-      if (!this.accessToken) {
+      if (!this.isAuthenticated) {
         return false;
       }
       return true;
     },
-    setAccessToken(token) {
-      this.accessToken = token;
-      if (token) {
-        localStorage.setItem(ACCESS_TOKEN_NAME, token);
-      } else {
-        localStorage.removeItem(ACCESS_TOKEN_NAME);
+    setAuthenticated(userData = null) {
+      this.isAuthenticated = true;
+      if (userData) {
+        this.setUserInfo(userData);
       }
     },
 
@@ -94,7 +91,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     clearUserData() {
-      this.setAccessToken(null);
+      this.isAuthenticated = false;
       this.email = null;
       this.nickname = null;
       this.id = null;
@@ -110,22 +107,20 @@ export const useAuthStore = defineStore('auth', {
       this.myCommentsLoading = false;
     },
 
-    async initFromStorage() {
-      const token = localStorage.getItem(ACCESS_TOKEN_NAME);
-      if (!token) return;
-
-      this.accessToken = token;
-    },
-
-    loginWithTokens(accessToken, userData = null) {
-      this.setAccessToken(accessToken);
-      if (userData) {
-        this.setUserInfo(userData);
+    async restoreSession() {
+      try {
+        const userData = await userApi.getMe();
+        this.setAuthenticated(userData);
+        return userData;
+      } catch (error) {
+        this.clearUserData();
+        return null;
       }
     },
 
-    async logout() {
+    async logout({ skipRequest = false } = {}) {
       this.clearUserData();
+      if (skipRequest) return;
       try {
         await userApi.logout();
       } catch (e) {

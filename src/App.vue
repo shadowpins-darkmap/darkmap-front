@@ -9,9 +9,15 @@ export default {
 
 import { onMounted } from 'vue';
 import { useStatsStore } from '@/store/useStatsStore';
+import { useAuthStore } from '@/store/useAuthStore';
 
-onMounted(() => {
+onMounted(async () => {
   const statsStore = useStatsStore();
+  const authStore = useAuthStore();
+  
+  // 로그인 상태 복원 시도
+  await authStore.restoreSession();
+  
   statsStore.fetchStats();
 });
 </script>

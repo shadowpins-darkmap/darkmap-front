@@ -262,8 +262,8 @@
         @next="clickNext" />
     </section>
   </CommonPopup>
-  <CommonPopup :visible="showLoginPopup" @close="showLoginPopup = false">
-    <LoginPopup @login-success="handleLoginSuccess" @close="showLoginPopup = false"></LoginPopup>
+  <CommonPopup :visible="showLoginPopup" @close="handleLoginClose">
+    <LoginPopup @login-success="handleLoginSuccess" @close="handleLoginClose"></LoginPopup>
   </CommonPopup>
   <BaseAlertPopup v-if="showWelcomeAlert" @confirm="handleWelcomeConfirm" confirmText="확인" height="169px">
     <p style="margin-top: 6px;">{{ loginUserData.nickname }}님 다시 오셨네요! <br /> {{ loginUserData.loginCount }}번째 투어에요.</p>
@@ -344,8 +344,8 @@ const currentBubbleIndex = ref(0);
 let bubbleTimer = null;
 
 onMounted(async () => {
-  // 로컬스토리지 토큰 복구 → 자동 로그인
-  auth.initFromStorage();
+  // 세션 쿠키 기반 자동 로그인 시도
+  await auth.restoreSession();
   await loadInitialData();
 
   // 인삿말 토글
@@ -524,7 +524,6 @@ const handleArticleDetailClose = () => {
 };
 
 const handleLoginSuccess = (userData) => {
-  showLoginPopup.value = false;
   loginUserData.value = userData;
 
   if (showWelcomeAlert.value) return;
@@ -533,6 +532,10 @@ const handleLoginSuccess = (userData) => {
   } else {
     showNicknameStep.value = true;
   }
+};
+
+const handleLoginClose = () => {
+  showLoginPopup.value = false;
 };
 
 window.handleLoginSuccessGlobal = handleLoginSuccess;

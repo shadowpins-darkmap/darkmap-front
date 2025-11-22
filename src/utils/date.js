@@ -10,3 +10,7 @@ export const formatDate = (dateString) => {
 
   return `${month}-${day} ${ampm} ${displayHours}:${minutes}`;
 };
+
+export const wait = (ms) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};

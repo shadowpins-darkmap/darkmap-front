@@ -1,100 +1,72 @@
+import { API_BASE_URL } from '@/constant/url';
 import axios from 'axios';
-import { useAuthStore } from '@/store/useAuthStore';
+// import { useAuthStore } from '@/store/useAuthStore';
 
 const api = axios.create({
-  baseURL: 'https://api.kdark.weareshadowpins.com',
+  baseURL: API_BASE_URL,
   withCredentials: true,
 });
 
-const REFRESH_URL = 'https://api.kdark.weareshadowpins.com/api/v1/auth/refresh';
+// const REFRESH_URL = 'https://api.kdark.weareshadowpins.com/api/v1/auth/refresh';
 
-let refreshing = false;
-let waiters = [];
-let waiterRejects = [];
+// let refreshing = false;
+// let waiters = [];
 
-api.interceptors.request.use((config) => {
-  const auth = useAuthStore();
-  if (auth.accessToken && config.headers) {
-    config.headers.Authorization = `Bearer ${auth.accessToken}`;
-  }
-  return config;
-});
+// api.interceptors.response.use(
+//   (res) => res,
+//   async (err) => {
+//     const auth = useAuthStore();
+//     const original = err.config || {};
+//     const status = err.response?.status;
 
-api.interceptors.response.use(
-  (res) => res,
-  async (err) => {
-    const auth = useAuthStore();
-    const original = err.config || {};
-    const status = err.response?.status;
+//     if (!status) throw err;
 
-    if (!status) throw err;
+//     const isRefreshCall = original?.url
+//       ? original.url.includes('/auth/refresh')
+//       : false;
 
-    const isRefreshCall = original?.url
-      ? original.url.includes('/auth/refresh')
-      : false;
+//     if (status === 401 && !isRefreshCall && !original._retry) {
+//       if (refreshing) {
+//         return new Promise((resolve, reject) => {
+//           waiters.push({ resolve, reject, original });
+//         });
+//       }
 
-    if (status === 401 && !isRefreshCall && !original._retry) {
-      if (refreshing) {
-        return new Promise((resolve, reject) => {
-          waiters.push((newToken) => {
-            original.headers = original.headers || {};
-            if (newToken) {
-              original.headers.Authorization = `Bearer ${newToken}`;
-              original._retry = true;
-              resolve(api(original));
-            } else {
-              reject(err);
-            }
-          });
-          waiterRejects.push(reject);
-        });
-      }
+//       refreshing = true;
+//       original._retry = true;
 
-      refreshing = true;
-      original._retry = true;
+//       try {
+//         await axios.post(REFRESH_URL, {}, { withCredentials: true });
 
-      try {
-        const { data } = await axios.post(
-          REFRESH_URL,
-          {},
-          { withCredentials: true },
-        );
+//         auth.setAuthenticated();
 
-        if (!data?.accessToken) throw new Error('NO_NEW_TOKEN');
+//         waiters.forEach(({ resolve, original: waiterOriginal }) => {
+//           waiterOriginal._retry = true;
+//           resolve(api(waiterOriginal));
+//         });
+//         waiters = [];
 
-        auth.loginWithTokens(data.accessToken);
+//         return api(original);
+//       } catch (e) {
+//         waiters.forEach(({ reject }) => reject(e));
+//         waiters = [];
 
-        waiters.forEach((resolve) => resolve(data.accessToken));
-        waiters = [];
-        waiterRejects = [];
+//         throw e;
+//       } finally {
+//         refreshing = false;
+//       }
+//     }
 
-        original.headers = original.headers || {};
-        original.headers.Authorization = `Bearer ${data.accessToken}`;
-        return api(original);
-      } catch (e) {
-        waiters.forEach((resolve) => resolve(''));
-        waiterRejects.forEach((reject) => reject(e));
-        waiters = [];
-        waiterRejects = [];
+//     if (status === 403) {
+//       throw err;
+//     }
 
-        auth.logout();
+//     if (status === 302) {
+//       throw err;
+//     }
 
-        throw e;
-      } finally {
-        refreshing = false;
-      }
-    }
-
-    if (status === 403) {
-      throw err;
-    }
-
-    if (status === 302) {
-      throw err;
-    }
-
-    throw err;
-  },
-);
+//     throw err;
+//   },
+// );
 
 export default api;

@@ -20,53 +20,87 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref, defineEmits } from 'vue';
 import { useAuthStore } from '@/store/useAuthStore';
 import { userApi } from '@/api/user';
 import { debounce } from 'lodash';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
+// import { wait } from '@/utils/date';
 
+const emit = defineEmits(['login-success', 'close']);
 const auth = useAuthStore();
 
 let popupRef = null;
+let popupCheckInterval = null;
+let loginProcessing = false;
 
 const showLoginFailAlert = ref(false);
 
-const checkPopupClosed = async () => {
-  const interval = setInterval(async () => {
-    let isClosed = false;
-    isClosed = popupRef && popupRef.closed;
+const clearPopupWatcher = () => {
+  if (popupCheckInterval) {
+    clearInterval(popupCheckInterval);
+    popupCheckInterval = null;
+  }
+};
+
+const closePopup = () => {
+  if (popupRef && !popupRef.closed) {
+    popupRef.close();
+  }
+  popupRef = null;
+  clearPopupWatcher();
+};
+
+
+
+const processLoginSuccess = async () => {
+  if (loginProcessing) return;
+  loginProcessing = true;
+  try {
+    const userData = await userApi.getMe();
+    auth.setAuthenticated(userData);
+
+    emit('login-success', { nickname: userData.nickname, loginCount: userData.loginCount });
+    emit('close');
+  } catch (error) {
+    console.error('로그인 처리 실패:', error);
+    showLoginFailAlert.value = true;
+  } finally {
+    loginProcessing = false;
+  }
+};
+
+const handleSocialLoginMessage = async (event) => {
+  if (event.origin !== window.location.origin) return;
+  const { type, success } = event.data || {};
+  if (type !== 'SOCIAL_LOGIN_RESULT') return;
+
+  if (!success) {
+    showLoginFailAlert.value = true;
+    closePopup();
+    return;
+  }
+
+  await processLoginSuccess();
+  closePopup();
+};
+
+const checkPopupClosed = () => {
+  clearPopupWatcher();
+  popupCheckInterval = setInterval(() => {
+    const isClosed = popupRef && popupRef.closed;
     if (isClosed) {
-      clearInterval(interval);
-
-      const accessToken = localStorage.getItem('accessToken');
-
-      if (accessToken) {
-        try {
-          auth.loginWithTokens(accessToken);
-          const userData = await userApi.getMe();
-          auth.setUserInfo(userData);
-
-          if (window.handleLoginSuccessGlobal) {
-            window.handleLoginSuccessGlobal({ nickname: userData.nickname, loginCount: userData.loginCount });
-          }
-        } catch (error) {
-          console.error('로그인 처리 실패:', error);
-          showLoginFailAlert.value = true;
-        }
-      }
-
-      popupRef = null;
+      closePopup();
     }
   }, 1000);
 };
 
-const handleSocialLogin = debounce((provider) => {
+const handleSocialLogin = debounce(async (provider) => {
   console.log('소셜 로그인 시작:', provider);
   const loginUrl =
     provider === 'kakao'
-      ? `https://api.kdark.weareshadowpins.com/api/v1/auth/login/kakao`
-      : 'https://api.kdark.weareshadowpins.com/oauth2/authorization/google';
+      ? `/api/v1/auth/login/kakao`
+      : `/api/v1/auth/login/google`;
 
   popupRef = window.open(loginUrl, '소셜로그인', 'width=500,height=700');
 
@@ -79,12 +113,18 @@ const handleSocialLogin = debounce((provider) => {
 }, 300);
 
 
+onMounted(() => {
+  window.addEventListener('message', handleSocialLoginMessage);
+});
+
 
 onBeforeUnmount(() => {
+  window.removeEventListener('message', handleSocialLoginMessage);
   if (popupRef && !popupRef.closed) {
     popupRef.close();
   }
   popupRef = null;
+  clearPopupWatcher();
 });
 </script>
 
