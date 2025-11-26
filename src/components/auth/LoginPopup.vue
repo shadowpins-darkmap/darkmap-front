@@ -13,122 +13,33 @@
       </button>
     </div>
   </div>
-
-  <BaseAlertPopup v-if="showLoginFailAlert" @confirm="showLoginFailAlert = false" confirmText="확인" height="169px">
-    <p>로그인/가입에 실패했습니다.<br /> 정보를 다시 확인해주세요.</p>
-  </BaseAlertPopup>
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref, defineEmits } from 'vue';
-import { useAuthStore } from '@/store/useAuthStore';
-import { userApi } from '@/api/user';
 import { debounce } from 'lodash';
-import BaseAlertPopup from '@/components/BaseAlert.vue';
 import { getOAuthLoginUrl, OAUTH_PROVIDERS } from '@/utils/oauth';
-// import { wait } from '@/utils/date';
 
-const emit = defineEmits(['login-success', 'close']);
-const auth = useAuthStore();
+// ========== 소셜 로그인 핸들러 ==========
+const handleSocialLogin = debounce((provider) => {
+  console.log('🚀 소셜 로그인 시작:', provider);
 
-let popupRef = null;
-let popupCheckInterval = null;
-let loginProcessing = false;
-
-const showLoginFailAlert = ref(false);
-
-const clearPopupWatcher = () => {
-  if (popupCheckInterval) {
-    clearInterval(popupCheckInterval);
-    popupCheckInterval = null;
-  }
-};
-
-const closePopup = () => {
-  if (popupRef && !popupRef.closed) {
-    popupRef.close();
-  }
-  popupRef = null;
-  clearPopupWatcher();
-};
-
-
-
-const processLoginSuccess = async () => {
-  if (loginProcessing) return;
-  loginProcessing = true;
-  try {
-    const userData = await userApi.getMe();
-    auth.setAuthenticated(userData);
-
-    emit('login-success', { nickname: userData.nickname, loginCount: userData.loginCount });
-    emit('close');
-  } catch (error) {
-    console.error('로그인 처리 실패:', error);
-    showLoginFailAlert.value = true;
-  } finally {
-    loginProcessing = false;
-  }
-};
-
-const handleSocialLoginMessage = async (event) => {
-  if (event.origin !== window.location.origin) return;
-  const { type, success } = event.data || {};
-  if (type !== 'SOCIAL_LOGIN_RESULT') return;
-
-  if (!success) {
-    showLoginFailAlert.value = true;
-    closePopup();
-    return;
-  }
-
-  await processLoginSuccess();
-  closePopup();
-};
-
-const checkPopupClosed = () => {
-  clearPopupWatcher();
-  popupCheckInterval = setInterval(() => {
-    const isClosed = popupRef && popupRef.closed;
-    if (isClosed) {
-      closePopup();
-    }
-  }, 1000);
-};
-
-const handleSocialLogin = debounce(async (provider) => {
-  console.log('소셜 로그인 시작:', provider);
   const loginUrl = getOAuthLoginUrl(provider);
 
   if (!loginUrl) {
-    showLoginFailAlert.value = true;
+    alert('로그인 URL을 찾을 수 없습니다.');
     return;
   }
 
-  popupRef = window.open(loginUrl, '소셜로그인', 'width=500,height=700');
+  // OAuth 진행 중 표시 (돌아왔을 때 체크용)
+  sessionStorage.setItem('oauth_in_progress', 'true');
+  sessionStorage.setItem('oauth_provider', provider);
+  sessionStorage.setItem('oauth_start_time', Date.now().toString());
 
-  if (!popupRef) {
-    alert('팝업이 차단되었습니다. 팝업 허용을 켜주세요.');
-    return;
-  }
+  console.log('🔄 OAuth 페이지로 이동:', loginUrl);
 
-  checkPopupClosed();
+  // 페이지 리다이렉트
+  window.location.href = loginUrl;
 }, 300);
-
-
-onMounted(() => {
-  window.addEventListener('message', handleSocialLoginMessage);
-});
-
-
-onBeforeUnmount(() => {
-  window.removeEventListener('message', handleSocialLoginMessage);
-  if (popupRef && !popupRef.closed) {
-    popupRef.close();
-  }
-  popupRef = null;
-  clearPopupWatcher();
-});
 </script>
 
 <style scoped>

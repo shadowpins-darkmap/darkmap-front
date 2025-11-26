@@ -5,48 +5,24 @@ export const OAUTH_PROVIDERS = {
   KAKAO: 'kakao',
 };
 
-const PROVIDER_ENDPOINTS = {
-  [OAUTH_PROVIDERS.GOOGLE]: '/oauth2/authorization/google',
-  [OAUTH_PROVIDERS.KAKAO]: '/api/v1/auth/login/kakao',
-};
+/**
+ * OAuth 로그인 URL 생성
+ * @param {string} provider - 'google' | 'kakao'
+ * @param {string} redirectPath - 로그인 후 이동할 경로 (선택사항)
+ * @returns {string} OAuth 로그인 URL
+ */
+export function getOAuthLoginUrl(provider, redirectPath = '/') {
+  // 백엔드 base URL
+  const baseUrl =
+    process.env.NODE_ENV === 'development'
+      ? '' // 로컬: 프록시 사용
+      : API_BASE_URL; // 배포: 직접 호출
 
-const normalizeBaseUrl = (url) => {
-  if (!url) return '';
-  return url.endsWith('/') ? url.slice(0, -1) : url;
-};
-
-const buildQueryString = (redirectPath) => {
-  if (!redirectPath) return '';
-
+  // 쿼리 파라미터 구성
   const params = new URLSearchParams({
     redirect: redirectPath,
   });
 
-  const queryString = params.toString();
-  return queryString ? `?${queryString}` : '';
-};
-
-export function getOAuthLoginUrl(provider, redirectPath) {
-  const endpoint = PROVIDER_ENDPOINTS[provider];
-
-  if (!endpoint) {
-    console.error(`Invalid OAuth provider: ${provider}`);
-    return null;
-  }
-
-  const baseUrl = normalizeBaseUrl(API_BASE_URL);
-  const queryString = buildQueryString(redirectPath);
-
-  return `${baseUrl}${endpoint}${queryString}`;
-}
-
-export function loginWithOAuth(provider, redirectPath = '/') {
-  const url = getOAuthLoginUrl(provider, redirectPath);
-
-  if (!url) {
-    throw new Error(`Failed to generate OAuth URL for provider: ${provider}`);
-  }
-
-  sessionStorage.setItem('oauth_return_url', window.location.href);
-  window.location.href = url;
+  // 최종 URL 반환
+  return `${baseUrl}/api/oauth/${provider}?${params.toString()}`;
 }
