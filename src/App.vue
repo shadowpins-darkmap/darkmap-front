@@ -15,6 +15,13 @@ onMounted(async () => {
   const statsStore = useStatsStore();
   const authStore = useAuthStore();
   
+  // OAuth 팝업에서 온 경우 처리
+  if (window.opener) {
+    window.opener.postMessage({ type: 'OAUTH_POPUP_LOADED' }, window.location.origin);
+    window.close();
+    return;
+  }
+  
   // 로그인 상태 복원 시도
   await authStore.restoreSession();
   

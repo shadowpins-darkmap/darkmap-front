@@ -33,7 +33,7 @@ const auth = useAuthStore();
 const showLoginFailAlert = ref(false);
 let popupRef = null;
 let popupCloseInterval = null;
-let loginProcessing = false;
+
 
 const clearPopupCloseWatcher = () => {
   if (popupCloseInterval) {
@@ -50,49 +50,33 @@ const closePopup = () => {
   clearPopupCloseWatcher();
 };
 
-const processLoginSuccess = async () => {
-  if (loginProcessing) return;
-  loginProcessing = true;
 
-  try {
-    const userData = await userApi.getMe(); // 쿠키 기반 /me
-    auth.setAuthenticated(userData);
-    emit('login-success', { nickname: userData.nickname, loginCount: userData.loginCount });
-    emit('close');
-  } catch (error) {
-    console.error('로그인 처리 실패:', error);
-    showLoginFailAlert.value = true;
-  } finally {
-    loginProcessing = false;
-  }
-};
 
-// 팝업이 사용자에 의해 그냥 닫혔는지만 확인하는 watcher (선택)
-const startPopupCloseWatcher = () => {
+const startPopupWatcher = () => {
   clearPopupCloseWatcher();
   popupCloseInterval = setInterval(() => {
     if (popupRef && popupRef.closed) {
-      // 로그인 없이 닫힌 케이스
+      console.log('팝업 닫힘 - 로그인 취소');
       closePopup();
-      // 필요하면 여기서 "로그인 취소" 토스트 띄우기 등
     }
-  }, 500);
+  }, 1000);
 };
 
-// postMessage 수신 핸들러
 const handleOAuthMessage = async (event) => {
-  // 보안: 우리 도메인에서 온 메시지만 처리
   if (event.origin !== window.location.origin) return;
 
-  if (event.data?.type === 'OAUTH_SUCCESS') {
-    // 서버에서 쿠키 세팅 완료된 상태라고 가정하고 /me 호출
-    await processLoginSuccess();
-    closePopup();
-  }
-
-  if (event.data?.type === 'OAUTH_FAIL') {
-    closePopup();
-    showLoginFailAlert.value = true;
+  if (event.data?.type === 'OAUTH_POPUP_LOADED') {
+    console.log('📬 OAuth 팝업 로드 완료 - /me 호출');
+    try {
+      const userData = await userApi.getMe();
+      auth.setAuthenticated(userData);
+      emit('login-success', { nickname: userData.nickname, loginCount: userData.loginCount });
+      emit('close');
+    } catch {
+      showLoginFailAlert.value = true;
+    } finally {
+      closePopup();
+    }
   }
 };
 
@@ -112,7 +96,7 @@ const handleSocialLogin = debounce((provider) => {
     return;
   }
 
-  startPopupCloseWatcher();
+  startPopupWatcher();
 }, 300);
 
 onMounted(() => {
