@@ -16,29 +16,39 @@
 </template>
 
 <script setup>
+import { defineEmits } from 'vue';
 import { debounce } from 'lodash';
 import { getOAuthLoginUrl, OAUTH_PROVIDERS } from '@/utils/oauth';
 
-// ========== 소셜 로그인 핸들러 ==========
+const emit = defineEmits(['close']);
+
 const handleSocialLogin = debounce((provider) => {
   console.log('🚀 소셜 로그인 시작:', provider);
 
   const loginUrl = getOAuthLoginUrl(provider);
+
+  console.log('📍 생성된 URL:', loginUrl);
 
   if (!loginUrl) {
     alert('로그인 URL을 찾을 수 없습니다.');
     return;
   }
 
-  // OAuth 진행 중 표시 (돌아왔을 때 체크용)
+  // sessionStorage 설정
   sessionStorage.setItem('oauth_in_progress', 'true');
   sessionStorage.setItem('oauth_provider', provider);
   sessionStorage.setItem('oauth_start_time', Date.now().toString());
 
-  console.log('🔄 OAuth 페이지로 이동:', loginUrl);
+  console.log('✅ SessionStorage 설정 완료');
 
-  // 페이지 리다이렉트
-  window.location.href = loginUrl;
+  // 팝업 닫기
+  emit('close');
+
+  // 약간의 딜레이 후 리다이렉트
+  setTimeout(() => {
+    console.log('🔄 페이지 이동:', loginUrl);
+    window.location.href = loginUrl;
+  }, 150);
 }, 300);
 </script>
 
