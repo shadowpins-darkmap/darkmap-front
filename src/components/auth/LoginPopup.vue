@@ -13,43 +13,116 @@
       </button>
     </div>
   </div>
+
+  <BaseAlertPopup v-if="showLoginFailAlert" @confirm="showLoginFailAlert = false" confirmText="확인" height="169px">
+    <p>로그인/가입에 실패했습니다.<br /> 정보를 다시 확인해주세요.</p>
+  </BaseAlertPopup>
 </template>
 
 <script setup>
-import { defineEmits } from 'vue';
+import { defineEmits, onMounted, onBeforeUnmount, ref } from 'vue';
 import { debounce } from 'lodash';
 import { getOAuthLoginUrl, OAUTH_PROVIDERS } from '@/utils/oauth';
+import { useAuthStore } from '@/store/useAuthStore';
+import { userApi } from '@/api/user';
+import BaseAlertPopup from '@/components/BaseAlert.vue';
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['login-success', 'close']);
+const auth = useAuthStore();
 
-const handleSocialLogin = debounce((provider) => {
-  console.log('🚀 소셜 로그인 시작:', provider);
+const showLoginFailAlert = ref(false);
+let popupRef = null;
+let popupCheckInterval = null;
+let loginProcessing = false;
 
-  const loginUrl = getOAuthLoginUrl(provider);
+const clearPopupWatcher = () => {
+  if (popupCheckInterval) {
+    clearInterval(popupCheckInterval);
+    popupCheckInterval = null;
+  }
+};
 
-  console.log('📍 생성된 URL:', loginUrl);
+const closePopup = () => {
+  if (popupRef && !popupRef.closed) {
+    popupRef.close();
+  }
+  popupRef = null;
+  clearPopupWatcher();
+};
 
-  if (!loginUrl) {
-    alert('로그인 URL을 찾을 수 없습니다.');
+const processLoginSuccess = async () => {
+  if (loginProcessing) return;
+  loginProcessing = true;
+  try {
+    const userData = await userApi.getMe();
+    auth.setAuthenticated(userData);
+
+    emit('login-success', { nickname: userData.nickname, loginCount: userData.loginCount });
+    emit('close');
+  } catch (error) {
+    console.error('로그인 처리 실패:', error);
+    showLoginFailAlert.value = true;
+  } finally {
+    loginProcessing = false;
+  }
+};
+
+const handleSocialLoginMessage = async (event) => {
+  if (event.origin !== window.location.origin) return;
+  const { type, success } = event.data || {};
+  if (type !== 'SOCIAL_LOGIN_RESULT') return;
+
+  if (!success) {
+    showLoginFailAlert.value = true;
+    closePopup();
     return;
   }
 
-  // sessionStorage 설정
-  sessionStorage.setItem('oauth_in_progress', 'true');
-  sessionStorage.setItem('oauth_provider', provider);
-  sessionStorage.setItem('oauth_start_time', Date.now().toString());
+  await processLoginSuccess();
+  closePopup();
+};
 
-  console.log('✅ SessionStorage 설정 완료');
+const checkPopupClosed = () => {
+  clearPopupWatcher();
+  popupCheckInterval = setInterval(() => {
+    const isClosed = popupRef && popupRef.closed;
+    if (isClosed) {
+      closePopup();
+    }
+  }, 1000);
+};
 
-  // 팝업 닫기
-  emit('close');
+const handleSocialLogin = debounce((provider) => {
+  console.log('소셜 로그인 시작:', provider);
+  const loginUrl = getOAuthLoginUrl(provider);
 
-  // 약간의 딜레이 후 리다이렉트
-  setTimeout(() => {
-    console.log('🔄 페이지 이동:', loginUrl);
-    window.location.href = loginUrl;
-  }, 150);
+  if (!loginUrl) {
+    showLoginFailAlert.value = true;
+    return;
+  }
+
+  popupRef = window.open(loginUrl, '소셜로그인', 'width=500,height=700');
+
+  if (!popupRef) {
+    showLoginFailAlert.value = true;
+    return;
+  }
+
+  checkPopupClosed();
 }, 300);
+
+onMounted(() => {
+  window.addEventListener('message', handleSocialLoginMessage);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('message', handleSocialLoginMessage);
+  if (popupRef && !popupRef.closed) {
+    popupRef.close();
+  }
+  popupRef = null;
+  clearPopupWatcher();
+});
 </script>
 
 <style scoped>
