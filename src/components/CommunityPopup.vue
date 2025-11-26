@@ -347,6 +347,7 @@ onMounted(async () => {
   const userData = await auth.restoreSession();
 
   if (userData && auth.isLoggedIn) {
+    showLoginPopup.value = false;
     handleLoginSuccess({ nickname: userData.nickname, loginCount: userData.loginCount });
   }
 
@@ -356,6 +357,23 @@ onMounted(async () => {
   bubbleTimer = setInterval(() => {
     currentBubbleIndex.value = (currentBubbleIndex.value + 1) % 2;
   }, 3000);
+
+  const checkCookieInterval = setInterval(async () => {
+    if (!auth.isLoggedIn && auth.checkCookieAuth()) {
+      console.log('🍪 새로운 쿠키 감지 - 세션 복원 시도');
+      const newUserData = await auth.restoreSession();
+      if (newUserData) {
+        showLoginPopup.value = false;
+        handleLoginSuccess({ nickname: newUserData.nickname, loginCount: newUserData.loginCount });
+        clearInterval(checkCookieInterval);
+      }
+    }
+  }, 1000);
+
+  // 30초 후 감시 중단
+  setTimeout(() => {
+    clearInterval(checkCookieInterval);
+  }, 30000);
 });
 
 const loadInitialData = async () => {
