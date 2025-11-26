@@ -72,7 +72,7 @@
               <span>다크플레이스 등록</span>
               <span class="point_color">{{
                 auth.approvedReportCount ?? 0
-                }}</span>
+              }}</span>
             </li>
           </ul>
           <p class="tap_count_info" v-if="currentTab === '내 게시글'">
@@ -132,7 +132,7 @@
                   </span>
                   <span class="ellipsis__2 alarm_contents">{{
                     item.title
-                  }}</span>
+                    }}</span>
                 </button>
               </li>
             </template>
@@ -344,8 +344,12 @@ const currentBubbleIndex = ref(0);
 let bubbleTimer = null;
 
 onMounted(async () => {
-  // 세션 쿠키 기반 자동 로그인 시도
-  await auth.restoreSession();
+  const userData = await auth.restoreSession();
+
+  if (userData && auth.isLoggedIn) {
+    handleLoginSuccess({ nickname: userData.nickname, loginCount: userData.loginCount });
+  }
+
   await loadInitialData();
 
   // 인삿말 토글

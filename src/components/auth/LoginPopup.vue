@@ -4,11 +4,11 @@
       <img width="146" height="152" src="@/assets/loginLogoImg.svg" alt="login logo image" />
     </div>
     <div class="login_buttons_wrap">
-      <button class="yellow_button" @click="handleSocialLogin('kakao')">
+      <button class="yellow_button" @click="handleSocialLogin(OAUTH_PROVIDERS.KAKAO)">
         <img width="20" height="18" src="@/assets/kakaoIcon.svg" alt="kakao icon" class="kakao_icon" />
         카카오로 계속하기
       </button>
-      <button class="black_button" @click="handleSocialLogin('google')">
+      <button class="black_button" @click="handleSocialLogin(OAUTH_PROVIDERS.GOOGLE)">
         Google 계정으로 계속하기
       </button>
     </div>
@@ -25,6 +25,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { userApi } from '@/api/user';
 import { debounce } from 'lodash';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
+import { getOAuthLoginUrl, OAUTH_PROVIDERS } from '@/utils/oauth';
 // import { wait } from '@/utils/date';
 
 const emit = defineEmits(['login-success', 'close']);
@@ -97,10 +98,12 @@ const checkPopupClosed = () => {
 
 const handleSocialLogin = debounce(async (provider) => {
   console.log('소셜 로그인 시작:', provider);
-  const loginUrl =
-    provider === 'kakao'
-      ? `/api/v1/auth/login/kakao`
-      : `/api/v1/auth/login/google`;
+  const loginUrl = getOAuthLoginUrl(provider);
+
+  if (!loginUrl) {
+    showLoginFailAlert.value = true;
+    return;
+  }
 
   popupRef = window.open(loginUrl, '소셜로그인', 'width=500,height=700');
 
