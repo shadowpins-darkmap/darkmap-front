@@ -32,13 +32,13 @@ const auth = useAuthStore();
 
 const showLoginFailAlert = ref(false);
 let popupRef = null;
-let popupCheckInterval = null;
+let popupCloseInterval = null;
 let loginProcessing = false;
 
-const clearPopupWatcher = () => {
-  if (popupCheckInterval) {
-    clearInterval(popupCheckInterval);
-    popupCheckInterval = null;
+const clearPopupCloseWatcher = () => {
+  if (popupCloseInterval) {
+    clearInterval(popupCloseInterval);
+    popupCloseInterval = null;
   }
 };
 
@@ -47,16 +47,16 @@ const closePopup = () => {
     popupRef.close();
   }
   popupRef = null;
-  clearPopupWatcher();
+  clearPopupCloseWatcher();
 };
 
 const processLoginSuccess = async () => {
   if (loginProcessing) return;
   loginProcessing = true;
-  try {
-    const userData = await userApi.getMe();
-    auth.setAuthenticated(userData);
 
+  try {
+    const userData = await userApi.getMe(); // 쿠키 기반 /me
+    auth.setAuthenticated(userData);
     emit('login-success', { nickname: userData.nickname, loginCount: userData.loginCount });
     emit('close');
   } catch (error) {
@@ -67,29 +67,33 @@ const processLoginSuccess = async () => {
   }
 };
 
-const handleSocialLoginMessage = async (event) => {
-  if (event.origin !== window.location.origin) return;
-  const { type, success } = event.data || {};
-  if (type !== 'SOCIAL_LOGIN_RESULT') return;
-
-  if (!success) {
-    showLoginFailAlert.value = true;
-    closePopup();
-    return;
-  }
-
-  await processLoginSuccess();
-  closePopup();
+// 팝업이 사용자에 의해 그냥 닫혔는지만 확인하는 watcher (선택)
+const startPopupCloseWatcher = () => {
+  clearPopupCloseWatcher();
+  popupCloseInterval = setInterval(() => {
+    if (popupRef && popupRef.closed) {
+      // 로그인 없이 닫힌 케이스
+      closePopup();
+      // 필요하면 여기서 "로그인 취소" 토스트 띄우기 등
+    }
+  }, 500);
 };
 
-const checkPopupClosed = () => {
-  clearPopupWatcher();
-  popupCheckInterval = setInterval(() => {
-    const isClosed = popupRef && popupRef.closed;
-    if (isClosed) {
-      closePopup();
-    }
-  }, 1000);
+// postMessage 수신 핸들러
+const handleOAuthMessage = async (event) => {
+  // 보안: 우리 도메인에서 온 메시지만 처리
+  if (event.origin !== window.location.origin) return;
+
+  if (event.data?.type === 'OAUTH_SUCCESS') {
+    // 서버에서 쿠키 세팅 완료된 상태라고 가정하고 /me 호출
+    await processLoginSuccess();
+    closePopup();
+  }
+
+  if (event.data?.type === 'OAUTH_FAIL') {
+    closePopup();
+    showLoginFailAlert.value = true;
+  }
 };
 
 const handleSocialLogin = debounce((provider) => {
@@ -108,20 +112,16 @@ const handleSocialLogin = debounce((provider) => {
     return;
   }
 
-  checkPopupClosed();
+  startPopupCloseWatcher();
 }, 300);
 
 onMounted(() => {
-  window.addEventListener('message', handleSocialLoginMessage);
+  window.addEventListener('message', handleOAuthMessage);
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener('message', handleSocialLoginMessage);
-  if (popupRef && !popupRef.closed) {
-    popupRef.close();
-  }
-  popupRef = null;
-  clearPopupWatcher();
+  window.removeEventListener('message', handleOAuthMessage);
+  closePopup();
 });
 </script>
 
