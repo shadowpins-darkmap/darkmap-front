@@ -51,15 +51,33 @@ const closePopup = () => {
   }, 500);
 };
 
+const isDebugModeEnabled = () => {
+  try {
+    return localStorage.getItem('social_login_debug') === 'true';
+  } catch (error) {
+    console.warn('Failed to read social login debug flag:', error);
+    return false;
+  }
+};
+
 onMounted(async () => {
   const params = new URLSearchParams(window.location.search);
   const success = params.get('success') === 'true';
+  const debugMode = isDebugModeEnabled();
+
+  const showDebugAlert = (title, payload) => {
+    if (!debugMode) return;
+    window.alert(
+      `${title}\n${typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2)}`
+    );
+  };
   console.log('Social login redirect loaded with success:', {
     params,
     success,
   });
 
   if (!success) {
+    showDebugAlert('❌ Social login failed (query)', { params: Object.fromEntries(params.entries()) });
     notifyOpener({
       type: 'SOCIAL_LOGIN_RESULT',
       success: false,
@@ -71,6 +89,7 @@ onMounted(async () => {
   try {
     const userData = await userApi.getMe();
     authStore.setAuthenticated(userData);
+    showDebugAlert('✅ userApi.getMe() success', userData);
     notifyOpener({
       type: 'SOCIAL_LOGIN_RESULT',
       success: true,
@@ -79,6 +98,7 @@ onMounted(async () => {
     notifyOpener({ type: 'OAUTH_POPUP_LOADED' });
   } catch (error) {
     console.error('Failed to fetch user info after social login:', error);
+    showDebugAlert('❌ userApi.getMe() failed', error?.message || error);
     notifyOpener({
       type: 'SOCIAL_LOGIN_RESULT',
       success: false,
