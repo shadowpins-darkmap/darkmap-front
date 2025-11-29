@@ -22,7 +22,7 @@
 <script setup>
 import { defineEmits, onMounted, onBeforeUnmount, ref } from 'vue';
 import { debounce } from 'lodash';
-import { getOAuthLoginUrl, OAUTH_PROVIDERS } from '@/utils/oauth';
+import { OAUTH_PROVIDERS } from '@/utils/oauth';
 import { useAuthStore } from '@/store/useAuthStore';
 import { userApi } from '@/api/user';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
@@ -111,19 +111,19 @@ const handleOAuthMessage = async (event) => {
 
 const handleSocialLogin = debounce((provider) => {
   console.log('소셜 로그인 시작:', provider);
-  const loginUrl = getOAuthLoginUrl(provider);
 
-  if (!loginUrl) {
-    showLoginFailAlert.value = true;
-    return;
-  }
-
-  popupRef = window.open(loginUrl, '소셜로그인', 'width=500,height=700');
+  const popupUrl = `/social-login-start?provider=${provider}`;
+  popupRef = window.open(
+    popupUrl,
+    '소셜로그인',
+    'width=500,height=700'
+  );
 
   if (!popupRef) {
     showLoginFailAlert.value = true;
     return;
   }
+
 
   startPopupWatcher();
 }, 300);

@@ -7,61 +7,34 @@
 import { onMounted } from 'vue';
 
 const notifyOpener = (payload) => {
-  if (!window.opener) return;
-
-  try {
-    window.opener.postMessage(payload, '*'); // 부모에서 origin 필터링
-  } catch (e) {
-    console.error('[SocialRedirect] postMessage error', e);
+  if (!window.opener) {
+    console.warn('[SocialRedirect] window.opener 없음!');
+    return;
   }
-};
-
-const logToOpener = (message, extra = {}) => {
-  if (!window.opener) return;
   try {
-    window.opener.postMessage(
-      {
-        type: 'SOCIAL_LOGIN_DEBUG',
-        message,
-        extra,
-      },
-      '*',
-    );
+    window.opener.postMessage(payload, '*');
   } catch (e) {
-    console.error('[SocialRedirect] postMessage error', e);
+    console.error('[SocialRedirect] postMessage 실패', e);
   }
 };
 
 const closePopup = () => {
   setTimeout(() => {
     window.close();
-  }, 300);
+  }, 200);
 };
 
 onMounted(() => {
   const params = new URLSearchParams(window.location.search);
   const success = params.get('success') === 'true';
 
-  logToOpener('SocialRedirect mounted', {
-    search: window.location.search,
-    successParam: params.get('success'),
-    hasOpener: !!window.opener,
-  });
-
   if (!success) {
-    logToOpener('success=false, send fail result');
     notifyOpener({ type: 'SOCIAL_LOGIN_RESULT', success: false });
     closePopup();
     return;
   }
 
-  logToOpener('success=true, send success result');
-
-  notifyOpener({
-    type: 'SOCIAL_LOGIN_RESULT',
-    success: true,
-  });
-
+  notifyOpener({ type: 'SOCIAL_LOGIN_RESULT', success: true });
   closePopup();
 });
 </script>
