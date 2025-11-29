@@ -65,47 +65,37 @@ const startPopupWatcher = () => {
 const handleOAuthMessage = async (event) => {
   console.log('[LoginPopup] message event:', event.origin, event.data);
 
-  if (event.data?.type === 'SOCIAL_LOGIN_DEBUG') {
-    console.log('[SocialRedirect DEBUG]', event.data.message, event.data.extra);
+  if (event.data?.type === 'SOCIAL_DEBUG') {
+    console.log('[SOCIAL_DEBUG]', event.data.step, event.data.payload);
     return;
   }
 
-  if (event.data?.type === 'SOCIAL_LOGIN_RESULT') {
-    if (!event.data.success) {
-      showLoginFailAlert.value = true;
-      closePopup();
-      return;
-    }
-
-    try {
-      const userData = await userApi.getMe();
-      auth.setAuthenticated(userData);
-      emit('login-success', {
-        nickname: userData.nickname,
-        loginCount: userData.loginCount,
-      });
-      emit('close');
-    } catch (error) {
-      console.error('SOCIAL_LOGIN_RESULT 처리 실패:', error);
-      showLoginFailAlert.value = true;
-    } finally {
-      closePopup();
-    }
+  if (event.data?.type !== 'SOCIAL_LOGIN_RESULT') {
     return;
   }
 
-  if (event.data?.type === 'OAUTH_POPUP_LOADED') {
-    console.log('📬 OAuth 팝업 로드 완료 - /me 호출');
-    try {
-      const userData = await userApi.getMe();
-      auth.setAuthenticated(userData);
-      emit('login-success', { nickname: userData.nickname, loginCount: userData.loginCount });
-      emit('close');
-    } catch {
-      showLoginFailAlert.value = true;
-    } finally {
-      closePopup();
-    }
+  if (!event.data.success) {
+    console.log('[LoginPopup] SOCIAL_LOGIN_RESULT: 실패');
+    showLoginFailAlert.value = true;
+    closePopup();
+    return;
+  }
+
+  console.log('[LoginPopup] SOCIAL_LOGIN_RESULT: 성공 → /me 호출');
+
+  try {
+    const userData = await userApi.getMe();
+    auth.setAuthenticated(userData);
+    emit('login-success', {
+      nickname: userData.nickname,
+      loginCount: userData.loginCount,
+    });
+    emit('close');
+  } catch (error) {
+    console.error('SOCIAL_LOGIN_RESULT 처리 실패(/me 401 등):', error);
+    showLoginFailAlert.value = true;
+  } finally {
+    closePopup();
   }
 };
 

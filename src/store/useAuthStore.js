@@ -106,7 +106,6 @@ export const useAuthStore = defineStore('auth', {
 
     checkCookieAuth() {
       const cookies = document.cookie.split(';');
-      console.log('🍪 전체 쿠키:', document.cookie);
 
       const accessToken = cookies.find((cookie) =>
         cookie.trim().startsWith('access_token='),
@@ -114,9 +113,6 @@ export const useAuthStore = defineStore('auth', {
       const refreshToken = cookies.find((cookie) =>
         cookie.trim().startsWith('refresh_token='),
       );
-
-      console.log('🔑 access_token 존재:', !!accessToken);
-      console.log('🔄 refresh_token 존재:', !!refreshToken);
 
       return !!(accessToken && refreshToken);
     },
