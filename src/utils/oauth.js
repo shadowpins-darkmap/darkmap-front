@@ -14,9 +14,15 @@ export const OAUTH_PROVIDERS = {
 export function getOAuthLoginUrl(provider, redirectPath = '/social-redirect') {
   const baseUrl = process.env.NODE_ENV === 'development' ? '' : API_BASE_URL;
 
+  const redirectUrl = redirectPath.startsWith('http')
+    ? redirectPath
+    : `${window.location.origin}${redirectPath}`;
+
   const params = new URLSearchParams({
-    redirect: redirectPath,
+    redirect: redirectUrl,
   });
 
-  return `${baseUrl}/api/oauth/${provider}?${params.toString()}`;
+  const finalUrl = `${baseUrl}/api/oauth/${provider}?${params.toString()}`;
+  console.log('[getOAuthLoginUrl] 최종 loginUrl =', finalUrl);
+  return finalUrl;
 }
