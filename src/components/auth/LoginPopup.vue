@@ -26,7 +26,6 @@ import { getOAuthLoginUrl, OAUTH_PROVIDERS } from '@/utils/oauth';
 import { useAuthStore } from '@/store/useAuthStore';
 import { userApi } from '@/api/user';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
-import { BASE_URL } from '@/constant/url';
 
 const emit = defineEmits(['login-success', 'close']);
 const auth = useAuthStore();
@@ -35,26 +34,6 @@ const showLoginFailAlert = ref(false);
 let popupRef = null;
 let popupCloseInterval = null;
 
-const FALLBACK_POPUP_ORIGINS = [BASE_URL];
-
-const parseOrigin = (url) => {
-  if (!url) return null;
-  try {
-    return new URL(url).origin;
-  } catch {
-    return null;
-  }
-};
-
-const trustedOrigins = new Set(
-  [
-    window.location.origin,
-    parseOrigin(BASE_URL),
-    ...FALLBACK_POPUP_ORIGINS,
-  ].filter(Boolean),
-);
-
-const isTrustedOrigin = (origin) => trustedOrigins.has(origin);
 
 const clearPopupCloseWatcher = () => {
   if (popupCloseInterval) {
@@ -85,8 +64,6 @@ const startPopupWatcher = () => {
 
 const handleOAuthMessage = async (event) => {
   console.log('[LoginPopup] message event:', event.origin, event.data);
-
-  // if (!isTrustedOrigin(event.origin)) return;
 
   if (event.data?.type === 'SOCIAL_LOGIN_RESULT') {
     if (!event.data.success) {
