@@ -37,9 +37,9 @@ const notifyResult = (success) => {
 };
 
 const closePopup = () => {
-  setTimeout(() => {
-    window.close();
-  }, 300);
+  // setTimeout(() => {
+  //   window.close();
+  // }, 300);
 };
 
 onMounted(() => {
