@@ -70,9 +70,7 @@
             <li class="icon_list">
               <img src="@/assets/iconListMarker.svg" class="my_list_icon" alt="my list icon" width="16" height="16" />
               <span>다크플레이스 등록</span>
-              <span class="point_color">{{
-                auth.approvedReportCount ?? 0
-                }}</span>
+              <span class="point_color">{{ auth.approvedReportCount ?? 0 }}</span>
             </li>
           </ul>
           <p class="tap_count_info" v-if="currentTab === '내 게시글'">
@@ -130,9 +128,7 @@
                   <span class="alarm_list_icon">
                     <img src="@/assets/profileDefault.svg" alt="profile default image" width="40" height="40" />
                   </span>
-                  <span class="ellipsis__2 alarm_contents">{{
-                    item.title
-                  }}</span>
+                  <span class="ellipsis__2 alarm_contents">{{ item.title }}</span>
                 </button>
               </li>
             </template>
@@ -148,9 +144,7 @@
                   <span class="alarm_list_icon">
                     <img src="@/assets/profileDefault.svg" alt="profile default image" width="40" height="40" />
                   </span>
-                  <span class="ellipsis__2 alarm_contents">{{
-                    item.content
-                  }}</span>
+                  <span class="ellipsis__2 alarm_contents">{{ item.content }}</span>
                 </button>
               </li>
             </template>
@@ -262,8 +256,8 @@
         @next="clickNext" />
     </section>
   </CommonPopup>
-  <CommonPopup :visible="showLoginPopup" @close="showLoginPopup = false">
-    <LoginPopup @login-success="handleLoginSuccess" @close="showLoginPopup = false"></LoginPopup>
+  <CommonPopup :visible="showLoginPopup" @close="handleLoginClose">
+    <LoginPopup @login-success="handleLoginSuccess" @close="handleLoginClose"></LoginPopup>
   </CommonPopup>
   <BaseAlertPopup v-if="showWelcomeAlert" @confirm="handleWelcomeConfirm" confirmText="확인" height="169px">
     <p style="margin-top: 6px;">{{ loginUserData.nickname }}님 다시 오셨네요! <br /> {{ loginUserData.loginCount }}번째 투어에요.</p>
@@ -318,6 +312,7 @@ const showLoginAlert = ref(false);
 const showLoginPopup = ref(false);
 const showAlarmPopup = ref(false);
 const showAccountSection = ref(false);
+const showLoginFailAlert = ref(false);
 
 const showWelcomeAlert = ref(false);
 const showNicknameStep = ref(false);
@@ -333,7 +328,6 @@ const isTermsPanelOpen = ref(false);
 const isArticleDetailOpen = ref(false);
 const selectedArticleDetail = ref(null);
 
-
 /* --------- 아코디언 / 인삿말 --------- */
 const openSection = ref('mypage');
 const toggleSection = (section) => {
@@ -343,17 +337,69 @@ const toggleSection = (section) => {
 const currentBubbleIndex = ref(0);
 let bubbleTimer = null;
 
-onMounted(async () => {
-  // 로컬스토리지 토큰 복구 → 자동 로그인
-  auth.initFromStorage();
-  await loadInitialData();
+/* ========== OAuth 리다이렉트 복귀 체크 (리다이렉트 폴백용) ========== */
+const checkOAuthRedirectReturn = async () => {
+  const oauthInProgress = sessionStorage.getItem('oauth_in_progress');
 
-  // 인삿말 토글
-  bubbleTimer = setInterval(() => {
-    currentBubbleIndex.value = (currentBubbleIndex.value + 1) % 2;
-  }, 3000);
-});
+  if (oauthInProgress !== 'true') {
+    return;
+  }
 
+  console.log('🔍 OAuth 리다이렉트 후 복귀 감지');
+
+  const provider = sessionStorage.getItem('oauth_provider');
+  const startTime = sessionStorage.getItem('oauth_start_time');
+
+  // sessionStorage 즉시 클리어
+  sessionStorage.removeItem('oauth_in_progress');
+  sessionStorage.removeItem('oauth_provider');
+  sessionStorage.removeItem('oauth_start_time');
+
+  // 타임아웃 체크 (5분)
+  if (startTime && Date.now() - parseInt(startTime) > 5 * 60 * 1000) {
+    console.log('⏰ OAuth 타임아웃 (5분 초과)');
+    return;
+  }
+
+  console.log(`⏳ ${provider} 로그인 처리 대기 중...`);
+
+  // 쿠키 확인 (최대 3초 대기)
+  for (let i = 0; i < 6; i++) {
+    console.log(`🔄 쿠키 체크 시도 ${i + 1}/6`);
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    if (auth.checkCookieAuth()) {
+      console.log('✅ 인증 쿠키 확인됨');
+
+      try {
+        const userData = await auth.restoreSession();
+
+        if (userData) {
+          console.log('✅ 로그인 성공:', userData);
+          showLoginPopup.value = false;
+          handleLoginSuccess({
+            nickname: userData.nickname,
+            loginCount: userData.loginCount
+          });
+          return;
+        }
+      } catch (error) {
+        console.error('❌ 세션 복원 실패:', error);
+        showLoginFailAlert.value = true;  // ✅ 에러 알림
+        return;
+      }
+
+      break;
+    }
+  }
+
+  // 쿠키가 없으면 실패
+  console.log('❌ 로그인 실패 - 인증 쿠키 없음');
+  showLoginFailAlert.value = true;  // ✅ 에러 알림 (alert 대신)
+};
+
+/* ========== 초기 데이터 로딩 ========== */
 const loadInitialData = async () => {
   try {
     await statsStore.fetchStats();
@@ -375,11 +421,41 @@ const loadInitialData = async () => {
     console.error('초기 데이터 로딩 실패:', error);
   }
 };
+
+/* ========== 마운트 / 언마운트 ========== */
+onMounted(async () => {
+  console.log('🎬 CommunityPopup 마운트');
+
+  // 1. OAuth 리다이렉트 복귀 체크
+  await checkOAuthRedirectReturn();
+
+  // 2. 기존 세션 복원
+  if (!auth.isLoggedIn) {
+    const userData = await auth.restoreSession();
+    if (userData && auth.isLoggedIn) {
+      console.log('✅ 기존 세션 복원 성공:', userData);
+      showLoginPopup.value = false;
+      handleLoginSuccess({
+        nickname: userData.nickname,
+        loginCount: userData.loginCount
+      });
+    }
+  }
+
+  // 3. 초기 데이터 로딩
+  await loadInitialData();
+
+  // 4. 인삿말 토글 시작
+  bubbleTimer = setInterval(() => {
+    currentBubbleIndex.value = (currentBubbleIndex.value + 1) % 2;
+  }, 3000);
+});
+
 onBeforeUnmount(() => {
   if (bubbleTimer) clearInterval(bubbleTimer);
 });
 
-
+/* ========== Computed ========== */
 const alarmList = computed(() => {
   if (!auth.notifications) return [];
   const comments = auth.notifications.newComments?.map(item => ({
@@ -409,7 +485,7 @@ const alarmList = computed(() => {
 const myPostList = computed(() => auth.myBoards?.boards || []);
 const myCommentList = computed(() => auth.myComments || []);
 
-/* --------- 유틸 --------- */
+/* ========== 유틸 ========== */
 const getIcon = (type) => {
   switch (type) {
     case 'comment':
@@ -423,17 +499,15 @@ const getIcon = (type) => {
   }
 };
 
-/* --------- 페이징 --------- */
+/* ========== 페이징 ========== */
 const currentPage = ref(1);
 const itemsPerPage = 6;
 
 const totalPages = computed(() => {
   let totalLength = 0;
   if (currentTab.value === '알림') totalLength = alarmList.value.length;
-  else if (currentTab.value === '내 게시글')
-    totalLength = myPostList.value.length;
-  else if (currentTab.value === '내 댓글')
-    totalLength = myCommentList.value.length;
+  else if (currentTab.value === '내 게시글') totalLength = myPostList.value.length;
+  else if (currentTab.value === '내 댓글') totalLength = myCommentList.value.length;
   return Math.ceil(totalLength / itemsPerPage);
 });
 
@@ -450,18 +524,16 @@ const currentItems = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
   const end = start + itemsPerPage;
   if (currentTab.value === '알림') return alarmList.value.slice(start, end);
-  if (currentTab.value === '내 게시글')
-    return myPostList.value.slice(start, end);
-  if (currentTab.value === '내 댓글')
-    return myCommentList.value.slice(start, end);
+  if (currentTab.value === '내 게시글') return myPostList.value.slice(start, end);
+  if (currentTab.value === '내 댓글') return myCommentList.value.slice(start, end);
   return [];
 });
 
 const pageChange = (p) => (currentPage.value = p);
 const clickPrev = () => currentPage.value > 1 && currentPage.value--;
-const clickNext = () =>
-  currentPage.value < totalPages.value && currentPage.value++;
+const clickNext = () => currentPage.value < totalPages.value && currentPage.value++;
 
+/* ========== Watchers ========== */
 watch(currentTab, async (next) => {
   currentPage.value = 1;
   if (next === '내 댓글' && auth.isLoggedIn && !auth.myCommentsLoaded) {
@@ -523,11 +595,18 @@ const handleArticleDetailClose = () => {
   selectedArticleDetail.value = null;
 };
 
-const handleLoginSuccess = (userData) => {
-  showLoginPopup.value = false;
+/* ========== 로그인 관련 핸들러 ========== */
+const handleLoginSuccess = async (userData) => {
+  console.log('🎉 handleLoginSuccess 호출:', userData);
+
   loginUserData.value = userData;
 
-  if (showWelcomeAlert.value) return;
+  // 중복 실행 방지
+  if (showWelcomeAlert.value || showNicknameStep.value) {
+    console.log('⚠️ 이미 온보딩 진행 중');
+    return;
+  }
+
   if (userData.loginCount >= 2) {
     showWelcomeAlert.value = true;
   } else {
@@ -535,7 +614,9 @@ const handleLoginSuccess = (userData) => {
   }
 };
 
-window.handleLoginSuccessGlobal = handleLoginSuccess;
+const handleLoginClose = () => {
+  showLoginPopup.value = false;
+};
 
 const handleWelcomeConfirm = async () => {
   showWelcomeAlert.value = false;
@@ -561,6 +642,8 @@ const handleMarketingSkip = () => {
   showMarketingStep.value = false;
 };
 
+// 전역 함수 (혹시 필요한 경우)
+window.handleLoginSuccessGlobal = handleLoginSuccess;
 </script>
 
 <style scoped lang="scss">

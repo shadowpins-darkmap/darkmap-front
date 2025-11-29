@@ -2,16 +2,28 @@
   <router-view />
 </template>
 
-<script>
-export default {
-  name: 'App',
-};
-
+<script setup>
 import { onMounted } from 'vue';
 import { useStatsStore } from '@/store/useStatsStore';
+import { useAuthStore } from '@/store/useAuthStore';
 
-onMounted(() => {
+const isSocialRedirectPath = window.location.pathname.startsWith('/social-redirect');
+
+onMounted(async () => {
   const statsStore = useStatsStore();
+  const authStore = useAuthStore();
+
+  if (window.opener && !isSocialRedirectPath) {
+    window.opener.postMessage({ type: 'OAUTH_POPUP_LOADED' }, '*');
+    window.close();
+    return;
+  }
+
+  if (window.opener && isSocialRedirectPath) {
+    return;
+  }
+
+  await authStore.restoreSession();
   statsStore.fetchStats();
 });
 </script>

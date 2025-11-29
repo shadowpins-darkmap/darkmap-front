@@ -4,11 +4,11 @@
       <img width="146" height="152" src="@/assets/loginLogoImg.svg" alt="login logo image" />
     </div>
     <div class="login_buttons_wrap">
-      <button class="yellow_button" @click="handleSocialLogin('kakao')">
+      <button class="yellow_button" @click="handleSocialLogin(OAUTH_PROVIDERS.KAKAO)">
         <img width="20" height="18" src="@/assets/kakaoIcon.svg" alt="kakao icon" class="kakao_icon" />
         카카오로 계속하기
       </button>
-      <button class="black_button" @click="handleSocialLogin('google')">
+      <button class="black_button" @click="handleSocialLogin(OAUTH_PROVIDERS.GOOGLE)">
         Google 계정으로 계속하기
       </button>
     </div>
@@ -20,71 +20,121 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, ref } from 'vue';
+import { defineEmits, onMounted, onBeforeUnmount, ref } from 'vue';
+import { debounce } from 'lodash';
+import { OAUTH_PROVIDERS } from '@/utils/oauth';
 import { useAuthStore } from '@/store/useAuthStore';
 import { userApi } from '@/api/user';
-import { debounce } from 'lodash';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
 
+const emit = defineEmits(['login-success', 'close']);
 const auth = useAuthStore();
 
-let popupRef = null;
-
 const showLoginFailAlert = ref(false);
+let popupRef = null;
+let popupCloseInterval = null;
 
-const checkPopupClosed = async () => {
-  const interval = setInterval(async () => {
-    let isClosed = false;
-    isClosed = popupRef && popupRef.closed;
-    if (isClosed) {
-      clearInterval(interval);
 
-      const accessToken = localStorage.getItem('accessToken');
-
-      if (accessToken) {
-        try {
-          auth.loginWithTokens(accessToken);
-          const userData = await userApi.getMe();
-          auth.setUserInfo(userData);
-
-          if (window.handleLoginSuccessGlobal) {
-            window.handleLoginSuccessGlobal({ nickname: userData.nickname, loginCount: userData.loginCount });
-          }
-        } catch (error) {
-          console.error('로그인 처리 실패:', error);
-          showLoginFailAlert.value = true;
-        }
-      }
-
-      popupRef = null;
-    }
-  }, 1000);
+const clearPopupCloseWatcher = () => {
+  if (popupCloseInterval) {
+    clearInterval(popupCloseInterval);
+    popupCloseInterval = null;
+  }
 };
 
-const handleSocialLogin = debounce((provider) => {
-  console.log('소셜 로그인 시작:', provider);
-  const loginUrl =
-    provider === 'kakao'
-      ? `https://api.kdark.weareshadowpins.com/api/v1/auth/login/kakao`
-      : 'https://api.kdark.weareshadowpins.com/oauth2/authorization/google';
-
-  popupRef = window.open(loginUrl, '소셜로그인', 'width=500,height=700');
-
-  if (!popupRef) {
-    alert('팝업이 차단되었습니다. 팝업 허용을 켜주세요.');
-    return;
-  }
-
-  checkPopupClosed();
-}, 300);
-
-
-
-onBeforeUnmount(() => {
+const closePopup = () => {
   if (popupRef && !popupRef.closed) {
     popupRef.close();
   }
   popupRef = null;
+  clearPopupCloseWatcher();
+};
+
+
+
+const startPopupWatcher = () => {
+  clearPopupCloseWatcher();
+  popupCloseInterval = setInterval(() => {
+    if (popupRef && popupRef.closed) {
+      console.log('팝업 닫힘 - 로그인 취소');
+      closePopup();
+    }
+  }, 1000);
+};
+
+const handleOAuthMessage = async (event) => {
+  console.log('[LoginPopup] message event:', event.origin, event.data);
+
+  if (event.data?.type === 'SOCIAL_LOGIN_DEBUG') {
+    console.log('[SocialRedirect DEBUG]', event.data.message, event.data.extra);
+    return;
+  }
+
+  if (event.data?.type === 'SOCIAL_LOGIN_RESULT') {
+    if (!event.data.success) {
+      showLoginFailAlert.value = true;
+      closePopup();
+      return;
+    }
+
+    try {
+      const userData = await userApi.getMe();
+      auth.setAuthenticated(userData);
+      emit('login-success', {
+        nickname: userData.nickname,
+        loginCount: userData.loginCount,
+      });
+      emit('close');
+    } catch (error) {
+      console.error('SOCIAL_LOGIN_RESULT 처리 실패:', error);
+      showLoginFailAlert.value = true;
+    } finally {
+      closePopup();
+    }
+    return;
+  }
+
+  if (event.data?.type === 'OAUTH_POPUP_LOADED') {
+    console.log('📬 OAuth 팝업 로드 완료 - /me 호출');
+    try {
+      const userData = await userApi.getMe();
+      auth.setAuthenticated(userData);
+      emit('login-success', { nickname: userData.nickname, loginCount: userData.loginCount });
+      emit('close');
+    } catch {
+      showLoginFailAlert.value = true;
+    } finally {
+      closePopup();
+    }
+  }
+};
+
+const handleSocialLogin = debounce((provider) => {
+  console.log('소셜 로그인 시작 v2:', provider);
+
+  const popupUrl = `/social-login-start?provider=${provider}`;
+  popupRef = window.open(
+    popupUrl,
+    '소셜로그인',
+    'width=500,height=700'
+  );
+
+  if (!popupRef) {
+    showLoginFailAlert.value = true;
+    return;
+  }
+
+
+  startPopupWatcher();
+}, 300);
+
+onMounted(() => {
+  window.addEventListener('message', handleOAuthMessage);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('message', handleOAuthMessage);
+  closePopup();
 });
 </script>
 

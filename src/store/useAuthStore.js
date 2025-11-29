@@ -1,10 +1,9 @@
 import { defineStore } from 'pinia';
 import { userApi } from '@/api/user';
-import { ACCESS_TOKEN_NAME } from '@/constant/user';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    accessToken: null,
+    isAuthenticated: false,
     loading: false,
 
     email: null,
@@ -34,22 +33,17 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    isLoggedIn: (s) => !!s.accessToken,
+    isLoggedIn: (s) => s.isAuthenticated,
   },
 
   actions: {
     requireAuth() {
-      if (!this.accessToken) {
-        return false;
-      }
-      return true;
+      return this.isAuthenticated && this.checkCookieAuth();
     },
-    setAccessToken(token) {
-      this.accessToken = token;
-      if (token) {
-        localStorage.setItem(ACCESS_TOKEN_NAME, token);
-      } else {
-        localStorage.removeItem(ACCESS_TOKEN_NAME);
+    setAuthenticated(userData = null) {
+      this.isAuthenticated = true;
+      if (userData) {
+        this.setUserInfo(userData);
       }
     },
 
@@ -94,7 +88,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     clearUserData() {
-      this.setAccessToken(null);
+      this.isAuthenticated = false;
       this.email = null;
       this.nickname = null;
       this.id = null;
@@ -110,26 +104,102 @@ export const useAuthStore = defineStore('auth', {
       this.myCommentsLoading = false;
     },
 
-    async initFromStorage() {
-      const token = localStorage.getItem(ACCESS_TOKEN_NAME);
-      if (!token) return;
+    checkCookieAuth() {
+      const cookies = document.cookie.split(';');
+      console.log('🍪 전체 쿠키:', document.cookie);
 
-      this.accessToken = token;
+      const accessToken = cookies.find((cookie) =>
+        cookie.trim().startsWith('access_token='),
+      );
+      const refreshToken = cookies.find((cookie) =>
+        cookie.trim().startsWith('refresh_token='),
+      );
+
+      console.log('🔑 access_token 존재:', !!accessToken);
+      console.log('🔄 refresh_token 존재:', !!refreshToken);
+
+      return !!(accessToken && refreshToken);
     },
 
-    loginWithTokens(accessToken, userData = null) {
-      this.setAccessToken(accessToken);
-      if (userData) {
-        this.setUserInfo(userData);
+    async restoreSession() {
+      console.log('🔄 세션 복원 시도 시작');
+
+      try {
+        if (!this.checkCookieAuth()) {
+          console.log('❌ 쿠키 인증 실패 - 로그아웃 상태로 설정');
+          this.clearUserData();
+          return null;
+        }
+
+        console.log('✅ 쿠키 인증 성공 - 사용자 정보 요청');
+        const userData = await userApi.getMe();
+        console.log('👤 사용자 정보 수신:', userData.nickname);
+
+        this.setAuthenticated(userData);
+        return userData;
+      } catch (error) {
+        console.error('❌ 세션 복원 실패:', error);
+        this.clearUserData();
+        return null;
       }
     },
 
-    async logout() {
-      this.clearUserData();
+    setCookie(name, value, options = {}) {
+      let cookieString = `${name}=${value}`;
+
+      if (options.expires) {
+        cookieString += `; expires=${options.expires.toUTCString()}`;
+      }
+      if (options.path) {
+        cookieString += `; path=${options.path}`;
+      }
+      if (options.domain) {
+        cookieString += `; domain=${options.domain}`;
+      }
+      if (options.secure) {
+        cookieString += `; secure`;
+      }
+      if (options.sameSite) {
+        cookieString += `; SameSite=${options.sameSite}`;
+      }
+
+      document.cookie = cookieString;
+    },
+
+    getCookieDomain() {
+      const hostname = window.location.hostname;
+
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return hostname;
+      }
+
+      return hostname.split('.').slice(-2).join('.');
+    },
+
+    clearAuthCookies() {
+      const cookiesToClear = ['access_token', 'refresh_token'];
+
+      cookiesToClear.forEach((cookieName) => {
+        this.setCookie(cookieName, '', {
+          expires: new Date(0),
+          path: '/',
+          domain: this.getCookieDomain(),
+          secure: window.location.protocol === 'https:',
+          sameSite: 'Lax',
+        });
+      });
+    },
+
+    async logout({ skipRequest = false } = {}) {
       try {
-        await userApi.logout();
+        if (!skipRequest) {
+          await userApi.logout();
+        }
       } catch (e) {
         console.error('로그아웃 API 실패:', e);
+      } finally {
+        this.clearUserData();
+        this.clearAuthCookies();
       }
     },
 
