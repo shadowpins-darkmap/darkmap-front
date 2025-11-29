@@ -5,16 +5,44 @@
 </template>
 <script setup>
 import { onMounted } from 'vue';
-import { BASE_URL } from '@/constant/url';
 import { userApi } from '@/api/user';
 import { useAuthStore } from '@/store/useAuthStore';
+import { BASE_URL } from '@/constant/url';
 
 const authStore = useAuthStore();
 
-const getTargetOrigin = () => window.location?.origin || BASE_URL;
+const parseOrigin = (url) => {
+  if (!url) return null;
+  try {
+    return new URL(url).origin;
+  } catch (error) {
+    console.warn('Failed to parse origin from URL:', url, error);
+    return null;
+  }
+};
+
+const getCandidateOrigins = () => {
+  const candidates = [
+    window.location?.origin,
+    parseOrigin(document.referrer),
+    parseOrigin(BASE_URL),
+  ].filter(Boolean);
+
+  return Array.from(new Set(candidates));
+};
+
 const notifyOpener = (payload) => {
   if (!window.opener) return;
-  window.opener.postMessage(payload, getTargetOrigin());
+
+  const origins = [...getCandidateOrigins(), '*'];
+  for (const origin of origins) {
+    try {
+      window.opener.postMessage(payload, origin);
+      return;
+    } catch (error) {
+      console.warn(`postMessage failed for origin ${origin}:`, error);
+    }
+  }
 };
 
 const closePopup = () => {
