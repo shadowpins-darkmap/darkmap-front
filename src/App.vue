@@ -13,16 +13,14 @@ onMounted(async () => {
   const statsStore = useStatsStore();
   const authStore = useAuthStore();
 
-  if (window.opener && !isSocialRedirectPath) {
-    window.opener.postMessage({ type: 'OAUTH_POPUP_LOADED' }, '*');
-    window.close();
-    return;
-  }
-
   if (window.opener && isSocialRedirectPath) {
     return;
   }
 
+  if (window.opener && !isSocialRedirectPath) {
+    window.opener.postMessage({ type: 'OAUTH_POPUP_LOADED' }, '*');
+    return;
+  }
   await authStore.restoreSession();
   statsStore.fetchStats();
 });
