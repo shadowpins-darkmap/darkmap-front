@@ -84,7 +84,9 @@ const startPopupWatcher = () => {
 };
 
 const handleOAuthMessage = async (event) => {
-  if (!isTrustedOrigin(event.origin)) return;
+  console.log('[LoginPopup] message event:', event.origin, event.data);
+
+  // if (!isTrustedOrigin(event.origin)) return;
 
   if (event.data?.type === 'SOCIAL_LOGIN_RESULT') {
     if (!event.data.success) {
