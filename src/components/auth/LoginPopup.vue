@@ -26,6 +26,7 @@ import { getOAuthLoginUrl, OAUTH_PROVIDERS } from '@/utils/oauth';
 import { useAuthStore } from '@/store/useAuthStore';
 import { userApi } from '@/api/user';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
+import { BASE_URL } from '@/constant/url';
 
 const emit = defineEmits(['login-success', 'close']);
 const auth = useAuthStore();
@@ -34,6 +35,26 @@ const showLoginFailAlert = ref(false);
 let popupRef = null;
 let popupCloseInterval = null;
 
+const FALLBACK_POPUP_ORIGINS = [BASE_URL];
+
+const parseOrigin = (url) => {
+  if (!url) return null;
+  try {
+    return new URL(url).origin;
+  } catch {
+    return null;
+  }
+};
+
+const trustedOrigins = new Set(
+  [
+    window.location.origin,
+    parseOrigin(BASE_URL),
+    ...FALLBACK_POPUP_ORIGINS,
+  ].filter(Boolean),
+);
+
+const isTrustedOrigin = (origin) => trustedOrigins.has(origin);
 
 const clearPopupCloseWatcher = () => {
   if (popupCloseInterval) {
@@ -63,7 +84,36 @@ const startPopupWatcher = () => {
 };
 
 const handleOAuthMessage = async (event) => {
-  if (event.origin !== window.location.origin) return;
+  if (!isTrustedOrigin(event.origin)) return;
+
+  if (event.data?.type === 'SOCIAL_LOGIN_RESULT') {
+    if (!event.data.success) {
+      showLoginFailAlert.value = true;
+      closePopup();
+      return;
+    }
+
+    try {
+      let userData = event.data.user;
+
+      if (!userData) {
+        userData = await userApi.getMe();
+      }
+
+      auth.setAuthenticated(userData);
+      emit('login-success', {
+        nickname: userData.nickname,
+        loginCount: userData.loginCount,
+      });
+      emit('close');
+    } catch (error) {
+      console.error('SOCIAL_LOGIN_RESULT 처리 실패:', error);
+      showLoginFailAlert.value = true;
+    } finally {
+      closePopup();
+    }
+    return;
+  }
 
   if (event.data?.type === 'OAUTH_POPUP_LOADED') {
     console.log('📬 OAuth 팝업 로드 완료 - /me 호출');

@@ -74,10 +74,7 @@ onMounted(async () => {
     notifyOpener({
       type: 'SOCIAL_LOGIN_RESULT',
       success: true,
-      user: {
-        nickname: userData.nickname,
-        loginCount: userData.loginCount,
-      },
+      user: userData,
     });
     notifyOpener({ type: 'OAUTH_POPUP_LOADED' });
   } catch (error) {

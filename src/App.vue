@@ -2,29 +2,28 @@
   <router-view />
 </template>
 
-<script>
-export default {
-  name: 'App',
-};
-
+<script setup>
 import { onMounted } from 'vue';
 import { useStatsStore } from '@/store/useStatsStore';
 import { useAuthStore } from '@/store/useAuthStore';
 
+const isSocialRedirectPath = window.location.pathname.startsWith('/social-redirect');
+
 onMounted(async () => {
   const statsStore = useStatsStore();
   const authStore = useAuthStore();
-  
-  // OAuth 팝업에서 온 경우 처리
-  if (window.opener) {
-    window.opener.postMessage({ type: 'OAUTH_POPUP_LOADED' }, window.location.origin);
+
+  if (window.opener && !isSocialRedirectPath) {
+    window.opener.postMessage({ type: 'OAUTH_POPUP_LOADED' }, '*');
     window.close();
     return;
   }
-  
-  // 로그인 상태 복원 시도
+
+  if (window.opener && isSocialRedirectPath) {
+    return;
+  }
+
   await authStore.restoreSession();
-  
   statsStore.fetchStats();
 });
 </script>
