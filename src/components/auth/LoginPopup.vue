@@ -65,6 +65,11 @@ const startPopupWatcher = () => {
 const handleOAuthMessage = async (event) => {
   console.log('[LoginPopup] message event:', event.origin, event.data);
 
+  if (event.data?.type === 'SOCIAL_LOGIN_DEBUG') {
+    console.log('[SocialRedirect DEBUG]', event.data.message, event.data.extra);
+    return;
+  }
+
   if (event.data?.type === 'SOCIAL_LOGIN_RESULT') {
     if (!event.data.success) {
       showLoginFailAlert.value = true;
@@ -73,12 +78,7 @@ const handleOAuthMessage = async (event) => {
     }
 
     try {
-      let userData = event.data.user;
-
-      if (!userData) {
-        userData = await userApi.getMe();
-      }
-
+      const userData = await userApi.getMe();
       auth.setAuthenticated(userData);
       emit('login-success', {
         nickname: userData.nickname,

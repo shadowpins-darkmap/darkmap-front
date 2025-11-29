@@ -5,19 +5,30 @@
 </template>
 <script setup>
 import { onMounted } from 'vue';
-import { BASE_URL } from '@/constant/url';
 
 const notifyOpener = (payload) => {
-  if (!window.opener) {
-    console.warn('[SocialRedirect] window.opener 가 없음, fallback으로 self redirect');
-    window.location.replace(BASE_URL || '/');
-    return;
-  }
+  if (!window.opener) return;
 
   try {
-    window.opener.postMessage(payload, '*');
-  } catch (error) {
-    console.error('[SocialRedirect] postMessage 실패:', error);
+    window.opener.postMessage(payload, '*'); // 부모에서 origin 필터링
+  } catch (e) {
+    console.error('[SocialRedirect] postMessage error', e);
+  }
+};
+
+const logToOpener = (message, extra = {}) => {
+  if (!window.opener) return;
+  try {
+    window.opener.postMessage(
+      {
+        type: 'SOCIAL_LOGIN_DEBUG',
+        message,
+        extra,
+      },
+      '*',
+    );
+  } catch (e) {
+    console.error('[SocialRedirect] postMessage error', e);
   }
 };
 
@@ -31,20 +42,21 @@ onMounted(() => {
   const params = new URLSearchParams(window.location.search);
   const success = params.get('success') === 'true';
 
-  console.log('[SocialRedirect] loaded', {
+  logToOpener('SocialRedirect mounted', {
     search: window.location.search,
-    success,
+    successParam: params.get('success'),
     hasOpener: !!window.opener,
   });
 
   if (!success) {
-    notifyOpener({
-      type: 'SOCIAL_LOGIN_RESULT',
-      success: false,
-    });
+    logToOpener('success=false, send fail result');
+    notifyOpener({ type: 'SOCIAL_LOGIN_RESULT', success: false });
     closePopup();
     return;
   }
+
+  logToOpener('success=true, send success result');
+
   notifyOpener({
     type: 'SOCIAL_LOGIN_RESULT',
     success: true,
