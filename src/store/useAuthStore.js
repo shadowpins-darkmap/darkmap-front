@@ -118,18 +118,13 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async restoreSession() {
-      console.log('🔄 세션 복원 시도 시작');
-
       try {
         if (!this.checkCookieAuth()) {
-          console.log('❌ 쿠키 인증 실패 - 로그아웃 상태로 설정');
           this.clearUserData();
           return null;
         }
 
-        console.log('✅ 쿠키 인증 성공 - 사용자 정보 요청');
         const userData = await userApi.getMe();
-        console.log('👤 사용자 정보 수신:', userData.nickname);
 
         this.setAuthenticated(userData);
         return userData;

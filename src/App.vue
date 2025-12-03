@@ -17,10 +17,6 @@ onMounted(async () => {
     return;
   }
 
-  if (window.opener && !isSocialRedirectPath) {
-    window.opener.postMessage({ type: 'OAUTH_POPUP_LOADED' }, '*');
-    return;
-  }
   await authStore.restoreSession();
   statsStore.fetchStats();
 });
