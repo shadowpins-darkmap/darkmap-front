@@ -5,6 +5,11 @@ export const OAUTH_PROVIDERS = {
   KAKAO: 'kakao',
 };
 
+const OAUTH_ENDPOINT_PATHS = {
+  [OAUTH_PROVIDERS.GOOGLE]: '/oauth2/authorization/google',
+  [OAUTH_PROVIDERS.KAKAO]: '/api/v1/auth/login/kakao',
+};
+
 /**
  * OAuth 로그인 URL 생성
  * @param {string} provider - 'google' | 'kakao'
@@ -12,17 +17,20 @@ export const OAUTH_PROVIDERS = {
  * @returns {string} OAuth 로그인 URL
  */
 export function getOAuthLoginUrl(provider, redirectPath = '/social-redirect') {
-  const baseUrl = process.env.NODE_ENV === 'development' ? '' : API_BASE_URL;
-
   const redirectUrl = redirectPath.startsWith('http')
     ? redirectPath
     : `${window.location.origin}${redirectPath}`;
 
+  const endpointPath = OAUTH_ENDPOINT_PATHS[provider];
+  if (!endpointPath) {
+    throw new Error(`[getOAuthLoginUrl] Unsupported provider: ${provider}`);
+  }
+
+  const baseUrl = API_BASE_URL || 'https://api.kdark.weareshadowpins.com';
   const params = new URLSearchParams({
     redirect: redirectUrl,
   });
 
-  const finalUrl = `${baseUrl}/api/oauth/${provider}?${params.toString()}`;
-  console.log('[getOAuthLoginUrl] 최종 loginUrl =', finalUrl);
-  return finalUrl;
+  const loginUrl = `${baseUrl}${endpointPath}?${params.toString()}`;
+  return loginUrl;
 }
