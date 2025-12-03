@@ -60,32 +60,21 @@ const startPopupWatcher = () => {
   clearPopupCloseWatcher();
   popupCloseInterval = setInterval(() => {
     if (popupRef && popupRef.closed) {
-      console.log('팝업 닫힘 - 로그인 취소');
       closePopup();
     }
   }, 1000);
 };
 
 const handleOAuthMessage = async (event) => {
-  console.log('[LoginPopup] message event:', event.origin, event.data);
-
-  if (event.data?.type === 'SOCIAL_DEBUG') {
-    console.log('[SOCIAL_DEBUG]', event.data.step, event.data.payload);
-    return;
-  }
-
   if (event.data?.type !== 'SOCIAL_LOGIN_RESULT') {
     return;
   }
 
   if (!event.data.success) {
-    console.log('[LoginPopup] SOCIAL_LOGIN_RESULT: 실패');
     showLoginFailAlert.value = true;
     closePopup();
     return;
   }
-
-  console.log('[LoginPopup] SOCIAL_LOGIN_RESULT: 성공 → /me 호출');
 
   try {
     const userData = await userApi.getMe();
@@ -104,8 +93,6 @@ const handleOAuthMessage = async (event) => {
 };
 
 const handleSocialLogin = debounce((provider) => {
-  console.log(`[LoginPopup] ${provider} 소셜로그인 팝업 열기`);
-
   const redirectPath = SOCIAL_REDIRECT_PATHS[provider] || '/social-redirect';
   const popupUrl = getOAuthLoginUrl(provider, redirectPath);
   popupRef = window.open(popupUrl, '소셜로그인', 'width=500,height=700');
