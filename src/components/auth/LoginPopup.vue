@@ -22,7 +22,7 @@
 <script setup>
 import { defineEmits, onMounted, onBeforeUnmount, ref } from 'vue';
 import { debounce } from 'lodash';
-import { OAUTH_PROVIDERS } from '@/utils/oauth';
+import { OAUTH_PROVIDERS, getOAuthLoginUrl } from '@/utils/oauth';
 import { useAuthStore } from '@/store/useAuthStore';
 import { userApi } from '@/api/user';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
@@ -34,6 +34,10 @@ const showLoginFailAlert = ref(false);
 let popupRef = null;
 let popupCloseInterval = null;
 
+const SOCIAL_REDIRECT_PATHS = {
+  [OAUTH_PROVIDERS.KAKAO]: '/social-redirect-kakao',
+  [OAUTH_PROVIDERS.GOOGLE]: '/social-redirect-google',
+};
 
 const clearPopupCloseWatcher = () => {
   if (popupCloseInterval) {
@@ -102,12 +106,9 @@ const handleOAuthMessage = async (event) => {
 const handleSocialLogin = debounce((provider) => {
   console.log(`[LoginPopup] ${provider} 소셜로그인 팝업 열기`);
 
-  const popupUrl = `/social-login?provider=${provider}`;
-  popupRef = window.open(
-    popupUrl,
-    '소셜로그인',
-    'width=500,height=700'
-  );
+  const redirectPath = SOCIAL_REDIRECT_PATHS[provider] || '/social-redirect';
+  const popupUrl = getOAuthLoginUrl(provider, redirectPath);
+  popupRef = window.open(popupUrl, '소셜로그인', 'width=500,height=700');
 
   if (!popupRef) {
     showLoginFailAlert.value = true;
