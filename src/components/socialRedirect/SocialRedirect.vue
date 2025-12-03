@@ -26,42 +26,66 @@ const logToOpener = (step, payload = {}) => {
 };
 
 const notifyResult = (success) => {
-  if (!window.opener) return;
-  window.opener.postMessage(
-    {
-      type: 'SOCIAL_LOGIN_RESULT',
-      success,
-    },
-    '*',
-  );
+  if (!window.opener) {
+    console.warn('[SocialRedirect] notifyResult 호출됐지만 opener 없음');
+    return;
+  }
+
+  try {
+    window.opener.postMessage(
+      {
+        type: 'SOCIAL_LOGIN_RESULT',
+        success,
+      },
+      '*',
+    );
+  } catch (e) {
+    console.error('[SocialRedirect] SOCIAL_LOGIN_RESULT postMessage 실패:', e);
+  }
 };
 
 const closePopup = () => {
-  // setTimeout(() => {
-  //   window.close();
-  // }, 300);
+  setTimeout(() => {
+    try {
+      window.close();
+    } catch (e) {
+      console.warn('[SocialRedirect] window.close 실패:', e);
+    }
+  }, 300);
 };
 
 onMounted(() => {
   const search = window.location.search;
   const params = new URLSearchParams(search);
-  const success = params.get('success') === 'true';
+
+  const successParam = params.get('success');
+  const hasSuccessParam = successParam !== null;
+  const successFromParam = successParam === 'true';
 
   logToOpener('SocialRedirect.mounted', {
     href: window.location.href,
     search,
-    successParam: params.get('success'),
     hasOpener: !!window.opener,
+    hasSuccessParam,
+    successParam,
   });
 
-  if (!success) {
-    logToOpener('SocialRedirect.result-fail');
+  if (!window.opener) {
+    console.warn('[SocialRedirect] opener 없음 - 직접 접속으로 판단, 메인으로 이동');
+    closePopup();
+    return;
+  }
+
+  const assumedSuccess = hasSuccessParam ? successFromParam : true;
+
+  if (!assumedSuccess) {
+    logToOpener('SocialRedirect.result-fail', { hasSuccessParam, successFromParam });
     notifyResult(false);
     closePopup();
     return;
   }
 
-  logToOpener('SocialRedirect.result-success');
+  logToOpener('SocialRedirect.result-success', { hasSuccessParam, successFromParam });
   notifyResult(true);
   closePopup();
 });
