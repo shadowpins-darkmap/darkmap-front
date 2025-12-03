@@ -1,7 +1,6 @@
 import { createWebHistory, createRouter } from 'vue-router';
 import RenderMap from '@/components/RenderMap.vue';
 import SocialRedirect from '@/components/socialRedirect/SocialRedirect.vue';
-import SocialLoginStart from '@/components/socialRedirect/SocialLoginStart.vue';
 
 const routes = [
   {
@@ -18,11 +17,6 @@ const routes = [
     path: '/social-redirect-google',
     name: 'SocialRedirectGoogle',
     component: SocialRedirect,
-  },
-  {
-    path: '/social-login-start',
-    name: 'SocialLoginStart',
-    component: SocialLoginStart,
   },
 ];
 

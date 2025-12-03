@@ -100,9 +100,9 @@ const handleOAuthMessage = async (event) => {
 };
 
 const handleSocialLogin = debounce((provider) => {
-  console.log('소셜 로그인 시작 v2:', provider);
+  console.log(`[LoginPopup] ${provider} 소셜로그인 팝업 열기`);
 
-  const popupUrl = `/social-login-start?provider=${provider}`;
+  const popupUrl = `/social-login?provider=${provider}`;
   popupRef = window.open(
     popupUrl,
     '소셜로그인',
