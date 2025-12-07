@@ -30,6 +30,7 @@ import BaseAlertPopup from '@/components/BaseAlert.vue';
 const emit = defineEmits(['login-success', 'close']);
 const auth = useAuthStore();
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const POST_LOGIN_COOKIE_DELAY_MS = 400;
 
 const showLoginFailAlert = ref(false);
 let popupRef = null;
@@ -55,17 +56,6 @@ const closePopup = () => {
   clearPopupCloseWatcher();
 };
 
-const waitForAuthCookies = async ({ timeout = 2000, interval = 100 } = {}) => {
-  const startedAt = Date.now();
-  while (!auth.checkCookieAuth()) {
-    if (Date.now() - startedAt >= timeout) {
-      return false;
-    }
-    await wait(interval);
-  }
-  return true;
-};
-
 const startPopupWatcher = () => {
   clearPopupCloseWatcher();
   popupCloseInterval = setInterval(() => {
@@ -87,10 +77,7 @@ const handleOAuthMessage = async (event) => {
   }
 
   try {
-    const hasCookies = await waitForAuthCookies();
-    if (!hasCookies) {
-      throw new Error('Auth cookies not ready after social login');
-    }
+    await wait(POST_LOGIN_COOKIE_DELAY_MS);
 
     const userData = await userApi.getMe();
     auth.setAuthenticated(userData);
