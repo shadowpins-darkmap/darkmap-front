@@ -38,7 +38,7 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     requireAuth() {
-      return this.isAuthenticated && this.checkCookieAuth();
+      return this.isAuthenticated;
     },
     setAuthenticated(userData = null) {
       this.isAuthenticated = true;
@@ -104,32 +104,16 @@ export const useAuthStore = defineStore('auth', {
       this.myCommentsLoading = false;
     },
 
-    checkCookieAuth() {
-      const cookies = document.cookie.split(';');
-
-      const accessToken = cookies.find((cookie) =>
-        cookie.trim().startsWith('access_token='),
-      );
-      const refreshToken = cookies.find((cookie) =>
-        cookie.trim().startsWith('refresh_token='),
-      );
-
-      return !!(accessToken && refreshToken);
-    },
-
     async restoreSession() {
       try {
-        if (!this.checkCookieAuth()) {
-          this.clearUserData();
-          return null;
-        }
-
         const userData = await userApi.getMe();
 
         this.setAuthenticated(userData);
         return userData;
       } catch (error) {
-        console.error('❌ 세션 복원 실패:', error);
+        if (error?.response?.status !== 401) {
+          console.error('❌ 세션 복원 실패:', error);
+        }
         this.clearUserData();
         return null;
       }

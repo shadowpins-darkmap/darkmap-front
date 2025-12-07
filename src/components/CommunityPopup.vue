@@ -363,39 +363,24 @@ const checkOAuthRedirectReturn = async () => {
 
   console.log(`⏳ ${provider} 로그인 처리 대기 중...`);
 
-  // 쿠키 확인 (최대 3초 대기)
   for (let i = 0; i < 6; i++) {
-    console.log(`🔄 쿠키 체크 시도 ${i + 1}/6`);
 
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    if (auth.checkCookieAuth()) {
-      console.log('✅ 인증 쿠키 확인됨');
+    const userData = await auth.restoreSession();
 
-      try {
-        const userData = await auth.restoreSession();
-
-        if (userData) {
-          console.log('✅ 로그인 성공:', userData);
-          showLoginPopup.value = false;
-          handleLoginSuccess({
-            nickname: userData.nickname,
-            loginCount: userData.loginCount
-          });
-          return;
-        }
-      } catch (error) {
-        console.error('❌ 세션 복원 실패:', error);
-        showLoginFailAlert.value = true;  // ✅ 에러 알림
-        return;
-      }
-
-      break;
+    if (userData) {
+      console.log('✅ 로그인 성공:', userData);
+      showLoginPopup.value = false;
+      handleLoginSuccess({
+        nickname: userData.nickname,
+        loginCount: userData.loginCount
+      });
+      return;
     }
   }
 
-  // 쿠키가 없으면 실패
-  console.log('❌ 로그인 실패 - 인증 쿠키 없음');
+  console.log('❌ 로그인 실패 - 세션 복원 실패');
   showLoginFailAlert.value = true;  // ✅ 에러 알림 (alert 대신)
 };
 
