@@ -45,4 +45,8 @@ export const userApi = {
     const { data } = await api.put('/api/v1/member/nickname', { nickname });
     return data;
   },
+
+  async withdraw() {
+    await api.delete('/api/v1/auth/withdraw');
+  },
 };

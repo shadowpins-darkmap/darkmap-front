@@ -1,19 +1,19 @@
 <template>
   <div class="base_alert_backdrop">
-    <div class="base_alert_popup" :style="{ height: props.height }">
+    <div class="base_alert_popup" :style="{ height: props.height, width: props.width }">
       <p v-if="title" class="popup_title">{{ title }}</p>
-      <p class="popup_description">
+      <div class="popup_description">
         <slot></slot>
-      </p>
+      </div>
       <div v-if="showTwoButtons" class="button_group">
-        <button class="cancel_button" @click="$emit('cancel')">
+        <button class="cancel_button" type="button" @click="$emit('cancel')">
           {{ cancelText }}
         </button>
-        <button class="confirm_button" @click="$emit('confirm')">
+        <button class="confirm_button" type="button" :disabled="confirmDisabled" @click="$emit('confirm')">
           {{ confirmText }}
         </button>
       </div>
-      <button v-else class="confirm_button" @click="$emit('confirm')">
+      <button v-else class="confirm_button" type="button" :disabled="confirmDisabled" @click="$emit('confirm')">
         {{ confirmText }}
       </button>
     </div>
@@ -42,8 +42,15 @@ const props = defineProps({
   height: {
     type: String,
   },
+  width: {
+    type: String,
+  },
+  confirmDisabled: {
+    type: Boolean,
+    default: false,
+  },
 });
-defineEmits(['confirm']);
+defineEmits(['confirm', 'cancel']);
 </script>
 
 <style scoped>
@@ -89,6 +96,11 @@ defineEmits(['confirm']);
   min-width: 120px;
   border: none;
   cursor: pointer;
+}
+
+.confirm_button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .cancel_button {
