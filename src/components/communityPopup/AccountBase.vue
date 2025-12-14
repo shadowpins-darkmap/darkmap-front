@@ -46,7 +46,7 @@
           <img width="30px" height="30px" src="@/assets/accountLogout.svg" alt="delete" />
           <span>로그아웃</span>
         </button>
-        <button class="account_action">
+        <button class="account_action" @click="openWithdrawModal">
           <img width="30px" height="30px" src="@/assets/accountDelete.svg" alt="delete" />
           <span>탈퇴하기</span>
         </button>
@@ -68,6 +68,19 @@
   <BaseAlertPopup v-if="showLoadErrorAlert" @confirm="handleLoadErrorConfirm" title="프로필 로드 실패" confirmText="확인">
     <p>프로필 불러오기에 실패했습니다.</p>
   </BaseAlertPopup>
+
+  <WithdrawConfirmModal :visible="showWithdrawModal" :loading="withdrawLoading" @cancel="handleWithdrawCancel"
+    @confirm="handleWithdrawConfirm" />
+
+  <BaseAlertPopup v-if="showWithdrawSuccessAlert" title="탈퇴 완료" confirmText="확인"
+    @confirm="handleWithdrawSuccessConfirm">
+    <p>탈퇴처리가 완료되었습니다.</p>
+  </BaseAlertPopup>
+
+  <BaseAlertPopup v-if="showWithdrawErrorAlert" title="탈퇴 실패" confirmText="확인"
+    @confirm="showWithdrawErrorAlert = false">
+    <p>{{ withdrawErrorMessage }}</p>
+  </BaseAlertPopup>
 </template>
 
 <script setup>
@@ -75,6 +88,7 @@ import { defineProps, ref, defineEmits, onMounted } from 'vue';
 import { useAuthStore } from '@/store/useAuthStore';
 import { userApi } from '@/api/user';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
+import WithdrawConfirmModal from '@/components/communityPopup/WithdrawConfirmModal.vue';
 
 defineProps({
   items: Object,
@@ -108,6 +122,11 @@ const showErrorAlert = ref(false);
 const errorMessage = ref('');
 const showSuccessAlert = ref(false);
 const showLoadErrorAlert = ref(false);
+const showWithdrawModal = ref(false);
+const withdrawLoading = ref(false);
+const showWithdrawSuccessAlert = ref(false);
+const showWithdrawErrorAlert = ref(false);
+const withdrawErrorMessage = ref('');
 
 const handleLoadErrorConfirm = () => {
   showLoadErrorAlert.value = false;
@@ -162,6 +181,40 @@ const openTerms = (label) => {
     );
   }
 };
+
+const openWithdrawModal = () => {
+  showWithdrawModal.value = true;
+};
+
+const handleWithdrawCancel = () => {
+  if (withdrawLoading.value) return;
+  showWithdrawModal.value = false;
+};
+
+const handleWithdrawConfirm = async () => {
+  if (withdrawLoading.value) {
+    return;
+  }
+
+  withdrawLoading.value = true;
+  try {
+    await auth.withdraw();
+    showWithdrawModal.value = false;
+    showWithdrawSuccessAlert.value = true;
+  } catch (error) {
+    const message = '회원 탈퇴 처리 중 문제가 발생했습니다.';
+    withdrawErrorMessage.value = message;
+    showWithdrawErrorAlert.value = true;
+  } finally {
+    withdrawLoading.value = false;
+  }
+};
+
+const handleWithdrawSuccessConfirm = () => {
+  showWithdrawSuccessAlert.value = false;
+  emit('back');
+};
+
 </script>
 
 <style scoped>
@@ -355,5 +408,10 @@ const openTerms = (label) => {
   width: 138px;
   align-self: flex-end;
   font-size: 14px;
+}
+
+.withdraw_modal {
+  text-align: left;
+  color: #fff;
 }
 </style>
