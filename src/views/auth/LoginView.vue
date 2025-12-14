@@ -36,7 +36,7 @@ import { RECENT_LOGIN_INFO_KEY } from '@/constant/storage';
 
 const isLoading = ref(false);
 const showLoginFailAlert = ref(false);
-const loaderMessage = ref('로그인 페이지로 이동 중이에요...');
+const loaderMessage = ref('메인 페이지로 이동 중이에요...');
 
 const route = useRoute();
 const router = useRouter();
@@ -115,7 +115,7 @@ const handleOAuthCallback = async () => {
     await clearAuthCallbackQuery();
   } finally {
     isLoading.value = false;
-    loaderMessage.value = '로그인 페이지로 이동 중이에요...';
+    loaderMessage.value = '메인 페이지로 이동 중이에요...';
     isHandlingOAuth = false;
   }
 };
