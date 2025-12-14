@@ -1,12 +1,13 @@
 <template>
-  <router-view />
+  <router-view v-if="isAppReady" />
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useStatsStore } from '@/store/useStatsStore';
 import { useAuthStore } from '@/store/useAuthStore';
 
+const isAppReady = ref(false);
 const isSocialRedirectPath = window.location.pathname.startsWith('/social-redirect');
 
 onMounted(async () => {
@@ -14,11 +15,16 @@ onMounted(async () => {
   const authStore = useAuthStore();
 
   if (window.opener && isSocialRedirectPath) {
+    isAppReady.value = true;
     return;
   }
 
-  await authStore.restoreSession();
-  statsStore.fetchStats();
+  try {
+    await authStore.restoreSession();
+    statsStore.fetchStats();
+  } finally {
+    isAppReady.value = true;
+  }
 });
 </script>
 
