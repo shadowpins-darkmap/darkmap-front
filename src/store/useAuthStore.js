@@ -119,52 +119,6 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    setCookie(name, value, options = {}) {
-      let cookieString = `${name}=${value}`;
-
-      if (options.expires) {
-        cookieString += `; expires=${options.expires.toUTCString()}`;
-      }
-      if (options.path) {
-        cookieString += `; path=${options.path}`;
-      }
-      if (options.domain) {
-        cookieString += `; domain=${options.domain}`;
-      }
-      if (options.secure) {
-        cookieString += `; secure`;
-      }
-      if (options.sameSite) {
-        cookieString += `; SameSite=${options.sameSite}`;
-      }
-
-      document.cookie = cookieString;
-    },
-
-    getCookieDomain() {
-      const hostname = window.location.hostname;
-
-      if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return hostname;
-      }
-
-      return hostname.split('.').slice(-2).join('.');
-    },
-
-    clearAuthCookies() {
-      const cookiesToClear = ['access_token', 'refresh_token'];
-
-      cookiesToClear.forEach((cookieName) => {
-        this.setCookie(cookieName, '', {
-          expires: new Date(0),
-          path: '/',
-          domain: this.getCookieDomain(),
-          secure: window.location.protocol === 'https:',
-          sameSite: 'Lax',
-        });
-      });
-    },
-
     async logout({ skipRequest = false } = {}) {
       try {
         if (!skipRequest) {
@@ -174,7 +128,6 @@ export const useAuthStore = defineStore('auth', {
         console.error('로그아웃 API 실패:', e);
       } finally {
         this.clearUserData();
-        this.clearAuthCookies();
       }
     },
 
