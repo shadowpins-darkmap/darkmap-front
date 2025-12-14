@@ -122,7 +122,6 @@
           </ul>
           <!-- 내 게시글 -->
           <ul class="alarm_list_wrap" v-if="currentTab === '내 게시글'">
-            {{ console.log(myPostList) }}
             <template v-if="myPostList.length > 0">
               <li class="alarm_list" v-for="item in myPostList.slice(0, 3)" :key="item.id">
                 <button class="alarm_list_button" @click="handleOpenArticleDetail(item)">
@@ -347,9 +346,6 @@ const consumeRecentLoginData = () => {
   }
 };
 
-const pendingRecentLoginData = ref(consumeRecentLoginData());
-const loginFlowHandled = ref(false);
-
 const fetchAccountData = async () => {
   if (!auth.isLoggedIn) return;
   await Promise.all([
@@ -378,7 +374,58 @@ const loadInitialData = async () => {
 
 /* ========== 마운트 / 언마운트 ========== */
 onMounted(async () => {
-  await ensureLoginFlowHandled();
+  const recentLoginData = consumeRecentLoginData();
+  let handledLogin = false;
+  let restoredUserData = null;
+
+  if (!auth.isLoggedIn) {
+    try {
+      restoredUserData = await auth.restoreSession();
+    } catch (error) {
+      console.error('세션 복원 실패:', error);
+    }
+  }
+
+  if (recentLoginData) {
+    let enrichedData = recentLoginData;
+
+    if (restoredUserData) {
+      enrichedData = {
+        nickname: restoredUserData.nickname,
+        loginCount: restoredUserData.loginCount,
+      };
+    } else if (auth.isLoggedIn) {
+      enrichedData = {
+        nickname: auth.nickname ?? recentLoginData.nickname,
+        loginCount: auth.loginCount ?? recentLoginData.loginCount ?? 0,
+      };
+    }
+
+    await handleLoginSuccess(enrichedData);
+    handledLogin = true;
+  }
+
+  if (!handledLogin && restoredUserData) {
+    await handleLoginSuccess(
+      {
+        nickname: restoredUserData.nickname,
+        loginCount: restoredUserData.loginCount,
+      },
+      { skipDataFetch: true },
+    );
+    handledLogin = true;
+  }
+
+  if (!handledLogin && auth.isLoggedIn) {
+    await handleLoginSuccess(
+      {
+        nickname: auth.nickname ?? '',
+        loginCount: auth.loginCount ?? 0,
+      },
+      { skipDataFetch: true },
+    );
+    handledLogin = true;
+  }
 
   // 초기 데이터 로딩
   await loadInitialData();
@@ -492,49 +539,6 @@ watch(showAlarmPopup, (v) => {
   }
 });
 
-watch(
-  () => auth.isLoggedIn,
-  async (loggedIn) => {
-    if (!loggedIn) {
-      loginFlowHandled.value = false;
-      return;
-    }
-
-    await ensureLoginFlowHandled();
-  },
-  { immediate: true },
-);
-
-const getAuthSnapshot = () => ({
-  nickname: auth.nickname ?? '',
-  loginCount: auth.loginCount ?? 0,
-});
-
-async function runLoginFlow(userData, options) {
-  if (!userData) {
-    return false;
-  }
-
-  await handleLoginSuccess(userData, options);
-  loginFlowHandled.value = true;
-  pendingRecentLoginData.value = null;
-  return true;
-}
-
-async function ensureLoginFlowHandled() {
-  if (loginFlowHandled.value) {
-    return;
-  }
-
-  if (await runLoginFlow(pendingRecentLoginData.value)) {
-    return;
-  }
-
-  if (auth.isLoggedIn) {
-    await runLoginFlow(getAuthSnapshot(), { skipDataFetch: true, silent: true });
-  }
-}
-
 /* --------- 버튼 핸들러 --------- */
 const handleOpenDetail = (type) => {
   selectedDetailType.value = type;
@@ -589,32 +593,21 @@ const handleArticleDetailClose = () => {
 };
 
 /* ========== 로그인 관련 핸들러 ========== */
-async function handleLoginSuccess(userData, { skipDataFetch = false, silent = false } = {}) {
-  console.log('🎉 handleLoginSuccess 호출:', userData);
-
+const handleLoginSuccess = async (userData, { skipDataFetch = false } = {}) => {
   loginUserData.value = userData;
-  console.log(userData, 'loginUserData');
 
   if (!skipDataFetch) {
     await fetchAccountData();
   }
 
-  // 중복 실행 방지
-  if (showWelcomeAlert.value || showNicknameStep.value) {
-    console.log('⚠️ 이미 온보딩 진행 중');
-    return;
-  }
-
-  if (silent) {
-    return;
-  }
+  if (showWelcomeAlert.value || showNicknameStep.value) return;
 
   if (userData.loginCount >= 2) {
     showWelcomeAlert.value = true;
   } else {
     showNicknameStep.value = true;
   }
-}
+};
 
 const handleLoginAlertConfirm = () => {
   showLoginAlert.value = false;
@@ -624,7 +617,6 @@ const handleLoginAlertConfirm = () => {
 const handleWelcomeConfirm = async () => {
   showWelcomeAlert.value = false;
   await loadInitialData();
-  sessionStorage.removeItem(RECENT_LOGIN_INFO_KEY);
 };
 
 const handleNicknameSubmit = (newNickname) => {
