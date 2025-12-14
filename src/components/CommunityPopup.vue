@@ -172,9 +172,9 @@
               오늘 처음 방문하셨나요? 가입 이후에 광장의 모든 글을 보실 수
               있어요.
             </p>
-            <button class="BaseCommunity__black_button" @click="showLoginPopup = true">
+            <RouterLink class="BaseCommunity__black_button" to="/login">
               로그인
-            </button>
+            </RouterLink>
           </div>
         </div>
       </div>
@@ -231,7 +231,7 @@
 
     <!-- 광장 커뮤니티  SlidePanel -->
     <SlidePanel :width="'510px'" :visible="isListPanelOpen" @close="isListPanelOpen = false">
-      <CommunityListPanel @close="handleListPanelClose" />
+      <CommunityListPanel @close="handleListPanelClose" @write-complete="handleCommunityWriteComplete" />
     </SlidePanel>
 
     <!-- 사이트 이용약관 -->
@@ -256,27 +256,21 @@
         @next="clickNext" />
     </section>
   </CommonPopup>
-  <CommonPopup :visible="showLoginPopup" @close="handleLoginClose">
-    <LoginPopup @login-success="handleLoginSuccess" @close="handleLoginClose"></LoginPopup>
-  </CommonPopup>
   <BaseAlertPopup v-if="showWelcomeAlert" @confirm="handleWelcomeConfirm" confirmText="확인" height="169px">
     <p style="margin-top: 6px;">{{ loginUserData.nickname }}님 다시 오셨네요! <br /> {{ loginUserData.loginCount }}번째 투어에요.</p>
   </BaseAlertPopup>
   <NicknameStep v-if="showNicknameStep" :nickname="loginUserData.nickname" @submit="handleNicknameSubmit" />
   <FirstVisitStep v-if="showFirstVisitStep" :nickname="loginUserData.nickname" @confirm="handleFirstVisitConfirm" />
   <MarketingConsentStep v-if="showMarketingStep" @agree="handleMarketingAgree" @skip="handleMarketingSkip" />
-  <BaseAlertPopup v-if="showLoginAlert" @cancel="showLoginAlert = false" @confirm="
-    () => {
-      showLoginPopup = true;
-      showLoginAlert = false;
-    }
-  " :showTwoButtons="true" cancelText="닫기" confirmText="로그인">
+  <BaseAlertPopup v-if="showLoginAlert" @cancel="showLoginAlert = false" @confirm="handleLoginAlertConfirm"
+    :showTwoButtons="true" cancelText="닫기" confirmText="로그인">
     <p>로그인이 필요합니다!</p>
   </BaseAlertPopup>
 </template>
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue';
+import { useRouter, RouterLink } from 'vue-router';
 import CarouselWrap from '@/components/carousel/CarouselWrap.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
 import CommunityInfoPanel from '@/components/communityPanel/CommunityInfoPanel.vue';
@@ -285,7 +279,6 @@ import CommunityListPanel from '@/components/communityPanel/CommunityListPanel.v
 import CommunityListDetailPanel from '@/components/communityPanel/CommunityListDetailPanel.vue';
 import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
-import LoginPopup from '@/components/auth/LoginPopup.vue';
 import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
 import NicknameStep from '@/components/onboarding/NicknameStep.vue';
 import FirstVisitStep from '@/components/onboarding/FirstVisitStep.vue';
@@ -300,26 +293,25 @@ import { useStatsStore } from '@/store/useStatsStore';
 import iconComment from '@/assets/alarmComment.svg';
 import iconLike from '@/assets/alarmLike.svg';
 import iconMarker from '@/assets/alarmMarker.svg';
+import { RECENT_LOGIN_INFO_KEY } from '@/constant/storage';
 
 const auth = useAuthStore();
 const statsStore = useStatsStore();
+const router = useRouter();
 
 /* --------- UI 상태 --------- */
 const tabOptions = ['알림', '내 게시글', '내 댓글'];
 const currentTab = ref('알림');
 const selectedDetailType = ref('');
 const showLoginAlert = ref(false);
-const showLoginPopup = ref(false);
 const showAlarmPopup = ref(false);
 const showAccountSection = ref(false);
-const showLoginFailAlert = ref(false);
 
 const showWelcomeAlert = ref(false);
 const showNicknameStep = ref(false);
 const showFirstVisitStep = ref(false);
 const showMarketingStep = ref(false);
 const loginUserData = ref({ nickname: '', loginCount: 0 });
-
 const isPanelOpen = ref(false);
 const isPanel2depsOpen = ref(false);
 const isListPanelOpen = ref(false);
@@ -337,100 +329,84 @@ const toggleSection = (section) => {
 const currentBubbleIndex = ref(0);
 let bubbleTimer = null;
 
-/* ========== OAuth 리다이렉트 복귀 체크 (리다이렉트 폴백용) ========== */
-const checkOAuthRedirectReturn = async () => {
-  const oauthInProgress = sessionStorage.getItem('oauth_in_progress');
-
-  if (oauthInProgress !== 'true') {
-    return;
+/* ========== 최근 로그인 데이터 확인 ========== */
+const consumeRecentLoginData = () => {
+  const raw = sessionStorage.getItem(RECENT_LOGIN_INFO_KEY);
+  if (!raw) {
+    return null;
   }
 
-  console.log('🔍 OAuth 리다이렉트 후 복귀 감지');
+  sessionStorage.removeItem(RECENT_LOGIN_INFO_KEY);
 
-  const provider = sessionStorage.getItem('oauth_provider');
-  const startTime = sessionStorage.getItem('oauth_start_time');
-
-  // sessionStorage 즉시 클리어
-  sessionStorage.removeItem('oauth_in_progress');
-  sessionStorage.removeItem('oauth_provider');
-  sessionStorage.removeItem('oauth_start_time');
-
-  // 타임아웃 체크 (5분)
-  if (startTime && Date.now() - parseInt(startTime) > 5 * 60 * 1000) {
-    console.log('⏰ OAuth 타임아웃 (5분 초과)');
-    return;
+  try {
+    return JSON.parse(raw);
+  } catch (error) {
+    console.warn('[CommunityPopup] 최근 로그인 정보 파싱 실패:', error);
+    return null;
   }
+};
 
-  console.log(`⏳ ${provider} 로그인 처리 대기 중...`);
-
-  for (let i = 0; i < 6; i++) {
-
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    const userData = await auth.restoreSession();
-
-    if (userData) {
-      console.log('✅ 로그인 성공:', userData);
-      showLoginPopup.value = false;
-      handleLoginSuccess({
-        nickname: userData.nickname,
-        loginCount: userData.loginCount
-      });
-      return;
-    }
-  }
-
-  console.log('❌ 로그인 실패 - 세션 복원 실패');
-  showLoginFailAlert.value = true;  // ✅ 에러 알림 (alert 대신)
+const fetchAccountData = async () => {
+  if (!auth.isLoggedIn) return;
+  await Promise.all([
+    auth.fetchNotifications().catch(err => {
+      console.error('알림 API 실패:', err);
+    }),
+    auth.getMyBoards().catch(err => {
+      console.error('내 게시글 API 실패:', err);
+    }),
+    auth.fetchMyComments().catch(err => {
+      console.error('내 댓글 API 실패:', err);
+    })
+  ]);
 };
 
 /* ========== 초기 데이터 로딩 ========== */
 const loadInitialData = async () => {
   try {
     await statsStore.fetchStats();
-
-    if (auth.isLoggedIn) {
-      await Promise.all([
-        auth.fetchNotifications().catch(err => {
-          console.error('알림 API 실패:', err);
-        }),
-        auth.getMyBoards().catch(err => {
-          console.error('내 게시글 API 실패:', err);
-        }),
-        auth.fetchMyComments().catch(err => {
-          console.error('내 댓글 API 실패:', err);
-        })
-      ]);
-    }
   } catch (error) {
     console.error('초기 데이터 로딩 실패:', error);
   }
+
+  await fetchAccountData();
 };
 
 /* ========== 마운트 / 언마운트 ========== */
 onMounted(async () => {
-  console.log('🎬 CommunityPopup 마운트');
+  const recentLoginData = consumeRecentLoginData();
+  let restoredUserData = null;
 
-  // 1. OAuth 리다이렉트 복귀 체크
-  await checkOAuthRedirectReturn();
-
-  // 2. 기존 세션 복원
   if (!auth.isLoggedIn) {
-    const userData = await auth.restoreSession();
-    if (userData && auth.isLoggedIn) {
-      console.log('✅ 기존 세션 복원 성공:', userData);
-      showLoginPopup.value = false;
-      handleLoginSuccess({
-        nickname: userData.nickname,
-        loginCount: userData.loginCount
-      });
+    try {
+      restoredUserData = await auth.restoreSession();
+    } catch (error) {
+      console.error('세션 복원 실패:', error);
     }
   }
 
-  // 3. 초기 데이터 로딩
+  if (recentLoginData) {
+    let enrichedData = recentLoginData;
+
+    if (restoredUserData) {
+      enrichedData = {
+        nickname: restoredUserData.nickname,
+        loginCount: restoredUserData.loginCount,
+      };
+    } else if (auth.isLoggedIn) {
+      enrichedData = {
+        nickname: auth.nickname ?? recentLoginData.nickname,
+        loginCount: auth.loginCount ?? recentLoginData.loginCount ?? 0,
+      };
+    }
+
+    await handleLoginSuccess(enrichedData);
+  }
+
+  // 초기 데이터 로딩
   await loadInitialData();
 
-  // 4. 인삿말 토글 시작
+  // 인삿말 토글 시작
   bubbleTimer = setInterval(() => {
     currentBubbleIndex.value = (currentBubbleIndex.value + 1) % 2;
   }, 3000);
@@ -569,6 +545,18 @@ const handleCommunityMove = () => {
   isListPanelOpen.value = true;
 };
 
+const handleCommunityWriteComplete = async () => {
+  if (!auth.isLoggedIn) {
+    return;
+  }
+
+  try {
+    await auth.getMyBoards();
+  } catch (error) {
+    console.error('내 게시글 새로고침 실패:', error);
+  }
+};
+
 const handleOpenArticleDetail = (article) => {
   selectedArticleDetail.value = article;
   showAlarmPopup.value = false;
@@ -581,16 +569,14 @@ const handleArticleDetailClose = () => {
 };
 
 /* ========== 로그인 관련 핸들러 ========== */
-const handleLoginSuccess = async (userData) => {
-  console.log('🎉 handleLoginSuccess 호출:', userData);
-
+const handleLoginSuccess = async (userData, { skipDataFetch = false } = {}) => {
   loginUserData.value = userData;
 
-  // 중복 실행 방지
-  if (showWelcomeAlert.value || showNicknameStep.value) {
-    console.log('⚠️ 이미 온보딩 진행 중');
-    return;
+  if (!skipDataFetch) {
+    await fetchAccountData();
   }
+
+  if (showWelcomeAlert.value || showNicknameStep.value) return;
 
   if (userData.loginCount >= 2) {
     showWelcomeAlert.value = true;
@@ -599,8 +585,9 @@ const handleLoginSuccess = async (userData) => {
   }
 };
 
-const handleLoginClose = () => {
-  showLoginPopup.value = false;
+const handleLoginAlertConfirm = () => {
+  showLoginAlert.value = false;
+  router.push('/login');
 };
 
 const handleWelcomeConfirm = async () => {
@@ -627,8 +614,6 @@ const handleMarketingSkip = () => {
   showMarketingStep.value = false;
 };
 
-// 전역 함수 (혹시 필요한 경우)
-window.handleLoginSuccessGlobal = handleLoginSuccess;
 </script>
 
 <style scoped lang="scss">

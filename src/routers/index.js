@@ -1,7 +1,6 @@
 import { createWebHistory, createRouter } from 'vue-router';
 import RenderMap from '@/components/RenderMap.vue';
-import SocialRedirect from '@/components/socialRedirect/SocialRedirect.vue';
-
+import LoginView from '@/views/auth/LoginView.vue';
 const routes = [
   {
     path: '/', // TestComponent.vue로 이동할 Path
@@ -9,14 +8,9 @@ const routes = [
     component: RenderMap, // Path로 이동될 Component
   },
   {
-    path: '/social-redirect-kakao',
-    name: 'SocialRedirectKakao',
-    component: SocialRedirect,
-  },
-  {
-    path: '/social-redirect-google',
-    name: 'SocialRedirectGoogle',
-    component: SocialRedirect,
+    path: '/login',
+    name: 'LoginView',
+    component: LoginView,
   },
 ];
 
