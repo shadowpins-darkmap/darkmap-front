@@ -131,6 +131,12 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    async withdraw() {
+      if (!this.requireAuth()) return;
+      await userApi.withdraw();
+      this.clearUserData();
+    },
+
     async fetchUserProfile() {
       if (!this.requireAuth()) return;
       const data = await userApi.getMe();
