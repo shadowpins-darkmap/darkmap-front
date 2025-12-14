@@ -375,7 +375,6 @@ const loadInitialData = async () => {
 /* ========== 마운트 / 언마운트 ========== */
 onMounted(async () => {
   const recentLoginData = consumeRecentLoginData();
-  let handledLogin = false;
   let restoredUserData = null;
 
   if (!auth.isLoggedIn) {
@@ -402,29 +401,6 @@ onMounted(async () => {
     }
 
     await handleLoginSuccess(enrichedData);
-    handledLogin = true;
-  }
-
-  if (!handledLogin && restoredUserData) {
-    await handleLoginSuccess(
-      {
-        nickname: restoredUserData.nickname,
-        loginCount: restoredUserData.loginCount,
-      },
-      { skipDataFetch: true },
-    );
-    handledLogin = true;
-  }
-
-  if (!handledLogin && auth.isLoggedIn) {
-    await handleLoginSuccess(
-      {
-        nickname: auth.nickname ?? '',
-        loginCount: auth.loginCount ?? 0,
-      },
-      { skipDataFetch: true },
-    );
-    handledLogin = true;
   }
 
   // 초기 데이터 로딩
