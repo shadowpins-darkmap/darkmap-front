@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/articles/:path*",
+      "destination": "https://api.kdark.weareshadowpins.com/articles/:path*"
+    },
+    {
       "source": "/api/:path*",
       "destination": "https://api.kdark.weareshadowpins.com/api/:path*"
     },
