@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/articles/",
+      "destination": "/articles",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/articles/:path*",
