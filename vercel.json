@@ -1,8 +1,8 @@
 {
   "redirects": [
     {
-      "source": "/articles/",
-      "destination": "/articles",
+      "source": "/articles/:path*/",
+      "destination": "/articles/:path*",
       "permanent": true
     }
   ],
@@ -10,10 +10,6 @@
     {
       "source": "/articles/:path*",
       "destination": "https://api.kdark.weareshadowpins.com/articles/:path*"
-    },
-    {
-      "source": "/articles",
-      "destination": "https://api.kdark.weareshadowpins.com/articles"
     },
     {
       "source": "/api/:path*",
