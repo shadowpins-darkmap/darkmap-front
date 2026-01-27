@@ -14,8 +14,12 @@ module.exports = defineConfig({
 
   devServer: {
     proxy: {
+      '/articles': {
+        target: 'https://api.kdark.weareshadowpins.com',
+        changeOrigin: true,
+      },
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'https://api.kdark.weareshadowpins.com',
         changeOrigin: true,
       },
     },

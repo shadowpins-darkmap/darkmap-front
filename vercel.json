@@ -5,6 +5,10 @@
       "destination": "https://api.kdark.weareshadowpins.com/articles/:path*"
     },
     {
+      "source": "/articles",
+      "destination": "https://api.kdark.weareshadowpins.com/articles"
+    },
+    {
       "source": "/api/:path*",
       "destination": "https://api.kdark.weareshadowpins.com/api/:path*"
     },
