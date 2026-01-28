@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/articles/:path*",
-      "destination": "https://api.kdark.weareshadowpins.com/articles/:path*"
+      "destination": "http://darkmap-api-lb-1782199916.ap-northeast-2.elb.amazonaws.com/articles/:path*"
     },
     {
       "source": "/api/:path*",
