@@ -8,7 +8,7 @@ const routes = [
     component: RenderMap, // Path로 이동될 Component
   },
   {
-    path: '/login',
+    path: '/login_',
     name: 'LoginView',
     component: LoginView,
   },
