@@ -152,33 +152,48 @@ const onClickCluster = (e, cluster) => {
   overlay = new CustomOverlay(clusterPosition, container, map, cluster.count);
 };
 
-// 마커 생성 함수
-const createMarkers = () => {
-  for (const article of articles.value) {
-    const markerTag = document.createElement('div');
-    markerTag.classList.add('marker');
-    if (Object.keys(markerColor).includes(article.category)) {
-      markerTag.style.backgroundColor = markerColor[article.category];
-    }
-    markerTag.setAttribute('article_title', article.title);
-    markerTag.setAttribute('article_url', article.url);
-    markerTag.setAttribute('article_data', article.date);
-    article.marker = new library.AdvancedMarkerElement({
-      map,
-      position: article.position,
-      content: markerTag,
+// 단일 마커 생성 함수
+const createSingleMarker = (article) => {
+  const markerTag = document.createElement('div');
+  markerTag.classList.add('marker');
+  if (Object.keys(markerColor).includes(article.category)) {
+    markerTag.style.backgroundColor = markerColor[article.category];
+  }
+  markerTag.setAttribute('article_title', article.title);
+  markerTag.setAttribute('article_url', article.url);
+  markerTag.setAttribute('article_data', article.date);
+  article.marker = new library.AdvancedMarkerElement({
+    map,
+    position: article.position,
+    content: markerTag,
+  });
+  article.marker.addListener('click', () => {
+    closeOverlay();
+
+    const container = document.createElement('div');
+    const app = createApp(MarkerPopup, {
+      closeWindow: closeOverlay,
+      article: article,
     });
-    article.marker.addListener('click', () => {
-      closeOverlay();
+    app.mount(container);
 
-      const container = document.createElement('div');
-      const app = createApp(MarkerPopup, {
-        closeWindow: closeOverlay,
-        article: article,
-      });
-      app.mount(container);
+    overlay = new CustomOverlay(article.position, container, map, 1);
+  });
+};
 
-      overlay = new CustomOverlay(article.position, container, map, 1);
+// 마커 배치 생성 함수
+const createMarkersBatched = async (articlesList, batchSize = 50) => {
+  for (let i = 0; i < articlesList.length; i += batchSize) {
+    const batch = articlesList.slice(i, i + batchSize);
+    batch.forEach(createSingleMarker);
+
+    // 다음 배치 전에 브라우저에게 제어권 반환
+    await new Promise((resolve) => {
+      if (typeof requestIdleCallback !== 'undefined') {
+        requestIdleCallback(resolve);
+      } else {
+        setTimeout(resolve, 0);
+      }
     });
   }
 };
@@ -272,8 +287,7 @@ const createClusters = () => {
 
 onMounted(async () => {
   try {
-    // 1. 병렬로 시작: 기사 로딩, 위치 가져오기, Google Maps 라이브러리 로드
-    const articlesPromise = loadArticles();
+    // 1. 위치 가져오기와 Google Maps 라이브러리를 병렬로 로드
     const locationPromise = getUserLocation();
 
     // 2. Google Maps 라이브러리 로드
@@ -289,7 +303,7 @@ onMounted(async () => {
     library.Map = Map;
     library.AdvancedMarkerElement = AdvancedMarkerElement;
 
-    // 3. 사용자 위치 또는 서울시청 기준으로 지도 생성
+    // 3. 지도를 즉시 생성하고 표시
     map = new library.Map(mapDiv.value, {
       center: userLocation,
       zoom: DEFAULT_ZOOM,
@@ -299,16 +313,18 @@ onMounted(async () => {
       streetViewControl: false,
     });
 
-    // 4. 기사 로딩이 완료될 때까지 대기 (지도는 이미 보임)
+    // 4. 지도가 표시된 후 백그라운드에서 기사 로딩
     isLoading.value = true;
-    await articlesPromise;
+    await loadArticles();
+    isLoading.value = false;
 
-    // 5. 기사 로딩 완료 후 마커와 클러스터 생성
-    createMarkers();
+    // 5. 마커를 배치로 생성 (UI 블로킹 방지)
+    await createMarkersBatched(articles.value);
+
+    // 6. 모든 마커 생성 완료 후 클러스터 생성
     createClusters();
   } catch (error) {
     console.error('Google Maps 로딩 실패:', error);
-  } finally {
     isLoading.value = false;
   }
 });
@@ -363,9 +379,10 @@ const changeFilter = (crimeTypes, selectedSido, dongList) => {
 
 <style lang="scss" scoped>
 .map-container {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .loader-container {
@@ -403,8 +420,8 @@ div:deep(.cluster) {
 }
 
 .map {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   z-index: 1;
 }
 </style>
