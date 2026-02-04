@@ -8,17 +8,25 @@
 </template>
 
 <script setup>
+import { defineAsyncComponent } from 'vue';
 import TestMap from '@/components/TestMap.vue';
-// import ControlPopup from '@/components/ControlPopup.vue';
-import ControlMobile from '@/components/ControlMobile.vue';
-import CommunityPopup from '@/components/CommunityPopup.vue';
 import { useDevice } from '@/composables/useDevice';
+
+// Lazy load heavy components
+const ControlMobile = defineAsyncComponent(
+  () => import('@/components/ControlMobile.vue'),
+);
+const CommunityPopup = defineAsyncComponent(
+  () => import('@/components/CommunityPopup.vue'),
+);
 
 const { isMobile } = useDevice();
 </script>
 
 <style scoped>
 .render-map {
-  position: relative;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
 }
 </style>

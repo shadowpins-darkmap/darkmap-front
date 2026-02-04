@@ -1,64 +1,93 @@
 .popup_wrap {
   position: absolute;
-  top: 40px;
-  left: 40px;
-  height: calc(100% - 80px);
+  top: 20px;
+  left: 20px;
   z-index: 2;
   display: flex;
-  gap: 30px;
+  gap: 10px;
   flex-direction: column;
+  max-height: calc(100vh - 40px);
 }
 .logo {
-  width: 150px;
-  height: 150px;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.logo img {
+  width: 100%;
+  height: 100%;
 }
 
 .head_panel {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  width: 436px;
-  height: 50px;
+  gap: 6px;
+  width: 320px;
+  height: 40px;
   border-radius: 50px;
   border: #f1cfc8 2px solid;
   background-color: #6d54ce;
+  flex-shrink: 0;
 }
 .panel_item {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  gap: 10px;
+  padding: 4px 8px;
+  gap: 4px;
 }
 .panel_item_text {
   color: #ffffff;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: bold;
   text-align: center;
 }
 
 .crime_logo {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 25px;
+    height: 25px;
+  }
 }
 
 .body_panel {
-  max-height: 450px;
-  // overflow: hidden;
-  width: 426px;
-  padding: 0 18px;
+  width: 100%;
+  padding: 0 12px;
   box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .body_panel_wrap {
-  border-radius: 20px;
+  border-radius: 16px;
   border: #f1cfc8 2px solid;
   background-color: #6d54ce;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  max-height: calc(100vh - 280px);
+}
+
+.scroll_area_wrap {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 0;
 }
 .body_title_wrap {
-  padding-top: 28px;
+  padding-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .body_title {
   display: inline-flex;
@@ -66,32 +95,32 @@
   align-items: center;
   justify-content: center;
   border-radius: 34px;
-  margin-bottom: 15px;
-  font-size: 14px;
+  margin-bottom: 6px;
+  font-size: 11px;
   font-weight: 600;
   color: #000000;
   background-color: #ffefeb;
-  margin-right: 10px;
+  margin-right: 6px;
 }
 .body_title > span {
-  padding: 5px 12px;
+  padding: 3px 8px;
   flex: 0 0 auto;
 }
 
 .select_all {
   display: flex;
   flex-wrap: nowrap;
-  align-items: flex-start;
+  align-items: center;
+  margin-bottom: 6px;
 }
 
 .checkbox_text {
   display: flex;
   align-items: center;
-  margin-left: 6px;
+  margin-left: 3px;
   color: #ffffff;
-  font-size: 12px;
-  line-height: 14px;
-  padding-top: 2px;
+  font-size: 10px;
+  line-height: 12px;
   font-weight: 500;
   word-break: keep-all;
   text-align: left;
@@ -99,20 +128,26 @@
 
 .checkboxes {
   display: grid;
-  row-gap: 15px;
+  grid-template-columns: repeat(4, 1fr);
+  row-gap: 6px;
+  column-gap: 2px;
+  margin-top: 6px;
+  margin-bottom: 6px;
 }
 
 .checkbox {
   display: flex;
   flex-wrap: nowrap;
-  align-items: flex-start;
+  align-items: center;
 }
 .checkbox_wrap {
   display: inline-flex;
 }
 
 .check {
-  width: 18px;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 .check:hover {
@@ -129,8 +164,8 @@
 
 .article_table {
   display: grid;
-  grid-template-columns: 97px 277px;
-  grid-auto-rows: 27px;
+  grid-template-columns: 70px 1fr;
+  grid-auto-rows: 20px;
   align-items: center;
   border-top: #00ffc2 0.5px solid;
   border-bottom: #00ffc2 0.5px solid;
@@ -138,13 +173,13 @@
 
 .table_position {
   color: #ffefeb;
-  font-size: 12px;
+  font-size: 10px;
   text-align: left;
 }
 
 .table_title {
   color: #ffefeb;
-  font-size: 12px;
+  font-size: 10px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -158,11 +193,11 @@
 
 // 페이지 네이션
 .paging {
-  margin-top: 26px;
-  margin-left: 55px;
-  margin-right: 55px;
-  width: 263.5px;
-  height: 30px;
+  margin-top: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  height: 24px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -172,8 +207,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin: 0 30px;
+  gap: 8px;
+  margin: 0 15px;
 }
 
 .paging_number {
@@ -181,9 +216,9 @@
   align-items: center;
   justify-content: center;
   color: #ffefeb;
-  font-size: 14px;
-  width: 30px;
-  height: 30px;
+  font-size: 12px;
+  width: 24px;
+  height: 24px;
   &:hover {
     cursor: pointer;
     background-image: url('../assets/hoverPage.svg');
@@ -201,8 +236,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
 }
 
 // 신고
@@ -212,28 +247,32 @@
 
 // 검색
 .search_wrap {
-  width: 436px;
+  width: 320px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
+  gap: 8px;
 }
 .search_button {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: 50px;
+  gap: 6px;
+  height: 36px;
   border-radius: 50px;
-  padding: 10px;
+  padding: 8px 12px;
   background-color: rgba(196, 184, 208, 0.787);
   border: 2px solid #f1cfc8;
+  flex: 1;
 }
 .search_button_text {
   font-weight: 400;
-  font-size: 12px;
+  font-size: 10px;
   color: #fff;
 }
 
 .footer {
-  margin-top: 27px;
+  margin-top: 10px;
+  padding-bottom: 8px;
 }

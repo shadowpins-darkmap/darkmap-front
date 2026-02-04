@@ -2,20 +2,15 @@
   <div class="popup_wrap">
     <!-- 로고 영역 -->
     <div class="logo">
-      <img
-        width="150px"
-        height="150px"
-        alt="다크맵 투어 로고"
-        src="../assets/logo.svg"
-      />
+      <img alt="다크맵 투어 로고" src="../assets/logo.svg" />
     </div>
 
     <!-- 검색 영역  -->
     <div class="search_wrap">
       <button class="report_guide_button" @click="showReportGuide = true">
         <img
-          width="80px"
-          height="80px"
+          width="40px"
+          height="40px"
           alt="신고 버튼 아이콘"
           src="../assets/reportButton.svg"
         />
