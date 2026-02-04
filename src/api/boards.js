@@ -16,9 +16,13 @@ export const boardsApi = {
     return data;
   },
 
-  async searchBoardByKeyword(keyword, page = 1) {
+  async searchBoardByKeyword(keyword, page = 1, category = null) {
+    const params = { keyword, page };
+    if (category) {
+      params.category = category;
+    }
     const { data } = await api.get('/api/v1/search/all', {
-      params: { keyword, page },
+      params,
     });
     return data;
   },

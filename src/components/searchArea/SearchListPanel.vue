@@ -1,96 +1,159 @@
 <template>
   <div class="slider_wrap">
     <button class="slider_colse_button" @click="$emit('close')">
-      <img src="@/assets/sliderCloseIcon.svg" alt="slider close icon" width="36" height="36" />
+      <img
+        src="@/assets/sliderCloseIcon.svg"
+        alt="slider close icon"
+        width="36"
+        height="36"
+      />
     </button>
     <!-- 검색 인풋 -->
     <div class="search_top_input_wrap">
-      <input v-model="keyword" type="text" placeholder="내가 사는 지역의 이름을 한 번 검색해보세요." class="search_top_input"
-        @keyup.enter="handleSearch" />
+      <input
+        v-model="keyword"
+        type="text"
+        placeholder="내가 사는 지역의 이름을 한 번 검색해보세요."
+        class="search_top_input"
+        @keyup.enter="handleSearch"
+      />
       <button class="search_top_button" @click="handleSearch">
-        <img src="@/assets/iconSearch.svg" alt="search" width="24" height="24" />
+        <img
+          src="@/assets/iconSearch.svg"
+          alt="search"
+          width="24"
+          height="24"
+        />
       </button>
       <p class="search_guide">
         띄어쓰기 공백을 포함해서 정확한 키워드를 입력해주세요!
       </p>
     </div>
     <!-- 리스트 솔팅 탭 -->
-    <GradientScroll :width="'350px'" :height="'75px'" gradient-color="rgba(0,0,0,1)">
+    <GradientScroll
+      :width="'350px'"
+      :height="'75px'"
+      gradient-color="rgba(0,0,0,1)"
+    >
       <ul class="sort_list_wrap">
-        <li v-for="(cat, i) in categories" :key="i" class="sort_list" :class="{ on: selectedCategory === cat }">
-          <button class="sort_list_button" @click="selectedCategory = cat">
+        <li
+          v-for="(cat, i) in categories"
+          :key="i"
+          class="sort_list"
+          :class="{ on: selectedCategory === cat }"
+        >
+          <button class="sort_list_button" @click="selectCategory(cat)">
             <span>{{ cat }}</span>
           </button>
         </li>
       </ul>
     </GradientScroll>
     <strong v-if="keyword && (hasSearched || loading)" class="search_title">
-      {{ loading ? '검색중입니다.' : `총 ${totalElements}건의 검색결과가 있습니다.` }}
+      {{
+        loading
+          ? '검색중입니다.'
+          : `총 ${totalElements}건의 검색결과가 있습니다.`
+      }}
     </strong>
 
     <!-- 검색된 게시글 리스트 -->
-    <GradientScroll :width="'100%'" :height="'100%'" direction="vertical" gradient-color="rgba(0,0,0,1)">
+    <GradientScroll
+      :width="'100%'"
+      :height="'100%'"
+      direction="vertical"
+      gradient-color="rgba(0,0,0,1)"
+    >
       <div class="search_scroll_area">
-        <ul class="search_list_wrap">
+        <ul v-if="currentItems.length > 0" class="search_list_wrap">
           <li class="search_list" v-for="item in currentItems" :key="item.id">
             <button class="search_list_button" @click="openDetail(item)">
               <span class="search_list_contents">
                 <span class="tag_button_wrap">
                   <span class="search_list_tag">
-                    {{ item.resultType === 'ARTICLE' ? (item.crimeType || '뉴스') : (item.category || '커뮤니티') }}
+                    {{
+                      item.resultType === 'ARTICLE'
+                        ? item.crimeType || '뉴스'
+                        : item.category || '커뮤니티'
+                    }}
                   </span>
                   <span class="search_list_arrow">
-                    <img src="@/assets/slideCardArrowGreen.svg" class="search_list_arrow_icon"
-                      alt="search list arrow icon" width="18" height="18" />
+                    <img
+                      src="@/assets/slideCardArrowGreen.svg"
+                      class="search_list_arrow_icon"
+                      alt="search list arrow icon"
+                      width="18"
+                      height="18"
+                    />
                   </span>
                 </span>
                 <!-- 제목 하이라이팅 -->
-                <span class="ellipsis__1 search_list_contents_title" v-html="highlightKeyword(item.title)"></span>
+                <span
+                  class="ellipsis__1 search_list_contents_title"
+                  v-html="highlightKeyword(item.title)"
+                ></span>
 
                 <!-- 내용 하이라이팅 -->
-                <span class="ellipsis__1 search_list_contents_detail"
-                  v-html="highlightKeyword(item.content || '')"></span>
+                <span
+                  class="ellipsis__1 search_list_contents_detail"
+                  v-html="highlightKeyword(item.content || '')"
+                ></span>
               </span>
             </button>
           </li>
         </ul>
-        <PaginationWrap v-if="totalElements > 10" :currentPage="currentPage + 1"
-          :pageNumbers="pageNumbers.map(p => p + 1)" @page-change="(page) => pageChange(page - 1)" @prev="clickPrev"
-          @next="clickNext" />
+        <div v-else-if="hasSearched && !loading" class="no_results">
+          <p>검색 결과가 없습니다.</p>
+        </div>
+        <PaginationWrap
+          v-if="totalElements > 10"
+          :currentPage="currentPage + 1"
+          :pageNumbers="pageNumbers.map((p) => p + 1)"
+          @page-change="(page) => pageChange(page - 1)"
+          @prev="clickPrev"
+          @next="clickNext"
+        />
       </div>
     </GradientScroll>
   </div>
-  <SlidePanel :width="'510px'" :visible="isPanel2depsOpen" @close="isPanel2depsOpen = false" :left="'510px'"
-    :right="'auto'">
-    <CommunityListDetailPanel :post="selectedPost" @close="isPanel2depsOpen = false" />
+  <SlidePanel
+    :width="'510px'"
+    :visible="isPanel2depsOpen"
+    @close="isPanel2depsOpen = false"
+    :left="'510px'"
+    :right="'auto'"
+  >
+    <CommunityListDetailPanel
+      :post="selectedPost"
+      @close="isPanel2depsOpen = false"
+    />
   </SlidePanel>
-  <BaseAlertPopup v-if="showErrorPopup" @confirm="showErrorPopup = false" confirmText="확인">
+  <BaseAlertPopup
+    v-if="showErrorPopup"
+    @confirm="showErrorPopup = false"
+    confirmText="확인"
+  >
     <p>서버에 문제가 발생했습니다.<br />잠시 후 다시 시도해주세요.</p>
   </BaseAlertPopup>
 </template>
 
 <script setup>
-import { ref, computed, watch, defineProps } from 'vue';
+import { computed, defineProps, ref, watch } from 'vue';
 import { boardsApi } from '@/api/boards';
+import BaseAlertPopup from '@/components/BaseAlert.vue';
+import CommunityListDetailPanel from '@/components/communityPanel/CommunityListDetailPanel.vue';
 import GradientScroll from '@/components/gradientScroll/GradientScroll.vue';
 import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
-import CommunityListDetailPanel from '@/components/communityPanel/CommunityListDetailPanel.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
-import BaseAlertPopup from '@/components/BaseAlert.vue';
 
 const props = defineProps({
   selectedArticle: {
     type: Object,
-    default: null
-  }
+    default: null,
+  },
 });
 
 const categories = ['전체', '뉴스', '커뮤니티'];
 const selectedCategory = ref('전체');
-
-watch(selectedCategory, () => {
-  currentPage.value = 0;
-});
 const selectedPost = ref(null);
 const keyword = ref('');
 const allSearchResults = ref([]);
@@ -98,27 +161,61 @@ const apiTotalElements = ref(0);
 const loading = ref(false);
 const hasSearched = ref(false);
 const showErrorPopup = ref(false);
-let searchTimeout = null;
+const currentPage = ref(0);
+const itemsPerPage = 10;
+const isPanel2depsOpen = ref(false);
 
+// 카테고리 선택 함수
+const selectCategory = (cat) => {
+  selectedCategory.value = cat;
+  currentPage.value = 0;
+  if (hasSearched.value && keyword.value.trim()) {
+    handleSearch();
+  }
+};
+
+// 검색 함수
 const handleSearch = async () => {
-  if (!keyword.value.trim()) return;
-
-  if (searchTimeout) {
-    clearTimeout(searchTimeout);
+  if (!keyword.value.trim()) {
+    console.warn('검색어가 비어있습니다.');
+    return;
   }
 
-  if (loading.value) return;
+  if (loading.value) {
+    console.log('이미 검색 중입니다.');
+    return;
+  }
 
   loading.value = true;
   hasSearched.value = true;
   currentPage.value = 0;
 
   try {
-    const data = await boardsApi.searchBoardByKeyword(keyword.value, 1);
-    allSearchResults.value = Array.isArray(data?.content) ? data.content : [];
-    apiTotalElements.value = data?.totalElements || 0;
+    const data = await boardsApi.searchBoardByKeyword(
+      keyword.value,
+      currentPage.value + 1,
+      selectedCategory.value === '전체' ? null : selectedCategory.value,
+    );
+
+    if (data?.results) {
+      allSearchResults.value = data.results;
+      apiTotalElements.value = data.totalElements || data.results.length;
+    } else if (data && Array.isArray(data)) {
+      // Fallback for array response
+      allSearchResults.value = data;
+      apiTotalElements.value = data.length;
+    } else {
+      console.warn('API 응답 형식이 예상과 다릅니다:', data);
+      allSearchResults.value = [];
+      apiTotalElements.value = 0;
+    }
+
+    if (allSearchResults.value.length === 0) {
+      console.log('검색 결과가 없습니다.');
+    }
   } catch (error) {
     console.error('검색 실패:', error);
+    console.error('에러 상세:', error.response || error.message);
     allSearchResults.value = [];
     apiTotalElements.value = 0;
     showErrorPopup.value = true;
@@ -127,18 +224,20 @@ const handleSearch = async () => {
   }
 };
 
+// 키워드 하이라이팅
 const highlightKeyword = (text) => {
+  if (!text) return '';
   if (!keyword.value) return text;
+
   const escapedKeyword = keyword.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const regex = new RegExp(`(${escapedKeyword})`, 'gi');
   return text.replace(regex, '<mark class="highlight">$1</mark>');
 };
 
-const currentPage = ref(0);
-const itemsPerPage = 10;
-const isPanel2depsOpen = ref(false);
-
+// 상세 페이지 열기
 const openDetail = async (item) => {
+  console.log('상세 페이지 열기:', item);
+
   if (item.resultType === 'ARTICLE' && item.url) {
     window.open(item.url, '_blank');
     return;
@@ -157,26 +256,42 @@ const openDetail = async (item) => {
   }
 };
 
-watch(() => props.selectedPost, (post) => {
-  if (post) {
-    selectedPost.value = post;
-    isPanel2depsOpen.value = true;
-  }
-}, { immediate: true });
+// props 감시
+watch(
+  () => props.selectedPost,
+  (post) => {
+    if (post) {
+      selectedPost.value = post;
+      isPanel2depsOpen.value = true;
+    }
+  },
+  { immediate: true },
+);
 
+// 필터링된 결과
 const filteredResults = computed(() => {
+  let results = allSearchResults.value;
+
   if (selectedCategory.value === '뉴스') {
-    return allSearchResults.value.filter(item => item.resultType === 'ARTICLE');
+    results = results.filter((item) => item.resultType === 'ARTICLE');
   } else if (selectedCategory.value === '커뮤니티') {
-    return allSearchResults.value.filter(item => item.resultType === 'BOARD');
+    results = results.filter((item) => item.resultType === 'BOARD');
   }
-  return allSearchResults.value;
+
+  return results;
 });
 
-const totalElements = computed(() => apiTotalElements.value);
+// 총 개수
+const totalElements = computed(() => {
+  return filteredResults.value.length;
+});
 
-const totalPages = computed(() => Math.ceil(totalElements.value / itemsPerPage));
+// 총 페이지 수
+const totalPages = computed(() => {
+  return Math.ceil(totalElements.value / itemsPerPage);
+});
 
+// 페이지 번호 배열
 const pageNumbers = computed(() => {
   const max = 5;
   const start = Math.floor(currentPage.value / max) * max;
@@ -186,25 +301,15 @@ const pageNumbers = computed(() => {
   );
 });
 
+// 현재 페이지의 아이템들
 const currentItems = computed(() => {
-  return filteredResults.value;
+  const start = currentPage.value * itemsPerPage;
+  const end = start + itemsPerPage;
+  const items = filteredResults.value.slice(start, end);
+  return items;
 });
 
-const loadPage = async (page) => {
-  if (loading.value) return;
-
-  loading.value = true;
-  try {
-    const data = await boardsApi.searchBoardByKeyword(keyword.value, page + 1);
-    allSearchResults.value = Array.isArray(data?.content) ? data.content : [];
-  } catch (error) {
-    console.error('페이지 로딩 실패:', error);
-    showErrorPopup.value = true;
-  } finally {
-    loading.value = false;
-  }
-};
-
+// 스크롤 최상단으로
 const scrollToTop = () => {
   const scrollArea = document.querySelector('.search_scroll_area');
   if (scrollArea) {
@@ -212,12 +317,14 @@ const scrollToTop = () => {
   }
 };
 
+// 페이지 변경
 const pageChange = async (page) => {
   currentPage.value = page;
   await loadPage(page);
   scrollToTop();
 };
 
+// 이전 페이지
 const clickPrev = async () => {
   if (currentPage.value > 0) {
     currentPage.value--;
@@ -226,11 +333,41 @@ const clickPrev = async () => {
   }
 };
 
+// 다음 페이지
 const clickNext = async () => {
   if (currentPage.value < totalPages.value - 1) {
     currentPage.value++;
     await loadPage(currentPage.value);
     scrollToTop();
+  }
+};
+
+// 페이지 로드 (API 호출)
+const loadPage = async (page) => {
+  if (loading.value) return;
+
+  loading.value = true;
+  try {
+    const data = await boardsApi.searchBoardByKeyword(
+      keyword.value,
+      page + 1,
+      selectedCategory.value === '전체' ? null : selectedCategory.value,
+    );
+    if (data?.results) {
+      allSearchResults.value = data.results;
+      apiTotalElements.value = data.totalElements || data.results.length;
+    } else if (data && Array.isArray(data)) {
+      allSearchResults.value = data;
+      apiTotalElements.value = data.length;
+    } else {
+      allSearchResults.value = [];
+      apiTotalElements.value = 0;
+    }
+  } catch (error) {
+    console.error('페이지 로딩 실패:', error);
+    showErrorPopup.value = true;
+  } finally {
+    loading.value = false;
   }
 };
 </script>
@@ -332,9 +469,15 @@ const clickNext = async () => {
   color: #fff;
   font-weight: 600;
   font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.sort_list.on>.sort_list_button {
+.sort_list_button:hover {
+  opacity: 0.8;
+}
+
+.sort_list.on > .sort_list_button {
   background-color: #00ffc2;
   font-family: 'Roboto';
   color: #000;
@@ -343,6 +486,7 @@ const clickNext = async () => {
 // 광장 게시글 리스트
 .search_scroll_area {
   margin: 20px 0;
+  min-height: 300px;
 }
 
 .search_list_wrap {
@@ -363,12 +507,14 @@ const clickNext = async () => {
   min-height: 18px;
   margin-top: 14px;
   margin-bottom: 12px;
+  display: block;
 }
 
 .search_list_contents_detail {
   color: #fff;
   font-size: 12px;
   min-height: 15px;
+  display: block;
 }
 
 .tag_button_wrap {
@@ -403,13 +549,49 @@ const clickNext = async () => {
   border-radius: 8px;
   flex-wrap: wrap;
   text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.search_list_button:hover {
+  background-color: #018f6c;
 }
 
 .search_list_contents {
   width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .list_contents_tag {
   color: #00ffc2;
+}
+
+/* 하이라이트 스타일 */
+:deep(.highlight) {
+  background-color: #ffeb3b;
+  color: #000;
+  font-weight: bold;
+  padding: 0 2px;
+}
+
+/* ellipsis 유틸리티 클래스 */
+.ellipsis__1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+
+/* 검색 결과 없음 */
+.no_results {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #fff;
+  font-size: 16px;
 }
 </style>
