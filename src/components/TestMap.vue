@@ -48,66 +48,206 @@ const closeOverlay = () => {
   }
 };
 
+// CustomOverlay 클래스를 onMounted 밖에서 정의 (OverlayView를 받아서 생성)
+let CustomOverlay = null;
+
+const initCustomOverlay = (OverlayView) => {
+  CustomOverlay = class extends OverlayView {
+    position;
+    div;
+    constructor(position, content, map, num) {
+      super();
+      this.position = position;
+      this.content = content;
+      this.map = map;
+      this.div = null;
+      this.num = num;
+      this.setMap(map);
+    }
+
+    onAdd() {
+      this.div = document.createElement('div');
+      this.div.style.position = 'absolute';
+      this.div.style.pointerEvents = 'auto'; // 클릭 이벤트 허용
+      this.div.appendChild(this.content);
+      CustomOverlay.preventMapHitsAndGesturesFrom(this.div);
+      const panes = this.getPanes();
+      panes.floatPane.appendChild(this.div);
+    }
+
+    draw() {
+      if (this.div) {
+        const overlayProjection = this.getProjection();
+        const position = overlayProjection.fromLatLngToDivPixel(this.position);
+
+        const popupHeight = this.div.offsetHeight;
+
+        const offsetX = 16;
+        const offsetY = popupHeight / 2;
+
+        const gap = 20;
+        this.div.style.left = `${position.x + offsetX + gap}px`;
+        this.div.style.top = `${position.y - offsetY}px`;
+        this.div.style.zIndex = '1000';
+      }
+    }
+
+    onRemove() {
+      if (this.div) {
+        this.div.parentNode.removeChild(this.div);
+        this.div = null;
+      }
+    }
+
+    close() {
+      this.setMap(null);
+    }
+  };
+};
+
+const renderer = {
+  render: ({ count, position, markers }) => {
+    const clusterTag = document.createElement('div');
+    clusterTag.classList.add('cluster');
+    const size = Math.min(16 + count, 200);
+    clusterTag.innerHTML = `
+    <div style="line-height: ${size}px">${String(count)}<div>
+  `;
+    clusterTag.style.backgroundColor = markers[0].content.style.backgroundColor;
+    clusterTag.style.width = size + 'px';
+    clusterTag.style.height = size + 'px';
+    const mark = new library.AdvancedMarkerElement({
+      map,
+      content: clusterTag,
+      position,
+      zIndex: 1000 + count,
+    });
+
+    return mark;
+  },
+};
+
+const onClickCluster = (e, cluster) => {
+  closeOverlay();
+
+  const clusterPosition = {
+    lat: cluster.position.lat(),
+    lng: cluster.position.lng(),
+  };
+
+  // 클러스터 내 마커들의 원본 기사 데이터를 찾아서 전달
+  const clusterArticles = cluster.markers.map((marker) => {
+    // marker의 content에서 title을 가져와서 원본 데이터 찾기
+    const title = marker.content.getAttribute('article_title');
+    return articles.value.find((article) => article.title === title);
+  });
+
+  const container = document.createElement('div');
+  const app = createApp(MarkerPopup, {
+    closeWindow: closeOverlay,
+    article: clusterArticles, // 완전한 기사 객체 배열 전달
+  });
+  app.mount(container);
+
+  overlay = new CustomOverlay(clusterPosition, container, map, cluster.count);
+};
+
+// 마커 생성 함수
+const createMarkers = () => {
+  for (const article of articles.value) {
+    const markerTag = document.createElement('div');
+    markerTag.classList.add('marker');
+    if (Object.keys(markerColor).includes(article.category)) {
+      markerTag.style.backgroundColor = markerColor[article.category];
+    }
+    markerTag.setAttribute('article_title', article.title);
+    markerTag.setAttribute('article_url', article.url);
+    markerTag.setAttribute('article_data', article.date);
+    article.marker = new library.AdvancedMarkerElement({
+      map,
+      position: article.position,
+      content: markerTag,
+    });
+    article.marker.addListener('click', () => {
+      closeOverlay();
+
+      const container = document.createElement('div');
+      const app = createApp(MarkerPopup, {
+        closeWindow: closeOverlay,
+        article: article,
+      });
+      app.mount(container);
+
+      overlay = new CustomOverlay(article.position, container, map, 1);
+    });
+  }
+};
+
+// 클러스터 생성 함수
+const createClusters = () => {
+  clusters.바바리맨 = new MarkerClusterer({
+    map,
+    markers: articles.value
+      .filter(({ category }) => {
+        return category === '바바리맨';
+      })
+      .map(({ marker }) => marker),
+    renderer,
+    onClusterClick: onClickCluster,
+  });
+  clusters.미행 = new MarkerClusterer({
+    map,
+    markers: articles.value
+      .filter(({ category }) => {
+        return category === '미행';
+      })
+      .map(({ marker }) => marker),
+    renderer,
+    onClusterClick: onClickCluster,
+  });
+  clusters.헌팅 = new MarkerClusterer({
+    map,
+    markers: articles.value
+      .filter(({ category }) => {
+        return category === '헌팅';
+      })
+      .map(({ marker }) => marker),
+    renderer,
+    onClusterClick: onClickCluster,
+  });
+  clusters.폭행 = new MarkerClusterer({
+    map,
+    markers: articles.value
+      .filter(({ category }) => {
+        return category === '폭행';
+      })
+      .map(({ marker }) => marker),
+    renderer,
+    onClusterClick: onClickCluster,
+  });
+  clusters.기타 = new MarkerClusterer({
+    map,
+    markers: articles.value
+      .filter(({ category }) => {
+        return category === '기타';
+      })
+      .map(({ marker }) => marker),
+    renderer,
+    onClusterClick: onClickCluster,
+  });
+  filteredArticles.value = [...articles.value];
+};
+
 onMounted(async () => {
   try {
-    isLoading.value = true;
-    await loadArticles();
+    // 1. 지도를 먼저 그린다 (병렬로 기사 로딩 시작)
+    const articlesPromise = loadArticles();
+
+    // 2. Google Maps 라이브러리 로드 및 지도 생성
     const { Map, OverlayView } = await loader.importLibrary('maps');
     const { AdvancedMarkerElement } = await loader.importLibrary('marker');
 
-    class CustomOverlay extends OverlayView {
-      position;
-      div;
-      constructor(position, content, map, num) {
-        super();
-        this.position = position;
-        this.content = content;
-        this.map = map;
-        this.div = null;
-        this.num = num;
-        this.setMap(map);
-      }
-
-      onAdd() {
-        this.div = document.createElement('div');
-        this.div.style.position = 'absolute';
-        this.div.style.pointerEvents = 'auto'; // 클릭 이벤트 허용
-        this.div.appendChild(this.content);
-        CustomOverlay.preventMapHitsAndGesturesFrom(this.div);
-        const panes = this.getPanes();
-        panes.floatPane.appendChild(this.div);
-      }
-
-      draw() {
-        if (this.div) {
-          const overlayProjection = this.getProjection();
-          const position = overlayProjection.fromLatLngToDivPixel(
-            this.position,
-          );
-
-          const popupHeight = this.div.offsetHeight;
-
-          const offsetX = 16;
-          const offsetY = popupHeight / 2;
-
-          const gap = 20;
-          this.div.style.left = `${position.x + offsetX + gap}px`;
-          this.div.style.top = `${position.y - offsetY}px`;
-          this.div.style.zIndex = '1000';
-        }
-      }
-
-      onRemove() {
-        if (this.div) {
-          this.div.parentNode.removeChild(this.div);
-          this.div = null;
-        }
-      }
-
-      close() {
-        this.setMap(null);
-      }
-    }
+    initCustomOverlay(OverlayView);
 
     library.Map = Map;
     library.AdvancedMarkerElement = AdvancedMarkerElement;
@@ -120,138 +260,13 @@ onMounted(async () => {
       streetViewControl: false,
     });
 
-    for (const article of articles.value) {
-      const markerTag = document.createElement('div');
-      markerTag.classList.add('marker');
-      if (Object.keys(markerColor).includes(article.category)) {
-        markerTag.style.backgroundColor = markerColor[article.category];
-      }
-      markerTag.setAttribute('article_title', article.title);
-      markerTag.setAttribute('article_url', article.url);
-      markerTag.setAttribute('article_data', article.date);
-      article.marker = new library.AdvancedMarkerElement({
-        map,
-        position: article.position,
-        content: markerTag,
-      });
-      article.marker.addListener('click', () => {
-        closeOverlay();
+    // 3. 기사 로딩이 완료될 때까지 대기 (지도는 이미 보임)
+    isLoading.value = true;
+    await articlesPromise;
 
-        const container = document.createElement('div');
-        const app = createApp(MarkerPopup, {
-          closeWindow: closeOverlay,
-          article: article,
-        });
-        app.mount(container);
-
-        overlay = new CustomOverlay(article.position, container, map, 1);
-      });
-    }
-
-    const renderer = {
-      render: ({ count, position, markers }) => {
-        const clusterTag = document.createElement('div');
-        clusterTag.classList.add('cluster');
-        const size = Math.min(16 + count, 200);
-        clusterTag.innerHTML = `
-    <div style="line-height: ${size}px">${String(count)}<div>
-  `;
-        clusterTag.style.backgroundColor =
-          markers[0].content.style.backgroundColor;
-        clusterTag.style.width = size + 'px';
-        clusterTag.style.height = size + 'px';
-        const mark = new library.AdvancedMarkerElement({
-          map,
-          content: clusterTag,
-          position,
-          zIndex: 1000 + count,
-        });
-
-        return mark;
-      },
-    };
-
-    const onClickCluster = (e, cluster) => {
-      closeOverlay();
-
-      const clusterPosition = {
-        lat: cluster.position.lat(),
-        lng: cluster.position.lng(),
-      };
-
-      // 클러스터 내 마커들의 원본 기사 데이터를 찾아서 전달
-      const clusterArticles = cluster.markers.map((marker) => {
-        // marker의 content에서 title을 가져와서 원본 데이터 찾기
-        const title = marker.content.getAttribute('article_title');
-        return articles.value.find((article) => article.title === title);
-      });
-
-      const container = document.createElement('div');
-      const app = createApp(MarkerPopup, {
-        closeWindow: closeOverlay,
-        article: clusterArticles, // 완전한 기사 객체 배열 전달
-      });
-      app.mount(container);
-
-      overlay = new CustomOverlay(
-        clusterPosition,
-        container,
-        map,
-        cluster.count,
-      );
-    };
-
-    clusters.바바리맨 = new MarkerClusterer({
-      map,
-      markers: articles.value
-        .filter(({ category }) => {
-          return category === '바바리맨';
-        })
-        .map(({ marker }) => marker),
-      renderer,
-      onClusterClick: onClickCluster,
-    });
-    clusters.미행 = new MarkerClusterer({
-      map,
-      markers: articles.value
-        .filter(({ category }) => {
-          return category === '미행';
-        })
-        .map(({ marker }) => marker),
-      renderer,
-      onClusterClick: onClickCluster,
-    });
-    clusters.헌팅 = new MarkerClusterer({
-      map,
-      markers: articles.value
-        .filter(({ category }) => {
-          return category === '헌팅';
-        })
-        .map(({ marker }) => marker),
-      renderer,
-      onClusterClick: onClickCluster,
-    });
-    clusters.폭행 = new MarkerClusterer({
-      map,
-      markers: articles.value
-        .filter(({ category }) => {
-          return category === '폭행';
-        })
-        .map(({ marker }) => marker),
-      renderer,
-      onClusterClick: onClickCluster,
-    });
-    clusters.기타 = new MarkerClusterer({
-      map,
-      markers: articles.value
-        .filter(({ category }) => {
-          return category === '기타';
-        })
-        .map(({ marker }) => marker),
-      renderer,
-      onClusterClick: onClickCluster,
-    });
-    filteredArticles.value = [...articles.value];
+    // 4. 기사 로딩 완료 후 마커와 클러스터 생성
+    createMarkers();
+    createClusters();
   } catch (error) {
     console.error('Google Maps 로딩 실패:', error);
   } finally {
