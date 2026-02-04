@@ -183,6 +183,38 @@ const createMarkers = () => {
   }
 };
 
+// 서울시청 기본 좌표
+const SEOUL_CITY_HALL = { lat: 37.5663, lng: 126.9779 };
+const DEFAULT_ZOOM = 14; // 더 가까운 줌 레벨
+
+// 사용자 위치 가져오기 (실패 시 서울시청 반환)
+const getUserLocation = () => {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve(SEOUL_CITY_HALL);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      },
+      () => {
+        // 위치 권한 거부 또는 오류 시 서울시청으로 fallback
+        resolve(SEOUL_CITY_HALL);
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 5000,
+        maximumAge: 300000, // 5분간 캐시 사용
+      },
+    );
+  });
+};
+
 // 클러스터 생성 함수
 const createClusters = () => {
   clusters.바바리맨 = new MarkerClusterer({
@@ -240,31 +272,38 @@ const createClusters = () => {
 
 onMounted(async () => {
   try {
-    // 1. 지도를 먼저 그린다 (병렬로 기사 로딩 시작)
+    // 1. 병렬로 시작: 기사 로딩, 위치 가져오기, Google Maps 라이브러리 로드
     const articlesPromise = loadArticles();
+    const locationPromise = getUserLocation();
 
-    // 2. Google Maps 라이브러리 로드 및 지도 생성
-    const { Map, OverlayView } = await loader.importLibrary('maps');
-    const { AdvancedMarkerElement } = await loader.importLibrary('marker');
+    // 2. Google Maps 라이브러리 로드
+    const [{ Map, OverlayView }, { AdvancedMarkerElement }, userLocation] =
+      await Promise.all([
+        loader.importLibrary('maps'),
+        loader.importLibrary('marker'),
+        locationPromise,
+      ]);
 
     initCustomOverlay(OverlayView);
 
     library.Map = Map;
     library.AdvancedMarkerElement = AdvancedMarkerElement;
+
+    // 3. 사용자 위치 또는 서울시청 기준으로 지도 생성
     map = new library.Map(mapDiv.value, {
-      center: { lat: 36.36727, lng: 127.07242 },
-      zoom: 7.5,
+      center: userLocation,
+      zoom: DEFAULT_ZOOM,
       mapId: '503c7df556477029',
       fullscreenControl: false,
       mapTypeControl: false,
       streetViewControl: false,
     });
 
-    // 3. 기사 로딩이 완료될 때까지 대기 (지도는 이미 보임)
+    // 4. 기사 로딩이 완료될 때까지 대기 (지도는 이미 보임)
     isLoading.value = true;
     await articlesPromise;
 
-    // 4. 기사 로딩 완료 후 마커와 클러스터 생성
+    // 5. 기사 로딩 완료 후 마커와 클러스터 생성
     createMarkers();
     createClusters();
   } catch (error) {
