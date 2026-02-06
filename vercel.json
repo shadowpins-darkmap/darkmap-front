@@ -1,16 +1,17 @@
 {
-  "rewrites": [
+  "routes": [
     {
-      "source": "/articles/:path*",
-      "destination": "http://darkmap-api-lb-1782199916.ap-northeast-2.elb.amazonaws.com/articles/:path*"
+      "src": "/articles/(.*)",
+      "dest": "http://darkmap-api-lb-1782199916.ap-northeast-2.elb.amazonaws.com/articles/$1"
     },
     {
-      "source": "/api/:path*",
-      "destination": "https://api.kdark.weareshadowpins.com/api/:path*"
+      "src": "/api/(.*)",
+      "dest": "https://api.kdark.weareshadowpins.com/api/$1"
     },
+    { "handle": "filesystem" },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/.*",
+      "dest": "/index.html"
     }
   ]
 }
