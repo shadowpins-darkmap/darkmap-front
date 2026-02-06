@@ -10,7 +10,7 @@ const OAUTH_ENDPOINT_PATHS = {
   [OAUTH_PROVIDERS.KAKAO]: '/api/v1/auth/login/kakao',
 };
 
-const FALLBACK_API_BASE_URL = API_BASE_URL || DEFAULT_API_URL;
+const FALLBACK_API_BASE_URL = DEFAULT_API_URL;
 
 export function getOAuthLoginUrl(provider) {
   const endpointPath = OAUTH_ENDPOINT_PATHS[provider];
