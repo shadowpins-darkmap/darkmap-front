@@ -1,6 +1,36 @@
 import { defineStore } from 'pinia';
 import { userApi } from '@/api/user';
 
+const getSessionStorage = () => {
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+  return window.sessionStorage;
+};
+
+const computeExpiryTimestamp = (value) => {
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue) || numericValue <= 0) {
+    return null;
+  }
+
+  // Assume large numbers are already absolute timestamps (ms).
+  if (numericValue > 1e12) {
+    return numericValue;
+  }
+
+  // Some APIs may already send ms but stay below the 1e12 threshold.
+  if (numericValue > 1e10) {
+    return numericValue;
+  }
+
+  return Date.now() + numericValue * 1000;
+};
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     isAuthenticated: false,
@@ -30,7 +60,22 @@ export const useAuthStore = defineStore('auth', {
     commentsTotalPages: 0,
     myCommentsLoaded: false,
     myCommentsLoading: false,
+
+    accessToken: null,
+    refreshToken: null,
+    accessTokenExpiresAt: null,
+    refreshTokenExpiresAt: null,
   }),
+
+  persist: {
+    storage: getSessionStorage(),
+    paths: [
+      'accessToken',
+      'refreshToken',
+      'accessTokenExpiresAt',
+      'refreshTokenExpiresAt',
+    ],
+  },
 
   getters: {
     isLoggedIn: (s) => s.isAuthenticated,
@@ -54,6 +99,45 @@ export const useAuthStore = defineStore('auth', {
       this.level = userData.level;
       this.loginCount = userData.loginCount;
       this.joinedAt = userData.joinedAt;
+    },
+
+    setTokens(tokenPayload = {}) {
+      if (!tokenPayload || typeof tokenPayload !== 'object') {
+        return;
+      }
+
+      if (tokenPayload.accessToken) {
+        this.accessToken = tokenPayload.accessToken;
+
+        const accessExpiry =
+          tokenPayload.accessTokenExpiresAt ??
+          tokenPayload.accessTokenExpiresIn ??
+          tokenPayload.expiresIn;
+
+        const computedAccessExpiry = computeExpiryTimestamp(accessExpiry);
+        if (computedAccessExpiry) {
+          this.accessTokenExpiresAt = computedAccessExpiry;
+        }
+      }
+
+      const refreshToken = tokenPayload.refreshToken ?? this.refreshToken;
+      this.refreshToken = refreshToken;
+
+      const refreshExpiry =
+        tokenPayload.refreshTokenExpiresAt ?? tokenPayload.refreshTokenExpiresIn;
+      const computedRefreshExpiry = computeExpiryTimestamp(refreshExpiry);
+      if (computedRefreshExpiry) {
+        this.refreshTokenExpiresAt = computedRefreshExpiry;
+      } else if (!refreshToken) {
+        this.refreshTokenExpiresAt = null;
+      }
+    },
+
+    clearTokens() {
+      this.accessToken = null;
+      this.refreshToken = null;
+      this.accessTokenExpiresAt = null;
+      this.refreshTokenExpiresAt = null;
     },
 
     setProfile(profileData) {
@@ -104,8 +188,18 @@ export const useAuthStore = defineStore('auth', {
       this.myCommentsLoading = false;
     },
 
+    clearSessionState() {
+      this.clearTokens();
+      this.clearUserData();
+    },
+
     async restoreSession() {
       try {
+        if (!this.accessToken || !this.refreshToken) {
+          this.clearSessionState();
+          return null;
+        }
+
         const userData = await userApi.getMe();
 
         this.setAuthenticated(userData);
@@ -114,7 +208,7 @@ export const useAuthStore = defineStore('auth', {
         if (error?.response?.status !== 401) {
           console.error('❌ 세션 복원 실패:', error);
         }
-        this.clearUserData();
+        this.clearSessionState();
         return null;
       }
     },
@@ -127,14 +221,14 @@ export const useAuthStore = defineStore('auth', {
       } catch (e) {
         console.error('로그아웃 API 실패:', e);
       } finally {
-        this.clearUserData();
+        this.clearSessionState();
       }
     },
 
     async withdraw() {
       if (!this.requireAuth()) return;
       await userApi.withdraw();
-      this.clearUserData();
+      this.clearSessionState();
     },
 
     async fetchUserProfile() {

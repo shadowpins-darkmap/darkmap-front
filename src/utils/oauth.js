@@ -1,4 +1,4 @@
-import { API_BASE_URL, DEFAULT_API_URL, IS_DEVELOPMENT } from '@/constant/url';
+import { API_BASE_URL, DEFAULT_API_URL } from '@/constant/url';
 
 export const OAUTH_PROVIDERS = {
   GOOGLE: 'google',
@@ -10,7 +10,7 @@ const OAUTH_ENDPOINT_PATHS = {
   [OAUTH_PROVIDERS.KAKAO]: '/api/v1/auth/login/kakao',
 };
 
-const FALLBACK_API_BASE_URL = IS_DEVELOPMENT ? 'http://localhost:8080' : DEFAULT_API_URL;
+const FALLBACK_API_BASE_URL = API_BASE_URL || DEFAULT_API_URL;
 
 export function getOAuthLoginUrl(provider) {
   const endpointPath = OAUTH_ENDPOINT_PATHS[provider];

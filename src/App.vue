@@ -3,16 +3,27 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { useRouter } from 'vue-router';
 import { useStatsStore } from '@/store/useStatsStore';
 import { useAuthStore } from '@/store/useAuthStore';
 
 const isAppReady = ref(false);
 const isSocialRedirectPath = window.location.pathname.startsWith('/social-redirect');
 
+const router = useRouter();
+const statsStore = useStatsStore();
+const authStore = useAuthStore();
+
+const handleRefreshFailed = () => {
+  console.warn('세션이 만료되어 로그인 페이지로 이동합니다.');
+  if (router.currentRoute.value.path !== '/login') {
+    router.replace('/login');
+  }
+};
+
 onMounted(async () => {
-  const statsStore = useStatsStore();
-  const authStore = useAuthStore();
+  window.addEventListener('auth:refresh-failed', handleRefreshFailed);
 
   if (window.opener && isSocialRedirectPath) {
     isAppReady.value = true;
@@ -25,6 +36,10 @@ onMounted(async () => {
   } finally {
     isAppReady.value = true;
   }
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('auth:refresh-failed', handleRefreshFailed);
 });
 </script>
 

@@ -7,12 +7,12 @@ const REFRESH_ENDPOINT = '/api/v1/auth/refresh';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true,
+  timeout: 10000,
 });
 
 const refreshClient = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true,
+  timeout: 10000,
 });
 
 let refreshRequest = null;
@@ -20,11 +20,27 @@ let refreshRequest = null;
 const getAuthStore = () => useAuthStore(pinia);
 
 const requestTokenRefresh = async () => {
-  if (!refreshRequest) {
-    refreshRequest = refreshClient.post(REFRESH_ENDPOINT).finally(() => {
+  if (refreshRequest) {
+    return refreshRequest;
+  }
+
+  const authStore = getAuthStore();
+  const { refreshToken } = authStore;
+
+  if (!refreshToken) {
+    return Promise.reject(new Error('리프레시 토큰이 존재하지 않습니다.'));
+  }
+
+  refreshRequest = refreshClient
+    .post(REFRESH_ENDPOINT, { refreshToken })
+    .then(({ data }) => {
+      authStore.setTokens?.(data);
+      return data;
+    })
+    .finally(() => {
       refreshRequest = null;
     });
-  }
+
   return refreshRequest;
 };
 
@@ -38,6 +54,21 @@ const forceLogout = async () => {
     window.dispatchEvent(new CustomEvent('auth:refresh-failed'));
   }
 };
+
+api.interceptors.request.use(
+  (config) => {
+    const authStore = getAuthStore();
+    const token = authStore?.accessToken;
+
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
 
 api.interceptors.response.use(
   (response) => response,
@@ -63,6 +94,12 @@ api.interceptors.response.use(
     }
 
     try {
+      const authStore = getAuthStore();
+      if (!authStore.refreshToken) {
+        await forceLogout();
+        return Promise.reject(error);
+      }
+
       config._retry = true;
       await requestTokenRefresh();
       return api(config);

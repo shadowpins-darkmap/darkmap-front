@@ -13,13 +13,15 @@ module.exports = defineConfig({
   },
 
   devServer: {
+    port: 3000,
     proxy: {
       '/articles': {
         target: 'https://api.kdark.weareshadowpins.com',
         changeOrigin: true,
       },
       '/api': {
-        target: 'https://api.kdark.weareshadowpins.com',
+        //target: 'https://api.kdark.weareshadowpins.com',
+        target: 'http://localhost:8080',
         changeOrigin: true,
       },
     },

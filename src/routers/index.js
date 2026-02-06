@@ -1,16 +1,17 @@
 import { createWebHistory, createRouter } from 'vue-router';
 
-// Route-level code splitting for better performance
+const MainView = () => import('@/views/MainView.vue');
+
 const routes = [
   {
     path: '/',
     name: 'RenderMap',
-    component: () => import('@/components/RenderMap.vue'),
+    component: MainView,
   },
   {
     path: '/login',
     name: 'LoginView',
-    component: () => import('@/views/auth/LoginView.vue'),
+    component: MainView,
   },
 ];
 
