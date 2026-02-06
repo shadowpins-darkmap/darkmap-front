@@ -9,10 +9,6 @@
       "destination": "https://api.kdark.weareshadowpins.com/api/:path*"
     },
     {
-      "source": "/login/:path*",
-      "destination": "https://api.kdark.weareshadowpins.com/login/:path*"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
