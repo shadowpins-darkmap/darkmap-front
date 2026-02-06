@@ -39,7 +39,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { userApi } from '@/api/user';
 import { RECENT_LOGIN_INFO_KEY } from '@/constant/storage';
 import { openOAuthPopup } from '@/lib/oauthPopup';
-import { API_BASE_URL, BASE_URL, LEGACY_BASE_URL } from '@/constant/url';
+import { API_BASE_URL, BASE_URL } from '@/constant/url';
 
 const emit = defineEmits(['close']);
 
@@ -83,7 +83,7 @@ const allowedOrigins = (() => {
     origins.add(window.location.origin);
   }
 
-  [API_BASE_URL, BASE_URL, LEGACY_BASE_URL].forEach((url) => {
+[API_BASE_URL, BASE_URL].forEach((url) => {
     if (!url) return;
     try {
       const origin = new URL(url).origin;

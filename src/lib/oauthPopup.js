@@ -64,7 +64,10 @@ export function openOAuthPopup(url, options = {}) {
 
       if (event.data.type === 'OAUTH_SUCCESS') {
         finalize(() => resolve(event.data.payload));
-      } else if (event.data.type === 'OAUTH_FAILURE') {
+      } else if (
+        event.data.type === 'OAUTH_FAILURE' ||
+        event.data.type === 'OAUTH_ERROR'
+      ) {
         finalize(() =>
           reject(
             new Error(
