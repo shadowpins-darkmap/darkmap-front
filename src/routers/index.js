@@ -8,7 +8,7 @@ const routes = [
     component: () => import('@/components/RenderMap.vue'),
   },
   {
-    path: '/login_',
+    path: '/login',
     name: 'LoginView',
     component: () => import('@/views/auth/LoginView.vue'),
   },
