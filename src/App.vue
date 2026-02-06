@@ -7,6 +7,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStatsStore } from '@/store/useStatsStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { consumeAuthPayloadFromHash } from '@/utils/authPayload';
 
 const isAppReady = ref(false);
 const isSocialRedirectPath = window.location.pathname.startsWith('/social-redirect');
@@ -22,6 +23,27 @@ const handleRefreshFailed = () => {
   }
 };
 
+const handleAuthPayloadFromHash = () => {
+  const result = consumeAuthPayloadFromHash();
+  if (!result) {
+    return;
+  }
+
+  if (result.type === 'success') {
+    authStore.setTokens(result.data);
+    if (result.data?.member) {
+      authStore.setAuthenticated(result.data.member);
+    }
+    return;
+  }
+
+  console.error('[App] OAuth 해시 인증 처리 실패:', result.data);
+  window.dispatchEvent(new CustomEvent('auth:hash-error', { detail: result.data }));
+  if (router.currentRoute.value.path !== '/login') {
+    router.replace('/login');
+  }
+};
+
 onMounted(async () => {
   window.addEventListener('auth:refresh-failed', handleRefreshFailed);
 
@@ -29,6 +51,8 @@ onMounted(async () => {
     isAppReady.value = true;
     return;
   }
+
+  handleAuthPayloadFromHash();
 
   try {
     await authStore.restoreSession();
