@@ -9,21 +9,21 @@
     <div class="search_wrap">
       <button class="report_guide_button" @click="showReportGuide = true">
         <img
-          width="40px"
-          height="40px"
+          width="53"
+          height="53"
           alt="신고 버튼 아이콘"
           src="../assets/reportButton.svg"
         />
       </button>
       <button class="search_button" @click="isListPanelOpen = true">
         <img
-          width="24px"
-          height="24px"
+          width="18"
+          height="18"
           alt="검색 아이콘"
           src="../assets/mainSearchIcon.svg"
         />
         <span class="search_button_text"
-          >내가 사는 동네에서 일어난 괴롭힘 사건을 한 번 알아보세요.</span
+          >내가 사는 동네의 괴롭힘 사건을 한 번 알아보세요.</span
         >
       </button>
     </div>
