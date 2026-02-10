@@ -1,4 +1,4 @@
-import { API_BASE_URL, DEFAULT_API_URL } from '@/constant/url';
+import { API_BASE_URL, BASE_URL, DEFAULT_API_URL } from '@/constant/url';
 
 export const OAUTH_PROVIDERS = {
   GOOGLE: 'google',
@@ -11,13 +11,36 @@ const OAUTH_ENDPOINT_PATHS = {
 };
 
 const FALLBACK_API_BASE_URL = DEFAULT_API_URL;
+const PROVIDERS_SUPPORTING_REDIRECT = new Set([OAUTH_PROVIDERS.KAKAO]);
 
-export function getOAuthLoginUrl(provider) {
+const getDefaultFrontendOrigin = () => {
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return window.location.origin;
+  }
+  return BASE_URL;
+};
+
+export function getOAuthLoginUrl(provider, options = {}) {
   const endpointPath = OAUTH_ENDPOINT_PATHS[provider];
   if (!endpointPath) {
     throw new Error(`[getOAuthLoginUrl] Unsupported provider: ${provider}`);
   }
 
   const baseUrl = API_BASE_URL || FALLBACK_API_BASE_URL;
-  return `${baseUrl}${endpointPath}`;
+  const resolvedUrl = new URL(endpointPath, baseUrl);
+  const redirectUri = options.redirectUri ?? getDefaultFrontendOrigin();
+
+  if (redirectUri && PROVIDERS_SUPPORTING_REDIRECT.has(provider)) {
+    resolvedUrl.searchParams.set('redirectUri', redirectUri);
+  }
+
+  if (options.params && typeof options.params === 'object') {
+    Object.entries(options.params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        resolvedUrl.searchParams.set(key, String(value));
+      }
+    });
+  }
+
+  return resolvedUrl.toString();
 }

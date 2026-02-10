@@ -68,13 +68,18 @@ export function openOAuthPopup(url, options = {}) {
         event.data.type === 'OAUTH_FAILURE' ||
         event.data.type === 'OAUTH_ERROR'
       ) {
+        const payload = event.data.payload || {};
+        const errorMessage =
+          payload.message ||
+          payload.error ||
+          '소셜 로그인에 실패했습니다. 잠시 후 다시 시도해 주세요.';
+        const error = new Error(errorMessage);
+        if (payload.error) {
+          error.code = payload.error;
+        }
+
         finalize(() =>
-          reject(
-            new Error(
-              event.data.payload?.message ||
-                '소셜 로그인에 실패했습니다. 잠시 후 다시 시도해 주세요.',
-            ),
-          ),
+          reject(error),
         );
       }
     };

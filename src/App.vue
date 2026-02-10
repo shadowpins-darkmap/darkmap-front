@@ -44,10 +44,39 @@ const handleAuthPayloadFromHash = () => {
   }
 };
 
+const bridgeAuthPayloadToOpener = () => {
+  if (!window.opener) {
+    return;
+  }
+
+  const result = consumeAuthPayloadFromHash();
+  if (!result) {
+    window.opener.postMessage(
+      {
+        type: 'OAUTH_ERROR',
+        payload: { message: '인증 정보를 확인할 수 없습니다.' },
+      },
+      '*',
+    );
+    window.close();
+    return;
+  }
+
+  window.opener.postMessage(
+    {
+      type: result.type === 'success' ? 'OAUTH_SUCCESS' : 'OAUTH_ERROR',
+      payload: result.data,
+    },
+    '*',
+  );
+  window.close();
+};
+
 onMounted(async () => {
   window.addEventListener('auth:refresh-failed', handleRefreshFailed);
 
   if (window.opener && isSocialRedirectPath) {
+    bridgeAuthPayloadToOpener();
     isAppReady.value = true;
     return;
   }
