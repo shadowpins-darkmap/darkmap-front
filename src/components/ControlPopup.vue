@@ -122,29 +122,36 @@
                 src="../assets/unchecked.svg"
               />
             </div>
-            <div class="checkbox_text">{{ d.name }}</div>
+            <div
+              class="checkbox_text"
+              :class="{ 'long-name': d.name.length > 4 }"
+            >
+              {{ d.name }}
+            </div>
           </div>
         </div>
         <div class="body_title_wrap">
           <strong class="body_title"><span>뉴스 투어</span></strong>
         </div>
-        <div style="border: 0; height: 1.5px; background: #00ffc2"></div>
-        <div
-          v-for="(tArticle, i) in tableArticles"
-          :key="i"
-          class="article_table"
-        >
-          <div class="table_position">
-            {{ tArticle.address || '-' }}
+        <div class="news_table_wrap">
+          <div class="news_table_line top"></div>
+          <div
+            v-for="(tArticle, i) in tableArticles"
+            :key="i"
+            class="article_table"
+          >
+            <div class="table_position">
+              {{ tArticle.address || '-' }}
+            </div>
+            <div class="table_title" @click="clickTitle(tArticle.url)">
+              {{ tArticle.title || '-' }}
+            </div>
           </div>
-          <div class="table_title" @click="clickTitle(tArticle.url)">
-            {{ tArticle.title || '-' }}
-          </div>
+          <div class="news_table_line bottom"></div>
         </div>
-        <div style="border: 0; height: 1.5px; background: #00ffc2" />
         <div class="paging">
           <button class="prev_next" @click="clickPrev">
-            <img style="width: 10px" src="../assets/leftArrow.svg" />
+            <img style="width: 5px" src="../assets/leftArrow.svg" />
           </button>
           <div class="paging_numbers">
             <span
@@ -158,7 +165,7 @@
             </span>
           </div>
           <button class="prev_next" @click="clickNext">
-            <img style="width: 10px" src="../assets/rightArrow.svg" />
+            <img style="width: 5px" src="../assets/rightArrow.svg" />
           </button>
         </div>
         <div class="footer">

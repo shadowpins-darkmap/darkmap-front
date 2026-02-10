@@ -78,28 +78,35 @@ onUnmounted(() => window.removeEventListener('mousedown', onClickOutside));
   font-size: 14px;
 
   &__toggle {
-    min-width: 80px;
-    padding: 4px 8px;
-    text-align: left;
-    font-size: 14px;
-    font-weight: 600;
-    border: 2px solid #ffefeb;
-    border-radius: 30px;
+    box-sizing: border-box;
+    height: 20px;
+    padding: 4px 10px;
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+    font-style: normal;
+    font-weight: 800;
+    font-size: 12px;
+    line-height: 1;
+    border: 1px solid #ffefeb;
+    border-radius: 11px;
     background: transparent;
     color: #ffefeb;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    gap: 5px;
+    white-space: nowrap;
 
     &::after {
-      margin-left: 8px;
       content: '';
       width: 8px;
       height: 8px;
       background-image: url('@/assets/arrowDropDown.svg');
       background-repeat: no-repeat;
       background-position: center;
+      background-size: contain;
+      flex-shrink: 0;
     }
   }
 

@@ -56,30 +56,40 @@ const isTermsPanelOpen = ref(false);
 
 <style lang="scss" scoped>
 .BaseFooter {
-  font-size: 12px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 10px;
   font-weight: 500;
-  color: #fff;
+  color: #FFEFEB;
+  margin-top: 20px;
+  padding-bottom: 5px;
 
   &intro {
     display: flex;
     align-items: center;
+    margin-bottom: 8px;
   }
 
   &container {
     display: flex;
     align-items: center;
-    margin-top: 10px;
-    gap: 14px;
+    gap: 12px;
   }
 
   &__link {
     display: block;
     text-decoration: underline;
-    color: #fff;
+    color: #FFEFEB;
   }
   .BaseFooterlink {
-    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    color: #FFEFEB;
     text-decoration: underline;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
   }
 }
 </style>
