@@ -42,6 +42,7 @@ export const useAuthStore = defineStore('auth', {
     level: null,
     loginCount: null,
     joinedAt: null,
+    marketingAgreed: null,
 
     profile: null,
     message: null,
@@ -99,6 +100,12 @@ export const useAuthStore = defineStore('auth', {
       this.level = userData.level;
       this.loginCount = userData.loginCount;
       this.joinedAt = userData.joinedAt;
+      if (Object.prototype.hasOwnProperty.call(userData, 'marketingAgreed')) {
+        this.marketingAgreed =
+          userData.marketingAgreed === null
+            ? null
+            : Boolean(userData.marketingAgreed);
+      }
     },
 
     setTokens(tokenPayload = {}) {
@@ -179,6 +186,7 @@ export const useAuthStore = defineStore('auth', {
       this.level = null;
       this.loginCount = null;
       this.joinedAt = null;
+      this.marketingAgreed = null;
       this.profile = null;
       this.message = null;
       this.notifications = [];

@@ -528,7 +528,20 @@ const showWelcomeAlert = ref(false);
 const showNicknameStep = ref(false);
 const showFirstVisitStep = ref(false);
 const showMarketingStep = ref(false);
-const loginUserData = ref({ nickname: '', loginCount: 0 });
+const loginUserData = ref({
+  nickname: '',
+  loginCount: 0,
+  marketingAgreed: null,
+});
+const resolveMarketingAgreed = (value, fallback = null) => {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  if (typeof fallback === 'boolean') {
+    return fallback;
+  }
+  return null;
+};
 const isPanelOpen = ref(false);
 const isPanel2depsOpen = ref(false);
 const isListPanelOpen = ref(false);
@@ -595,12 +608,20 @@ onMounted(async () => {
 
   // Session is already restored in App.vue, so we just use the existing auth state
   if (recentLoginData) {
-    let enrichedData = recentLoginData;
+    let enrichedData = {
+      nickname: recentLoginData.nickname,
+      loginCount: recentLoginData.loginCount ?? 0,
+      marketingAgreed: resolveMarketingAgreed(recentLoginData.marketingAgreed),
+    };
 
     if (auth.isLoggedIn) {
       enrichedData = {
-        nickname: auth.nickname ?? recentLoginData.nickname,
-        loginCount: auth.loginCount ?? recentLoginData.loginCount ?? 0,
+        nickname: auth.nickname ?? enrichedData.nickname,
+        loginCount: auth.loginCount ?? enrichedData.loginCount,
+        marketingAgreed: resolveMarketingAgreed(
+          auth.marketingAgreed,
+          enrichedData.marketingAgreed,
+        ),
       };
     }
 
@@ -788,7 +809,23 @@ const handleArticleDetailClose = () => {
 
 /* ========== 로그인 관련 핸들러 ========== */
 const handleLoginSuccess = async (userData, { skipDataFetch = false } = {}) => {
-  loginUserData.value = userData;
+  const normalizedMarketing = resolveMarketingAgreed(
+    userData.marketingAgreed,
+    auth.marketingAgreed,
+  );
+
+  loginUserData.value = {
+    nickname: userData.nickname ?? '',
+    loginCount: userData.loginCount ?? 0,
+    marketingAgreed: normalizedMarketing,
+  };
+
+  if (
+    typeof normalizedMarketing === 'boolean' &&
+    normalizedMarketing !== auth.marketingAgreed
+  ) {
+    auth.marketingAgreed = normalizedMarketing;
+  }
 
   if (!skipDataFetch) {
     await fetchAccountData();
@@ -821,14 +858,26 @@ const handleNicknameSubmit = (newNickname) => {
 
 const handleFirstVisitConfirm = () => {
   showFirstVisitStep.value = false;
+  const alreadyHandled = resolveMarketingAgreed(
+    auth.marketingAgreed,
+    loginUserData.value.marketingAgreed,
+  );
+  if (alreadyHandled === true) {
+    showMarketingStep.value = false;
+    return;
+  }
   showMarketingStep.value = true;
 };
 
 const handleMarketingAgree = () => {
+  auth.marketingAgreed = true;
+  loginUserData.value.marketingAgreed = true;
   showMarketingStep.value = false;
 };
 
 const handleMarketingSkip = () => {
+  auth.marketingAgreed = false;
+  loginUserData.value.marketingAgreed = false;
   showMarketingStep.value = false;
 };
 </script>

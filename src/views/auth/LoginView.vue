@@ -60,6 +60,10 @@ const persistRecentLoginInfo = (userData) => {
     JSON.stringify({
       nickname: userData.nickname,
       loginCount: userData.loginCount,
+      marketingAgreed:
+        typeof userData.marketingAgreed === 'boolean'
+          ? userData.marketingAgreed
+          : null,
     }),
   );
 };

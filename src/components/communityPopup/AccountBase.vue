@@ -103,20 +103,29 @@ const onLogout = async () => {
 
 const nickname = ref('');
 const originalNickname = ref('');
+const normalizeMarketingValue = (value) =>
+  value === null || value === undefined ? false : Boolean(value);
+const marketing = ref({
+  agreed: normalizeMarketingValue(auth.marketingAgreed),
+});
+const originalMarketing = ref({
+  agreed: normalizeMarketingValue(auth.marketingAgreed),
+});
 
 onMounted(async () => {
   try {
     const userData = await userApi.getMe();
     nickname.value = userData.nickname;
     originalNickname.value = userData.nickname;
+    const agreed = normalizeMarketingValue(userData.marketingAgreed);
+    marketing.value.agreed = agreed;
+    originalMarketing.value.agreed = agreed;
+    auth.setUserInfo(userData);
   } catch (error) {
     console.error('사용자 정보 로드 실패:', error);
     showLoadErrorAlert.value = true;
   }
 });
-
-const marketing = ref({ agreed: true });
-const originalMarketing = ref({ agreed: true });
 
 const showErrorAlert = ref(false);
 const errorMessage = ref('');
@@ -152,6 +161,9 @@ const handleSubmit = async () => {
     await Promise.all(promises);
     if (nickname.value !== originalNickname.value) {
       auth.nickname = nickname.value;
+    }
+    if (marketing.value.agreed !== auth.marketingAgreed) {
+      auth.marketingAgreed = marketing.value.agreed;
     }
 
     originalNickname.value = nickname.value;
