@@ -36,8 +36,15 @@ export const userApi = {
     return data;
   },
 
-  async updateMarketingAgreement() {
-    const { data } = await api.put('/api/v1/member/marketing-agreement');
+  async updateMarketingAgreement(agreed) {
+    if (typeof agreed !== 'boolean') {
+      throw new Error('마케팅 정보 수신 동의 여부(Boolean)를 전달해야 합니다.');
+    }
+    const payload = { agreed };
+    const { data } = await api.put(
+      '/api/v1/member/marketing-agreement',
+      payload,
+    );
     return data;
   },
 

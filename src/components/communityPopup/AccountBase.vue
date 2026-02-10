@@ -141,7 +141,7 @@ const handleSubmit = async () => {
   }
 
   if (marketing.value.agreed !== originalMarketing.value.agreed) {
-    promises.push(userApi.updateMarketingAgreement());
+    promises.push(userApi.updateMarketingAgreement(marketing.value.agreed));
   }
 
   if (promises.length === 0) {

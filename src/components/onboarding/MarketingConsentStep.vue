@@ -47,7 +47,7 @@ const showAlert = ref(true);
 
 const handleAgree = async () => {
   try {
-    await userApi.updateMarketingAgreement();
+    await userApi.updateMarketingAgreement(true);
     showAlert.value = false;
     emit('agree');
   } catch (error) {
