@@ -941,11 +941,11 @@ const handleMarketingSkip = () => {
     left: 4px;
     bottom: 0;
     height: 0;
-    transform: rotate(180deg) skewY(-40deg) scale(1.2, 1.8) translate(0, -50%);
+    transform: rotate(180deg) skewY(-40deg) scale(1.26, 1.8) translate(0, -50%);
     background-color: inherit;
-    width: 20px;
+    width: 30px;
     height: 10px;
-    border-top-right-radius: 20%;
+    border-top-right-radius: 10%;
   }
 
   &__bubble_text {
