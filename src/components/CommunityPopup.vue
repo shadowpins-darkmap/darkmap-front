@@ -728,6 +728,28 @@ const clickPrev = () => currentPage.value > 1 && currentPage.value--;
 const clickNext = () =>
   currentPage.value < totalPages.value && currentPage.value++;
 
+/* ========== 로그인 상태 변화 감지 (온보딩 플로우 트리거) ========== */
+watch(
+  () => auth.isLoggedIn,
+  async (isLoggedIn, wasLoggedIn) => {
+    if (!isLoggedIn || wasLoggedIn) return;
+
+    const recentLoginData = consumeRecentLoginData();
+    if (!recentLoginData) return;
+
+    const enrichedData = {
+      nickname: auth.nickname ?? recentLoginData.nickname,
+      loginCount: auth.loginCount ?? recentLoginData.loginCount ?? 0,
+      marketingAgreed: resolveMarketingAgreed(
+        auth.marketingAgreed,
+        recentLoginData.marketingAgreed,
+      ),
+    };
+
+    await handleLoginSuccess(enrichedData);
+  },
+);
+
 /* ========== Watchers ========== */
 watch(currentTab, async (next) => {
   currentPage.value = 1;
