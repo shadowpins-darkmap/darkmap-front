@@ -1,41 +1,65 @@
 <template>
   <div class="account_wrap">
     <button class="popup_back_button" @click="$emit('back')">
-      <img src="@/assets/popupBack.svg" alt="slider close icon" width="36" height="36" />
+      <img
+        src="@/assets/popupBack.svg"
+        alt="slider close icon"
+        width="36"
+        height="36"
+      />
     </button>
-    <div class="account_profile_img">
-      <img src="@/assets/accountProfileImg.svg" class="account_img" alt="account profile img" width="94" height="94" />
-    </div>
 
     <div class="account_profile_wrap">
-      <div>
-        <label class="form_label" for="nickname">닉네임</label>
-        <input id="nickname" type="text" class="form_input" placeholder="닉네임 입력" v-model="nickname" />
+      <div class="profile_header">
+        <div class="account_profile_img">
+          <img
+            src="@/assets/accountProfileImg.svg"
+            class="account_img"
+            alt="account profile img"
+            width="94"
+            height="94"
+          />
+        </div>
+        <div class="nickname_field">
+          <label class="form_label" for="nickname">닉네임</label>
+          <input
+            id="nickname"
+            type="text"
+            class="form_input"
+            placeholder="닉네임 입력"
+            v-model="nickname"
+          />
+        </div>
       </div>
+
       <!-- 약관 동의 -->
       <div class="terms_section">
         <p class="terms_title">서비스 법률 권한 설정</p>
-        <!-- 필수 동의 항목 -->
         <div class="term_item">
           <button class="term_label" @click="openTerms('개인정보처리방침')">
             개인정보처리방침
           </button>
-
-          <span class="term_state">업데이트 2025.7.7</span>
+          <span class="term_update term_control">업데이트 2025.7.7</span>
         </div>
 
-        <!-- 선택 동의 항목 -->
         <div class="term_item">
-          <button class="term_label" @click="openTerms('마케팅 및 광고 수신')">
-            마케팅 및 광고 수신
+          <button class="term_label" @click="openTerms('마케팅광고수신')">
+            마케팅광고수신
           </button>
-          <span :class="[marketing.agreed ? 'term_state' : 'term_state_off']">부동의
-          </span>
-          <label class="toggle_switch" :class="{ 'optional-on': marketing.agreed }">
-            <input type="checkbox" v-model="marketing.agreed" />
-            <span class="slider"></span>
-          </label>
-          <span :class="[marketing.agreed ? 'term_state_on' : 'term_state']">동의</span>
+          <div class="term_control">
+            <span class="term_state">철회</span>
+            <label class="toggle_switch">
+              <input
+                type="checkbox"
+                :checked="marketing.agreed"
+                @change="handleMarketingToggle"
+              />
+              <span class="slider"></span>
+            </label>
+            <span :class="marketing.agreed ? 'term_state_on' : 'term_state'"
+              >동의</span
+            >
+          </div>
         </div>
       </div>
 
@@ -43,11 +67,21 @@
       <div class="account_status">
         <p class="terms_title">계정 상태</p>
         <button class="account_action" @click="onLogout">
-          <img width="30px" height="30px" src="@/assets/accountLogout.svg" alt="delete" />
+          <img
+            width="24"
+            height="24"
+            src="@/assets/accountLogout.svg"
+            alt="logout"
+          />
           <span>로그아웃</span>
         </button>
         <button class="account_action" @click="openWithdrawModal">
-          <img width="30px" height="30px" src="@/assets/accountDelete.svg" alt="delete" />
+          <img
+            width="24"
+            height="24"
+            src="@/assets/accountDelete.svg"
+            alt="withdraw"
+          />
           <span>탈퇴하기</span>
         </button>
       </div>
@@ -57,28 +91,55 @@
     </div>
   </div>
 
-  <BaseAlertPopup v-if="showErrorAlert" @confirm="showErrorAlert = false" title="프로필 수정 실패" confirmText="확인">
+  <BaseAlertPopup
+    v-if="showErrorAlert"
+    @confirm="showErrorAlert = false"
+    title="프로필 수정 실패"
+    confirmText="확인"
+  >
     <p>{{ errorMessage }}</p>
   </BaseAlertPopup>
 
-  <BaseAlertPopup v-if="showSuccessAlert" @confirm="showSuccessAlert = false" title="프로필 수정 완료" confirmText="확인">
+  <BaseAlertPopup
+    v-if="showSuccessAlert"
+    @confirm="showSuccessAlert = false"
+    title="프로필 수정 완료"
+    confirmText="확인"
+  >
     <p>프로필 수정을 완료했습니다.</p>
   </BaseAlertPopup>
 
-  <BaseAlertPopup v-if="showLoadErrorAlert" @confirm="handleLoadErrorConfirm" title="프로필 로드 실패" confirmText="확인">
+  <BaseAlertPopup
+    v-if="showLoadErrorAlert"
+    @confirm="handleLoadErrorConfirm"
+    title="프로필 로드 실패"
+    confirmText="확인"
+  >
     <p>프로필 불러오기에 실패했습니다.</p>
   </BaseAlertPopup>
 
-  <WithdrawConfirmModal :visible="showWithdrawModal" :loading="withdrawLoading" @cancel="handleWithdrawCancel"
-    @confirm="handleWithdrawConfirm" />
+  <WithdrawConfirmModal
+    :visible="showWithdrawModal"
+    :loading="withdrawLoading"
+    @cancel="handleWithdrawCancel"
+    @confirm="handleWithdrawConfirm"
+  />
 
-  <BaseAlertPopup v-if="showWithdrawSuccessAlert" title="탈퇴 완료" confirmText="확인"
-    @confirm="handleWithdrawSuccessConfirm">
+  <BaseAlertPopup
+    v-if="showWithdrawSuccessAlert"
+    title="탈퇴 완료"
+    confirmText="확인"
+    @confirm="handleWithdrawSuccessConfirm"
+  >
     <p>탈퇴처리가 완료되었습니다.</p>
   </BaseAlertPopup>
 
-  <BaseAlertPopup v-if="showWithdrawErrorAlert" title="탈퇴 실패" confirmText="확인"
-    @confirm="showWithdrawErrorAlert = false">
+  <BaseAlertPopup
+    v-if="showWithdrawErrorAlert"
+    title="탈퇴 실패"
+    confirmText="확인"
+    @confirm="showWithdrawErrorAlert = false"
+  >
     <p>{{ withdrawErrorMessage }}</p>
   </BaseAlertPopup>
 </template>
@@ -181,11 +242,15 @@ const handleSubmit = async () => {
   }
 };
 
+const handleMarketingToggle = (event) => {
+  marketing.value.agreed = event.target.checked;
+};
+
 const openTerms = (label) => {
   if (label === '개인정보처리방침') {
     emit('open-terms-panel');
   }
-  if (label === '마케팅 및 광고 수신') {
+  if (label === '마케팅광고수신') {
     window.open(
       'https://dune-purple-f80.notion.site/20025ce1e4e980488049ccff29c43668',
       '_blank',
@@ -226,97 +291,90 @@ const handleWithdrawSuccessConfirm = () => {
   showWithdrawSuccessAlert.value = false;
   emit('back');
 };
-
 </script>
 
 <style scoped>
-/* 닉네임 인풋 */
+.account_wrap {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  color: #fff;
+  position: relative;
+  min-height: 520px;
+}
+
+.popup_back_button {
+  align-self: flex-start;
+  margin-bottom: 20px;
+}
+
+.account_profile_img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile_header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.nickname_field {
+  flex: 1;
+}
+
+.account_profile_wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+  width: 100%;
+  padding: 0 8px;
+}
+
 .form_label {
   display: block;
   font-weight: bold;
+  font-size: 16px;
   margin-bottom: 8px;
-  color: white;
-  font-size: 20px;
 }
 
 .form_input {
-  display: flex;
-  width: 260px;
-  padding: 12px 20px;
-  border-radius: 20px;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 28px;
+  height: 44px;
   border: 2px solid #f1cfc8;
-  font-size: 14px;
+  font-size: 16px;
+  line-height: 1.2;
+  color: #333;
 }
 
 .form_input::placeholder {
   color: #c7c7cc;
 }
 
-.account_wrap {
-  display: flex;
-  flex-direction: row;
-  margin-top: 50px;
-  justify-content: space-between;
-  color: #fff;
-  position: relative;
-}
-
-.popup_back_button {
-  position: absolute;
-  top: -50px;
-  left: 0px;
-}
-
-.account_profile_img {
-  display: flex;
-  justify-content: center;
-  padding-right: 20px;
-}
-
-.account_profile_wrap {
-  display: flex;
-  flex-direction: column;
-  flex: 1 0 0;
-  gap: 40px;
-}
-
-/* 닉네임 인풋 */
-.form_label {
-  font-weight: bold;
-  font-size: 18px;
-}
-
-.form_input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 20px;
-  height: 50px;
-  border: 2px solid #f1cfc8;
-  font-size: 14px;
-  color: #333;
-}
-
-/* 약관 섹션 */
 .terms_section {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
 .terms_title {
   font-weight: bold;
   font-size: 18px;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
 }
 
 .term_item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 12px;
 }
 
 .term_label {
   font-size: 16px;
+  letter-spacing: 0.4px;
   text-decoration: underline;
   flex: 1;
   color: #fff;
@@ -325,6 +383,21 @@ const handleWithdrawSuccessConfirm = () => {
 
 .term_state {
   font-size: 13px;
+  color: #d6d6d6;
+}
+
+.term_update {
+  font-size: 13px;
+  color: #fff;
+  justify-content: flex-end;
+}
+
+.term_control {
+  width: 124px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
 }
 
 .term_state_on {
@@ -335,39 +408,34 @@ const handleWithdrawSuccessConfirm = () => {
 
 .term_state_off {
   font-size: 13px;
-  color: #ababab;
+  color: #f4f4f4;
   font-weight: 500;
 }
 
-/* 계정 상태 */
 .account_status {
   display: flex;
   flex-direction: column;
+  gap: 12px;
 }
 
 .account_action {
-  width: 100px;
   display: flex;
   align-items: center;
-  margin-bottom: 8px;
-  gap: 8px;
-  align-self: flex-end;
+  gap: 10px;
+  align-self: flex-start;
 }
 
-.account_action>span {
+.account_action > span {
   font-size: 16px;
   text-decoration: underline;
   color: #fff;
-  display: flex;
-  padding-top: 2px;
 }
 
-/* 토글 스위치 */
 .toggle_switch {
   position: relative;
   display: inline-block;
   width: 34px;
-  height: 15px;
+  height: 16px;
 }
 
 .toggle_switch input {
@@ -385,41 +453,45 @@ const handleWithdrawSuccessConfirm = () => {
   bottom: 0;
   background-color: #ababab;
   border-radius: 20px;
-  transition: 0.4s;
+  transition: 0.2s;
 }
 
 .slider::before {
   position: absolute;
   content: '';
-  height: 13px;
-  width: 18px;
-  left: 1px;
-  bottom: 1px;
+  height: 12px;
+  width: 12px;
+  left: 2px;
+  bottom: 2px;
   background-color: white;
-  border-radius: 13px;
-  transition: 0.4s;
+  border-radius: 50%;
+  transition: 0.2s;
 }
 
-.toggle_switch input:checked+.slider {
+.toggle_switch input:checked + .slider {
   background-color: #ff99e5;
 }
 
-.toggle_switch input:checked+.slider::before {
-  transform: translateX(15px);
+.toggle_switch input:checked + .slider::before {
+  transform: translateX(18px);
 }
 
-/* 제출 버튼 */
+.toggle_switch.readonly {
+  pointer-events: none;
+  opacity: 0.85;
+}
+
 .submit_btn {
-  margin-top: 10px;
+  margin-top: auto;
   background: black;
   color: white;
   font-weight: bold;
-  padding: 14px;
-  border-radius: 30px;
+  padding: 14px 22px;
+  border-radius: 999px;
   border: 2px solid #f1cfc8;
-  width: 138px;
-  align-self: flex-end;
-  font-size: 14px;
+  width: 148px;
+  align-self: center;
+  font-size: 16px;
 }
 
 .withdraw_modal {
