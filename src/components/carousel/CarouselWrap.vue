@@ -13,10 +13,10 @@ const loadPopularBoards = async () => {
     loading.value = true;
     const response = await boardsApi.getPopularBoards(5);
     if (response && response.data) {
-      cards.value = response.data.map(board => ({
+      cards.value = response.data.map((board) => ({
         id: board.id,
         boardId: board.id,
-        url: board.imageUrl || "",
+        url: board.imageUrl || '',
         category: board.category || '기본',
         title: board.title,
         content: board.content || '',
@@ -40,8 +40,8 @@ onMounted(() => {
 });
 
 const props = defineProps({
-  itemsToShow: { type: Number, default: 1.2 },
-  gap: { type: Number, default: 5 },
+  itemsToShow: { type: Number, default: 1.1 },
+  gap: { type: Number, default: 4 },
   autoplay: { type: Number, default: 3000 },
   wrapAround: { type: Boolean, default: true },
   pauseAutoplayOnHover: { type: Boolean, default: true },
@@ -56,6 +56,7 @@ const props = defineProps({
 const carouselConfig = {
   height: props.height,
   itemsToShow: props.itemsToShow,
+  snapAlign: 'start',
   gap: props.gap,
   autoplay: props.autoplay,
   wrapAround: props.wrapAround,
@@ -66,35 +67,60 @@ const carouselConfig = {
 <template>
   <Carousel v-bind="carouselConfig" v-if="!loading">
     <Slide v-for="card in cards" :key="card.id">
-      <div class="slide_wrap" :class="{ green: props.green }" @click="props.onCardClick && props.onCardClick(card)">
+      <div
+        class="slide_wrap"
+        :class="{ green: props.green }"
+        @click="props.onCardClick && props.onCardClick(card)"
+      >
         <div class="slide_card">
           <span class="slide_card_tag">{{ card.category }}</span>
           <span class="slide_card_arrow">
-            <img :src="props.green
-              ? require('@/assets/slideCardArrowGreen.svg')
-              : require('@/assets/slideCardArrow.svg')
-              " class="card_arrow_icon" alt="card arrow icon" width="18" height="18" />
+            <img
+              :src="
+                props.green
+                  ? require('@/assets/slideCardArrowGreen.svg')
+                  : require('@/assets/slideCardArrow.svg')
+              "
+              class="card_arrow_icon"
+              alt="card arrow icon"
+              width="18"
+              height="18"
+            />
           </span>
         </div>
         <div class="slide_card">
           <span class="slide_card_contents text_wrap">
             <span class="ellipsis__2 contents_title">{{ card.title }}</span>
-            <span class="ellipsis__1 contents_detail">{{ card.contents }}</span>
+            <span class="ellipsis__1 contents_detail">{{ card.content }}</span>
           </span>
           <span class="slide_card_contents img_wrap">
             <img v-if="card.url" :src="card.url" alt="card" />
           </span>
         </div>
         <div class="slide_card lines">
-          <span class="ellipsis__2 card_bottom_text user">{{ card.user }}</span>
-          <span class="card_bottom_text data">{{ formatDate(card.createdAt) }}</span>
-          <span class="card_bottom_text count">조회수 {{ card.viewCount }}</span>
-          <button class="card_bottom_button card_bottom_text">
-            <span> {{ card.likeCount }}</span>
-            <img :src="props.green
-              ? require('@/assets/heartButtonIconGreen.svg')
-              : require('@/assets/heartButtonIcon.svg')
-              " class="like__toggle" alt="like toggle icon" width="16" height="16" />
+          <div class="card_bottom_meta">
+            <span class="card_bottom_text user">{{ card.user }}</span>
+            <span class="card_bottom_text data">{{
+              formatDate(card.createdAt)
+            }}</span>
+            <span class="card_bottom_text count"
+              >조회수 {{ card.viewCount }}</span
+            >
+          </div>
+          <button class="card_bottom_button">
+            <img
+              :src="
+                props.green
+                  ? require('@/assets/heartButtonIconGreen.svg')
+                  : require('@/assets/heartButtonIcon.svg')
+              "
+              class="like__toggle"
+              alt="like toggle icon"
+              color="#F1CFC8"
+              width="16"
+              height="16"
+            />
+            <span class="card_bottom_like_count">{{ card.likeCount }}</span>
           </button>
         </div>
       </div>
@@ -104,17 +130,19 @@ const carouselConfig = {
 <style scoped lang="scss">
 /* .carousel {} */
 .carousel__slide {
-  transform: translateX(-25px);
+  transform: translateX(0);
 }
 
 .slide_wrap {
-  width: 330px;
+  box-sizing: border-box;
+  width: 328px;
   height: 172px;
   border: 1px solid #f1cfc8;
   overflow: hidden;
   border-radius: 8px;
-  background-color: #ffffff52;
-  padding: 15px;
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  padding: 16px 12px 0;
   cursor: pointer;
 }
 
@@ -123,18 +151,26 @@ const carouselConfig = {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 10px;
+  padding-bottom: 0;
+}
+
+.slide_card:first-child {
+  margin-bottom: 12px;
+}
+
+.slide_card:nth-child(2) {
+  margin-bottom: 16px;
 }
 
 .slide_card_tag {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 8px;
-  height: 20px;
-  line-height: 20px;
+  padding: 2px 8px;
+  height: 21px;
+  line-height: 17px;
   border: 1px solid #f1cfc8;
-  border-radius: 20px;
+  border-radius: 15px;
   color: #f1cfc8;
   font-weight: 700;
   font-size: 12px;
@@ -152,9 +188,10 @@ const carouselConfig = {
 }
 
 .text_wrap {
-  width: calc(100% - 80px);
+  width: 224px;
   display: flex;
   flex-direction: column;
+  gap: 12px;
 }
 
 .contents_title {
@@ -162,77 +199,94 @@ const carouselConfig = {
   font-size: 16px;
   line-height: 140%;
   letter-spacing: -0.5px;
+  color: #fff;
 }
 
 .contents_detail {
   font-weight: 400;
   font-size: 12px;
-  padding-top: 8px;
+  line-height: 140%;
+  letter-spacing: -0.5px;
+  color: #fff;
 }
 
 .img_wrap {
-  width: 68px;
-  height: 68px;
+  width: 72px;
+  height: 72px;
   border-radius: 8px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .slide_card.lines {
-  position: relative;
+  margin: 0 -12px;
+  padding: 7px 10px;
+  border-top: 1px solid #f1cfc8;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.slide_card.lines::after {
-  content: '';
+.card_bottom_meta {
   display: flex;
-  width: 328px;
-  height: 1px;
-  background-color: #f1cfc8;
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: -14px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .card_bottom_text {
   color: #f1cfc8;
-  font-family: 'Roboto';
+  font-family: 'Noto Sans KR';
   font-weight: 400;
-  font-size: 12px;
+  font-size: 11px;
+  line-height: 130%;
   letter-spacing: -0.5px;
-  display: inline-flex;
-  gap: 5px;
-  word-break: break-all;
-  height: 34px;
+  display: flex;
+  word-break: keep-all;
+  white-space: nowrap;
+  height: 17px;
   flex-direction: row;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  justify-content: flex-start;
-  align-items: flex-start;
-  line-height: 1.2;
-  padding: 4px 0;
-  padding-right: 4px;
+  flex-wrap: nowrap;
+  padding: 0;
 }
 
 .card_bottom_text.user {
-  width: 55px;
+  width: 33px;
+  justify-content: flex-start;
 }
 
 .card_bottom_text.data {
-  min-width: 105px;
+  width: 100px;
+  justify-content: flex-start;
 }
 
 .card_bottom_text.count {
-  min-width: 55px;
+  width: 53px;
+  justify-content: flex-start;
 }
 
 .card_bottom_button {
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
   align-items: center;
   gap: 4px;
-  flex: auto 0 0;
-  width: 68px;
-  padding: 4px;
+  width: auto;
+  min-width: 35px;
+  justify-content: flex-end;
+  padding: 0;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.card_bottom_like_count {
+  color: #f1cfc8;
+  font-family: 'Noto Sans KR';
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 130%;
+  letter-spacing: -0.5px;
 }
 
 .slide_wrap.green {
@@ -244,12 +298,16 @@ const carouselConfig = {
   color: #00ffc2;
 }
 
+.slide_wrap.green .card_bottom_like_count {
+  color: #00ffc2;
+}
+
 .slide_wrap.green .slide_card_tag {
   border: 1px solid #00ffc2;
   color: #00ffc2;
 }
 
-.slide_wrap.green .slide_card.lines::after {
-  background-color: #00ffc2;
+.slide_wrap.green .slide_card.lines {
+  border-top: 1px solid #00ffc2;
 }
 </style>

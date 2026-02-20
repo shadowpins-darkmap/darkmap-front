@@ -287,11 +287,14 @@
           <!-- 로그인 유도 영역 -->
           <div class="BaseCommunity__button_box_center">
             <p class="BaseCommunity__title">
-              오늘 처음 방문하셨나요? 가입 이후에 광장의 모든 글을 보실 수
-              있어요.
+              오늘 처음 방문하셨나요? 가입 이후에<br />
+              광장의 모든 글을 보실 수 있어요.
             </p>
             <RouterLink class="BaseCommunity__black_button" to="/login">
-              로그인
+              회원가입
+            </RouterLink>
+            <RouterLink class="BaseCommunity__login_button" to="/login">
+              기존 회원 로그인
             </RouterLink>
           </div>
         </div>
@@ -1042,8 +1045,8 @@ const handleMarketingSkip = () => {
   }
 
   &__card {
-    width: calc(100% + 20px);
-    transform: translateX(-4px);
+    width: 100%;
+    overflow: hidden;
   }
 
   &__setting {
