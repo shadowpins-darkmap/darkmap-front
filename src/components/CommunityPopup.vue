@@ -528,6 +528,7 @@ const showWelcomeAlert = ref(false);
 const showNicknameStep = ref(false);
 const showFirstVisitStep = ref(false);
 const showMarketingStep = ref(false);
+const hasHandledLoginOnboarding = ref(false);
 const loginUserData = ref({
   nickname: '',
   loginCount: 0,
@@ -625,7 +626,8 @@ onMounted(async () => {
       };
     }
 
-    await handleLoginSuccess(enrichedData);
+    // 직후 loadInitialData()가 실행되므로 중복 API 호출을 피한다.
+    await handleLoginSuccess(enrichedData, { skipDataFetch: true });
   }
 
   // 초기 데이터 로딩
@@ -732,10 +734,15 @@ const clickNext = () =>
 watch(
   () => auth.isLoggedIn,
   async (isLoggedIn, wasLoggedIn) => {
-    if (!isLoggedIn || wasLoggedIn) return;
+    if (!isLoggedIn) {
+      hasHandledLoginOnboarding.value = false;
+      return;
+    }
+    if (wasLoggedIn || hasHandledLoginOnboarding.value) return;
 
     const recentLoginData = consumeRecentLoginData();
     if (!recentLoginData) return;
+    hasHandledLoginOnboarding.value = true;
 
     const enrichedData = {
       nickname: auth.nickname ?? recentLoginData.nickname,
@@ -746,7 +753,13 @@ watch(
       ),
     };
 
-    await handleLoginSuccess(enrichedData);
+    try {
+      // 로그인 직후 API 401 연쇄를 피하기 위해 온보딩 표시를 우선 처리한다.
+      await handleLoginSuccess(enrichedData, { skipDataFetch: true });
+    } catch (error) {
+      hasHandledLoginOnboarding.value = false;
+      console.warn('[CommunityPopup] 로그인 온보딩 처리 실패:', error);
+    }
   },
 );
 
