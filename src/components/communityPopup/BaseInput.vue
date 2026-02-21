@@ -12,8 +12,8 @@
         @change="handleChange"
       />
       <span class="file_label">파일 선택</span>
-      <span class="file_name">{{
-        fileName || '10mb 이하의 png, jpeg, gif 만 첨부 가능합니다.'
+      <span class="file_name" :class="{ is_placeholder: !fileName }">{{
+        fileName || '10MB 이하의 png, jpeg, gif 만 첨부 가능합니다.'
       }}</span>
     </label>
     <!-- 기본 인풋 (text, number 등) -->
@@ -24,6 +24,7 @@
       :id="id"
       :placeholder="placeholder"
       :value="modelValue"
+      :readonly="readonly"
       @input="emit('update:modelValue', $event.target.value)"
     />
 
@@ -52,6 +53,10 @@ const props = defineProps({
   accept: {
     type: String,
     default: '', // "image/*", etc.
+  },
+  readonly: {
+    type: Boolean,
+    default: false,
   },
   onChange: Function,
 });
@@ -94,6 +99,10 @@ const handleChange = (event) => {
   border: 2px solid #f1cfc8;
   font-size: 14px;
 }
+.form_input:read-only {
+  background-color: #faf1ef;
+  color: #6a6a6a;
+}
 .form_input::placeholder {
   color: #c7c7cc;
 }
@@ -101,24 +110,53 @@ const handleChange = (event) => {
 .custom_file_input {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 10px;
   background-color: #fff;
   color: #000;
-  padding: 12px;
+  padding: 10px;
   border-radius: 10px;
   border: 2px solid #f1cfc8;
-  font-size: 14px;
+  font-size: 12px;
   cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+.custom_file_input:hover {
+  border-color: #f1cfc8;
+  background-color: #fbf8ff;
+  box-shadow: 0 0 0 2px rgba(185, 152, 199, 0.15);
 }
 .hidden_file_input {
   display: none;
 }
 .file_label {
-  display: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 70px;
+  height: 30px;
+  padding: 0 1px;
+  border-radius: 15px;
+  background-color: #faf1ef;
+  border: 1px solid #f1cfc8;
+  color: #766e7a;
+  font-size: 12px;
+  font-weight: 700;
 }
 .file_name {
   font-size: 14px;
-  opacity: 0.9;
+  flex: 1;
+  min-width: 0;
+  color: #4b4b4b;
+  opacity: 1;
+  margin-left: 3px;
+}
+.file_name.is_placeholder {
+  color: #c7c7cc;
 }
 .preview_image {
   max-width: 50px;

@@ -1,31 +1,78 @@
 <template>
   <div class="form_wrap">
-    <BaseDropdown :list="categories" :selected="selectedCategory" :onSelect="handleCategorySelect" />
-    <BaseInput v-model="title" :id="'write_title'" label="유형 (필수)" placeholder="길거리 괴롭힘의 유형을 알려주세요." />
-    <BaseInput v-model="location" :id="'write_location'" label="위치 (필수)"
-      placeholder="구체적인 장소를 알 수 없다면 ‘구', ‘동’ 까지만 적으셔도 됩니다." />
-    <BaseTextarea v-model="content" label="내용 (필수)" placeholder="자신이 알고있거나 직간접적으로 경험한 사건의 경위 내용을 간략히 설명해주세요."
-      :id="'write_detail'" :height="'100px'" />
-    <BaseInput v-model="image" type="file" label="이미지" :id="'write_image'" :accept="'image/png, image/jpeg, image/gif'"
-      :onChange="handleImage" />
-    <BaseInput v-model="url" :id="'write_url'" label="뉴스기사 URL" placeholder="언론에 다뤄진 적이 있다면 뉴스기사 링크를 첨부해주세요. " />
+    <BaseDropdown
+      :list="categories"
+      :selected="selectedCategory"
+      :onSelect="handleCategorySelect"
+    />
+    <BaseInput
+      v-model="title"
+      :id="'write_title'"
+      label="유형 (필수)"
+      placeholder="길거리 괴롭힘의 유형을 알려주세요."
+      :readonly="true"
+    />
+    <BaseInput
+      v-model="location"
+      :id="'write_location'"
+      label="위치 (필수)"
+      placeholder="구체적인 장소를 알 수 없다면 ‘구', ‘동’ 까지만 적으셔도 됩니다."
+    />
+    <BaseTextarea
+      v-model="content"
+      label="내용 (필수)"
+      placeholder="자신이 알고있거나 직간접적으로 경험한 사건의 경위 내용을 간략히 설명해주세요."
+      :id="'write_detail'"
+      :height="'100px'"
+    />
+    <BaseInput
+      v-model="image"
+      type="file"
+      label="이미지"
+      :id="'write_image'"
+      :accept="'image/png, image/jpeg, image/gif'"
+      :onChange="handleImage"
+    />
+    <BaseInput
+      v-model="url"
+      :id="'write_url'"
+      label="뉴스기사 URL"
+      placeholder="언론에 다뤄진 적이 있다면 뉴스기사 링크를 첨부해주세요. "
+    />
     <button class="submit_button" @click="submitPost" :disabled="loading">
       {{ loading ? '제출 중...' : '제보' }}
     </button>
   </div>
 
-  <BaseAlertPopup v-if="showSuccessAlert" title="제보를 완료했습니다." @confirm="handleSuccessConfirm" confirmText="확인">
+  <BaseAlertPopup
+    v-if="showSuccessAlert"
+    title="제보를 완료했습니다."
+    @confirm="handleSuccessConfirm"
+    confirmText="확인"
+  >
     <p>
       사이트 운영진의 검토후 장소가 등록되면<br />등록하신 이메일로 알려드려요
     </p>
   </BaseAlertPopup>
-  <BaseAlertPopup v-if="showValidationPopup" title="입력 확인" @confirm="showValidationPopup = false">
+  <BaseAlertPopup
+    v-if="showValidationPopup"
+    title="입력 확인"
+    @confirm="showValidationPopup = false"
+  >
     <p>유형, 위치, 내용을 모두 입력해주세요.</p>
   </BaseAlertPopup>
-  <BaseAlertPopup v-if="showErrorPopup" title="제보 실패" @confirm="showErrorPopup = false">
+  <BaseAlertPopup
+    v-if="showErrorPopup"
+    title="제보 실패"
+    @confirm="showErrorPopup = false"
+  >
     <p>제보 접수에 실패했습니다. 다시 시도해주세요.</p>
   </BaseAlertPopup>
-  <BaseAlertPopup v-if="showImageErrorPopup" title="이미지 크기 초과" @confirm="showImageErrorPopup = false">
+  <BaseAlertPopup
+    v-if="showImageErrorPopup"
+    title="이미지 크기 초과"
+    @confirm="showImageErrorPopup = false"
+  >
     <p>10mb 이하의 이미지만 첨부할 수 있습니다.</p>
   </BaseAlertPopup>
 </template>
@@ -39,8 +86,8 @@ import BaseAlertPopup from '@/components/BaseAlert.vue';
 import { boardsApi } from '@/api/boards';
 
 const categories = ['바바리맨', '폭행', '헌팅', '미행', '그 외'];
-const selectedCategory = ref('');
-const title = ref('');
+const selectedCategory = ref(categories[0]);
+const title = ref(categories[0]);
 const location = ref('');
 const content = ref('');
 const imageFile = ref(null);
@@ -67,8 +114,8 @@ const handleCategorySelect = (item) => {
 };
 
 const resetForm = () => {
-  selectedCategory.value = '';
-  title.value = '';
+  selectedCategory.value = categories[0];
+  title.value = categories[0];
   location.value = '';
   content.value = '';
   imageFile.value = null;
@@ -126,7 +173,7 @@ const submitPost = async () => {
   flex-direction: column;
 }
 
-.form_wrap>*:first-child {
+.form_wrap > *:first-child {
   margin-bottom: 16px;
 }
 
