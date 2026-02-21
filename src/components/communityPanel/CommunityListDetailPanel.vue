@@ -40,7 +40,7 @@
 
     <GradientScroll
       :width="'100%'"
-      :height="'calc(100% - 400px)'"
+      :height="'calc(100% - 300px)'"
       direction="vertical"
       gradient-color="rgba(64,64,64,1.5)"
     >
