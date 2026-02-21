@@ -1,20 +1,59 @@
 <template>
   <div class="form_wrap">
-    <BaseDropdown :list="categories" :selected="selectedCategory" :onSelect="handleCategorySelect" />
-    <BaseInput v-model="title" :id="write_title" label="제목" placeholder="제목을 입력하세요" />
-    <BaseTextarea v-model="content" label="내용" placeholder="내용을 입력하세요" :id="write_contents" :height="'300px'" />
-    <BaseInput v-model="image" type="file" label="이미지" :id="'write_image'" :accept="'image/png, image/jpeg, image/gif'"
-      :onChange="handleImage" />
+    <BaseDropdown
+      :list="categories"
+      :selected="selectedCategory"
+      :onSelect="handleCategorySelect"
+    />
+    <BaseInput
+      v-model="title"
+      :id="write_title"
+      label="제목"
+      placeholder="제목을 입력하세요"
+    />
+    <BaseTextarea
+      v-model="content"
+      label="내용"
+      placeholder="내용을 입력하세요"
+      :id="write_contents"
+      :height="'300px'"
+    />
+    <BaseInput
+      v-model="image"
+      type="file"
+      label="이미지"
+      :id="'write_image'"
+      :accept="'image/png, image/jpeg, image/gif'"
+      :onChange="handleImage"
+    />
     <button class="submit_button" @click="submitPost">글쓰기</button>
   </div>
 
-  <BaseAlertPopup v-if="showSuccessAlert" @confirm="handleSuccessConfirm" title="글쓰기를 완료했습니다." confirmText="확인">
-    <p>감사합니다! K-다크맵 투어는 시민들의 기억과<br />이야기를 지키는 안전한 공간이 되겠습니다.</p>
+  <BaseAlertPopup
+    v-if="showSuccessAlert"
+    @confirm="handleSuccessConfirm"
+    title="글쓰기를 완료했습니다."
+    confirmText="확인"
+  >
+    <p>
+      감사합니다! K-다크맵 투어는 시민들의 기억과<br />이야기를 지키는 안전한
+      공간이 되겠습니다.
+    </p>
   </BaseAlertPopup>
-  <BaseAlertPopup v-if="showErrorAlert" @confirm="showErrorAlert = false" title="게시글 작성 실패" confirmText="확인">
+  <BaseAlertPopup
+    v-if="showErrorAlert"
+    @confirm="showErrorAlert = false"
+    title="게시글 작성 실패"
+    confirmText="확인"
+  >
     <p>게시글 작성에 실패했습니다.<br />다시 시도해주세요.</p>
   </BaseAlertPopup>
-  <BaseAlertPopup v-if="showValidationAlert" @confirm="showValidationAlert = false" title="입력 확인" confirmText="확인">
+  <BaseAlertPopup
+    v-if="showValidationAlert"
+    @confirm="showValidationAlert = false"
+    title="입력 확인"
+    confirmText="확인"
+  >
     <p>제목과 내용을 입력해주세요.</p>
   </BaseAlertPopup>
 </template>
@@ -45,7 +84,7 @@ const handleImage = (event) => {
     imageFile.value = file;
     previewUrl.value = URL.createObjectURL(file);
   } else {
-    alert('10mb 이하의 이미지만 첨부할 수 있습니다.');
+    alert('10MB 이하의 이미지만 첨부할 수 있습니다.');
   }
 };
 
@@ -85,14 +124,13 @@ const submitPost = async () => {
 
     showSuccessAlert.value = true;
     emit('submit', response.data);
-
   } catch (error) {
     console.error('게시글 작성 실패:', {
       message: error.message,
       status: error.response?.status,
       statusText: error.response?.statusText,
       data: error.response?.data,
-      config: error.config
+      config: error.config,
     });
     showErrorAlert.value = true;
   }
@@ -106,8 +144,29 @@ const submitPost = async () => {
   flex-direction: column;
 }
 
-.form_wrap>*:first-child {
+.form_wrap > *:first-child {
   margin-bottom: 16px;
+}
+
+:deep(.BaseDropdown) {
+  font-size: 15px;
+}
+
+:deep(.BaseDropdown__toggle) {
+  height: 26px;
+  padding: 6px 14px;
+  font-size: 14px;
+  border-radius: 14px;
+}
+
+:deep(.BaseDropdown__toggle::after) {
+  width: 10px;
+  height: 10px;
+}
+
+:deep(.BaseDropdown__menu) {
+  top: 34px;
+  min-width: 164px;
 }
 
 .input_title,

@@ -73,7 +73,7 @@
     title="이미지 크기 초과"
     @confirm="showImageErrorPopup = false"
   >
-    <p>10mb 이하의 이미지만 첨부할 수 있습니다.</p>
+    <p>10MB 이하의 이미지만 첨부할 수 있습니다.</p>
   </BaseAlertPopup>
 </template>
 
@@ -175,6 +175,27 @@ const submitPost = async () => {
 
 .form_wrap > *:first-child {
   margin-bottom: 16px;
+}
+
+:deep(.BaseDropdown) {
+  font-size: 15px;
+}
+
+:deep(.BaseDropdown__toggle) {
+  height: 26px;
+  padding: 6px 14px;
+  font-size: 14px;
+  border-radius: 14px;
+}
+
+:deep(.BaseDropdown__toggle::after) {
+  width: 10px;
+  height: 10px;
+}
+
+:deep(.BaseDropdown__menu) {
+  top: 34px;
+  min-width: 164px;
 }
 
 .input_title,
