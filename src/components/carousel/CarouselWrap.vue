@@ -20,7 +20,11 @@ const loadPopularBoards = async () => {
         category: board.category || '기본',
         title: board.title,
         content: board.content || '',
-        user: board.nickname || '익명',
+        user:
+          board.authorNickname ||
+          board.nickname ||
+          board.author?.nickname ||
+          '익명',
         createdAt: board.createdAt,
         viewCount: board.viewCount || 0,
         likeCount: board.likeCount || 0,
@@ -229,8 +233,7 @@ const carouselConfig = {
 .card_bottom_meta {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 1px;
+  gap: 8px;
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -241,42 +244,40 @@ const carouselConfig = {
   font-family: 'Noto Sans KR';
   font-weight: 400;
   font-size: 11px;
-  line-height: 130%;
+  line-height: 16px;
   letter-spacing: -0.5px;
-  display: flex;
+  display: block;
   word-break: keep-all;
   white-space: nowrap;
-  height: 17px;
-  flex-direction: row;
-  flex-wrap: nowrap;
   padding: 0;
 }
 
 .card_bottom_text.user {
-  width: 33px;
-  justify-content: flex-start;
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .card_bottom_text.data {
-  width: 100px;
-  justify-content: flex-start;
+  flex-shrink: 0;
 }
 
 .card_bottom_text.count {
-  width: 53px;
-  justify-content: flex-start;
+  flex-shrink: 0;
 }
 
 .card_bottom_button {
-  display: flex;
-  flex-direction: row;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  height: 16px;
+  line-height: 1;
   width: auto;
   min-width: 35px;
   justify-content: flex-end;
   padding: 0;
-  margin-left: auto;
+  margin-left: 10px;
   flex-shrink: 0;
 }
 
@@ -285,8 +286,16 @@ const carouselConfig = {
   font-family: 'Noto Sans KR';
   font-weight: 400;
   font-size: 11px;
-  line-height: 130%;
-  letter-spacing: -0.5px;
+  line-height: 16px;
+  display: block;
+  min-width: 10px;
+}
+
+.like__toggle {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
 }
 
 .slide_wrap.green {
