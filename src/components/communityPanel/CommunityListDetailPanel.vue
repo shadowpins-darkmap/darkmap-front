@@ -200,7 +200,7 @@
     <p>댓글이 삭제되었습니다.</p>
   </BaseAlertPopup>
   <BaseAlertPopup v-if="showLikePopup" @confirm="showLikePopup = false">
-    <p>댓글을 추천했습니다!</p>
+    <p>추천했습니다!</p>
   </BaseAlertPopup>
   <BaseAlertPopup v-if="showCommentPopup" @confirm="showCommentPopup = false">
     <p>댓글이 등록되었습니다.</p>
@@ -327,7 +327,7 @@ const handleBoardLike = async () => {
     const response = await boardsApi.likeBoard(props.post?.boardId);
     if (response?.data) {
       isPostLiked.value = response.data.isLiked;
-      showLikePopup.value = true;
+      showLikePopup.value = response.data.isLiked;
       await updatePostInfo();
     }
   } catch (error) {
