@@ -55,7 +55,7 @@
       </button>
     </div>
     <div class="scroll_area_wrap body_panel_wrap">
-      <div class="body_panel scroll_area">
+      <div class="body_panel">
         <strong class="body_title"><span>테마 투어</span></strong>
         <div class="select_all">
           <div @click="clickAllCrime">
