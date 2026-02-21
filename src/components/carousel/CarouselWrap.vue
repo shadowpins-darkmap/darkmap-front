@@ -25,6 +25,9 @@ const loadPopularBoards = async () => {
           board.nickname ||
           board.author?.nickname ||
           '익명',
+        authorNickname: board.authorNickname,
+        authorDeleted: board.authorDeleted,
+        authorAnonymized: board.authorAnonymized,
         createdAt: board.createdAt,
         viewCount: board.viewCount || 0,
         likeCount: board.likeCount || 0,

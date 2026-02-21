@@ -13,7 +13,9 @@
     <div class="profile_img_wrap">
       <div class="profile_detail_img_box">
         <img
-          src="@/assets/profileDefault.svg"
+          :src="(isPostWithdrawn)
+            ? require('@/assets/profileWithdrawnUser.svg')
+            : require('@/assets/profileDefault.svg')"
           alt="profile default image"
           width="56"
           height="56"
@@ -21,7 +23,10 @@
       </div>
 
       <div class="detail_top_profile">
-        <span class="detail_nickname">{{ props.post?.authorNickname }} </span>
+        <span
+          class="detail_nickname"
+          :class="{ withdrawn_nickname: isPostWithdrawn }"
+        >{{ (isPostWithdrawn) ? '알수없음' : props.post?.authorNickname }} </span>
         <span class="detail_count_wrap">
           <span class="detail_count">
             <span class="detail_comment"
@@ -50,31 +55,33 @@
             {{ props.post?.content || '내용이 없습니다.' }}
           </p>
           <div class="detail_icon_wrap">
-            <button class="detail_icon_button" @click="handleBoardLike">
-              <img
-                :src="
-                  isPostLiked
-                    ? require('@/assets/commentHeartIconOn.svg')
-                    : require('@/assets/commentHeartIconOff.svg')
-                "
-                alt="like"
-              />
-              <span class="detail_icon_text">이 글을 추천해요</span>
-            </button>
-            <button
-              class="detail_icon_button"
-              @click="openReportPopup('post', getPostBoardId(props.post))"
-            >
-              <img
-                :src="
-                  isPostReport
-                    ? require('@/assets/commentReportIconOn.svg')
-                    : require('@/assets/commentReportIconOff.svg')
-                "
-                alt="report"
-              />
-              <span class="detail_icon_text">이 글을 신고하고 싶어요</span>
-            </button>
+            <template v-if="!props.post?.authorDeleted && !props.post?.authorAnonymized">
+              <button class="detail_icon_button" @click="handleBoardLike">
+                <img
+                  :src="
+                    isPostLiked
+                      ? require('@/assets/commentHeartIconOn.svg')
+                      : require('@/assets/commentHeartIconOff.svg')
+                  "
+                  alt="like"
+                />
+                <span class="detail_icon_text">이 글을 추천해요</span>
+              </button>
+              <button
+                class="detail_icon_button"
+                @click="openReportPopup('post', getPostBoardId(props.post))"
+              >
+                <img
+                  :src="
+                    isPostReport
+                      ? require('@/assets/commentReportIconOn.svg')
+                      : require('@/assets/commentReportIconOff.svg')
+                  "
+                  alt="report"
+                />
+                <span class="detail_icon_text">이 글을 신고하고 싶어요</span>
+              </button>
+            </template>
           </div>
         </div>
 
@@ -87,14 +94,17 @@
             >
               <div class="comment_profile">
                 <img
-                  src="@/assets/profileDefault.svg"
+                  :src="(isWithdrawn(comment))
+                    ? require('@/assets/profileWithdrawnUser.svg')
+                    : require('@/assets/profileDefault.svg')"
                   alt="profile"
                   width="40"
                   height="40"
                 />
-                <span class="comment_nickname">{{
-                  comment.authorNickname
-                }}</span>
+                <span
+                  class="comment_nickname"
+                  :class="{ withdrawn_nickname: isWithdrawn(comment) }"
+                >{{ (isWithdrawn(comment)) ? '알수없음' : comment.authorNickname }}</span>
               </div>
               <div class="comment_bubble_wrap">
                 <span class="comment_data_wrap">
@@ -111,7 +121,7 @@
                 <span class="comment_bubble">
                   <p class="comment_content">{{ comment.content }}</p>
                 </span>
-                <span class="comment_icons">
+                <span v-if="!comment.authorDeleted && !comment.authorAnonymized" class="comment_icons">
                   <button
                     class="icon_button"
                     @click="handleCommentLike(comment.commentId)"
@@ -139,7 +149,7 @@
                     />
                   </button>
                   <button
-                    v-if="comment.authorNickname === auth.nickname"
+                    v-if="comment.isAuthor"
                     class="icon_button"
                     @click="handleDeleteComment(comment.commentId)"
                   >
@@ -296,6 +306,11 @@ const commentsPage = ref(1);
 const likedComments = ref(new Set());
 const auth = useAuthStore();
 const getPostBoardId = (post) => post?.boardId ?? post?.id ?? post?.board?.boardId;
+
+const isWithdrawn = (item) =>
+  item?.authorDeleted || item?.authorAnonymized || item?.authorNickname === '알수없음';
+
+const isPostWithdrawn = computed(() => isWithdrawn(props.post));
 
 const openReportPopup = (type, id) => {
   reportTarget.value = { type, id };
@@ -714,5 +729,11 @@ watch(
   border-radius: 42px;
   margin-top: 12px;
   align-self: flex-end;
+}
+
+/* 탈퇴한 회원 표시 */
+.withdrawn_nickname {
+  color: #888888;
+  font-style: italic;
 }
 </style>

@@ -52,15 +52,18 @@
           <button class="community_list_button" @click="openDetail(item)">
             <span class="community_list_profile">
               <img
-                src="@/assets/profileDefaultOutline.svg"
+                :src="(isWithdrawn(item))
+                  ? require('@/assets/profileWithdrawnUser.svg')
+                  : require('@/assets/profileDefaultOutline.svg')"
                 alt="profile default image"
                 width="34"
                 height="34"
               />
             </span>
-            <strong class="community_list_nickname">{{
-              item.authorNickname
-            }}</strong>
+            <strong
+              class="community_list_nickname"
+              :class="{ withdrawn_nickname: isWithdrawn(item) }"
+            >{{ (isWithdrawn(item)) ? '알수없음' : item.authorNickname }}</strong>
             <span class="community_list_contents">
               <span class="list_contents_tag">
                 <img
@@ -155,6 +158,9 @@ import CommunityReportForm from '@/components/communityPopup/CommunityReportForm
 import CommunityListDetailPanel from '@/components/communityPanel/CommunityListDetailPanel.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
 import { boardsApi } from '@/api/boards';
+
+const isWithdrawn = (item) =>
+  item?.authorDeleted || item?.authorAnonymized || item?.authorNickname === '알수없음';
 
 const categories = ['전체', '공지', '제보', '기억', '고민', '질문', '미분류'];
 const selectedCategory = ref('전체');
@@ -520,5 +526,11 @@ onMounted(() => {
   width: calc(50% - 4px);
   border-radius: 40px;
   white-space: nowrap;
+}
+
+/* 탈퇴한 회원 표시 */
+.withdrawn_nickname {
+  color: #888888;
+  font-style: italic;
 }
 </style>
