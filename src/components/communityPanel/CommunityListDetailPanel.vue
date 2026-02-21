@@ -63,7 +63,7 @@
             </button>
             <button
               class="detail_icon_button"
-              @click="openReportPopup('post', props.post?.boardId)"
+              @click="openReportPopup('post', getPostBoardId(props.post))"
             >
               <img
                 :src="
@@ -295,6 +295,7 @@ const commentsPerPage = 10;
 const commentsPage = ref(1);
 const likedComments = ref(new Set());
 const auth = useAuthStore();
+const getPostBoardId = (post) => post?.boardId ?? post?.id ?? post?.board?.boardId;
 
 const openReportPopup = (type, id) => {
   reportTarget.value = { type, id };
@@ -313,7 +314,9 @@ const onReportComplete = (type, id) => {
 
 const updatePostInfo = async () => {
   try {
-    const updatedPost = await boardsApi.getBoardById(props.post?.boardId);
+    const boardId = getPostBoardId(props.post);
+    if (!boardId) return;
+    const updatedPost = await boardsApi.getBoardById(boardId);
     if (updatedPost?.data) {
       Object.assign(props.post, updatedPost.data);
     }
@@ -324,7 +327,9 @@ const updatePostInfo = async () => {
 
 const handleBoardLike = async () => {
   try {
-    const response = await boardsApi.likeBoard(props.post?.boardId);
+    const boardId = getPostBoardId(props.post);
+    if (!boardId) return;
+    const response = await boardsApi.likeBoard(boardId);
     if (response?.data) {
       isPostLiked.value = response.data.isLiked;
       showLikePopup.value = response.data.isLiked;
@@ -385,9 +390,10 @@ const handleEnter = (e) => {
 };
 
 const loadComments = async () => {
-  if (!props.post?.boardId) return;
+  const boardId = getPostBoardId(props.post);
+  if (!boardId) return;
   try {
-    const response = await getCommentsByBoardId(props.post.boardId);
+    const response = await getCommentsByBoardId(boardId);
     if (response?.data) {
       comments.value = response.data;
     }
@@ -400,7 +406,9 @@ const loadComments = async () => {
 const submitComment = async () => {
   if (!comment.value.trim()) return;
   try {
-    const response = await createComment(props.post?.boardId, comment.value);
+    const boardId = getPostBoardId(props.post);
+    if (!boardId) return;
+    const response = await createComment(boardId, comment.value);
     if (response) {
       showCommentPopup.value = true;
       comment.value = '';
@@ -441,7 +449,7 @@ const changeCommentPage = (page) => {
 };
 
 watch(
-  () => props.post?.boardId,
+  () => getPostBoardId(props.post),
   async (newId) => {
     comments.value = [];
     if (!newId) {
