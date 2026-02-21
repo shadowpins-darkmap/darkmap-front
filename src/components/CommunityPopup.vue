@@ -394,7 +394,7 @@
 
     <!-- 광장 커뮤니티  SlidePanel -->
     <SlidePanel
-      :width="'510px'"
+      :width="'380px'"
       :visible="isListPanelOpen"
       @close="isListPanelOpen = false"
     >
@@ -420,7 +420,7 @@
 
     <!-- 게시글 상세 -->
     <SlidePanel
-      :width="'510px'"
+      :width="'380px'"
       :visible="isArticleDetailOpen"
       @close="handleArticleDetailClose"
     >

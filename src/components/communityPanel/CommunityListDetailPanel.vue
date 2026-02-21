@@ -1,20 +1,32 @@
 <template>
   <div class="slider_detail_wrap">
     <button class="slider_colse_button" @click="$emit('close')">
-      <img src="@/assets/detailCloseArrow.svg" alt="slider close icon" width="36" height="36" />
+      <img
+        src="@/assets/detailCloseArrow.svg"
+        alt="slider close icon"
+        width="36"
+        height="36"
+      />
     </button>
     <strong class="detail_title">{{ props.post?.title }}</strong>
 
     <div class="profile_img_wrap">
       <div class="profile_detail_img_box">
-        <img src="@/assets/profileDefault.svg" alt="profile default image" width="80" height="80" />
+        <img
+          src="@/assets/profileDefault.svg"
+          alt="profile default image"
+          width="56"
+          height="56"
+        />
       </div>
 
       <div class="detail_top_profile">
         <span class="detail_nickname">{{ props.post?.authorNickname }} </span>
         <span class="detail_count_wrap">
           <span class="detail_count">
-            <span class="detail_comment">댓글 {{ props.post?.commentCount }}</span>
+            <span class="detail_comment"
+              >댓글 {{ props.post?.commentCount }}</span
+            >
             <span class="detail_likes">좋아요 {{ props.post?.likeCount }}</span>
             <span class="detail_view">조회수 {{ props.post?.viewCount }}</span>
           </span>
@@ -26,22 +38,41 @@
       </div>
     </div>
 
-    <GradientScroll :width="'100%'" :height="'calc(100% - 400px)'" direction="vertical"
-      gradient-color="rgba(64,64,64,1.5)">
+    <GradientScroll
+      :width="'100%'"
+      :height="'calc(100% - 400px)'"
+      direction="vertical"
+      gradient-color="rgba(64,64,64,1.5)"
+    >
       <div class="detail_scroll_wrap">
         <div class="detail_content_wrap">
-          <p class="detail_content">{{ props.post?.content || '내용이 없습니다.' }}</p>
+          <p class="detail_content">
+            {{ props.post?.content || '내용이 없습니다.' }}
+          </p>
           <div class="detail_icon_wrap">
             <button class="detail_icon_button" @click="handleBoardLike">
               <img
-                :src="isPostLiked ? require('@/assets/commentHeartIconOn.svg') : require('@/assets/commentHeartIconOff.svg')"
-                alt="like" />
+                :src="
+                  isPostLiked
+                    ? require('@/assets/commentHeartIconOn.svg')
+                    : require('@/assets/commentHeartIconOff.svg')
+                "
+                alt="like"
+              />
               <span class="detail_icon_text">이 글을 추천해요</span>
             </button>
-            <button class="detail_icon_button" @click="openReportPopup('post', props.post?.boardId)">
+            <button
+              class="detail_icon_button"
+              @click="openReportPopup('post', props.post?.boardId)"
+            >
               <img
-                :src="isPostReport ? require('@/assets/commentReportIconOn.svg') : require('@/assets/commentReportIconOff.svg')"
-                alt="report" />
+                :src="
+                  isPostReport
+                    ? require('@/assets/commentReportIconOn.svg')
+                    : require('@/assets/commentReportIconOff.svg')
+                "
+                alt="report"
+              />
               <span class="detail_icon_text">이 글을 신고하고 싶어요</span>
             </button>
           </div>
@@ -49,59 +80,119 @@
 
         <div class="comments_list_wrap">
           <ul>
-            <li v-for="comment in paginatedComments" :key="comment.commentId" class="comments_item">
+            <li
+              v-for="comment in paginatedComments"
+              :key="comment.commentId"
+              class="comments_item"
+            >
               <div class="comment_profile">
-                <img src="@/assets/profileDefault.svg" alt="profile" width="40" height="40" />
-                <span class="comment_nickname">{{ comment.authorNickname }}</span>
+                <img
+                  src="@/assets/profileDefault.svg"
+                  alt="profile"
+                  width="40"
+                  height="40"
+                />
+                <span class="comment_nickname">{{
+                  comment.authorNickname
+                }}</span>
               </div>
               <div class="comment_bubble_wrap">
                 <span class="comment_data_wrap">
-                  <span class="comment_data">{{ formatDate(comment.createdAt) }}</span>
-                  <span class="comment_data">{{ formatTime(comment.createdAt) }}</span>
-                  <span class="comment_data">추천 {{ comment.likes || 0 }}</span>
+                  <span class="comment_data">{{
+                    formatDate(comment.createdAt)
+                  }}</span>
+                  <span class="comment_data">{{
+                    formatTime(comment.createdAt)
+                  }}</span>
+                  <span class="comment_data"
+                    >추천 {{ comment.likes || 0 }}</span
+                  >
                 </span>
                 <span class="comment_bubble">
                   <p class="comment_content">{{ comment.content }}</p>
                 </span>
                 <span class="comment_icons">
-                  <button class="icon_button" @click="handleCommentLike(comment.commentId)">
+                  <button
+                    class="icon_button"
+                    @click="handleCommentLike(comment.commentId)"
+                  >
                     <img
-                      :src="likedComments.has(comment.commentId) ? require('@/assets/commentHeartIconOn.svg') : require('@/assets/commentHeartIconOff.svg')"
-                      alt="like" />
+                      :src="
+                        likedComments.has(comment.commentId)
+                          ? require('@/assets/commentHeartIconOn.svg')
+                          : require('@/assets/commentHeartIconOff.svg')
+                      "
+                      alt="like"
+                    />
                   </button>
-                  <button class="icon_button" @click="openReportPopup('comment', comment.commentId)">
+                  <button
+                    class="icon_button"
+                    @click="openReportPopup('comment', comment.commentId)"
+                  >
                     <img
-                      :src="reportedComments.has(comment.commentId) ? require('@/assets/commentReportIconOn.svg') : require('@/assets/commentReportIconOff.svg')"
-                      alt="report" />
+                      :src="
+                        reportedComments.has(comment.commentId)
+                          ? require('@/assets/commentReportIconOn.svg')
+                          : require('@/assets/commentReportIconOff.svg')
+                      "
+                      alt="report"
+                    />
                   </button>
-                  <button v-if="comment.authorNickname === auth.nickname" class="icon_button"
-                    @click="handleDeleteComment(comment.commentId)">
+                  <button
+                    v-if="comment.authorNickname === auth.nickname"
+                    class="icon_button"
+                    @click="handleDeleteComment(comment.commentId)"
+                  >
                     <img src="@/assets/commentDeleteIcon.svg" alt="delete" />
                   </button>
                 </span>
               </div>
             </li>
           </ul>
-          <div v-if="comments.length > commentsPerPage" class="comment_pagination_wrap">
-            <PaginationWrap :currentPage="commentsPage"
-              :pageNumbers="Array.from({ length: commentsTotalPages }, (_, i) => i + 1)"
-              @page-change="changeCommentPage" />
+          <div
+            v-if="comments.length > commentsPerPage"
+            class="comment_pagination_wrap"
+          >
+            <PaginationWrap
+              :currentPage="commentsPage"
+              :pageNumbers="
+                Array.from({ length: commentsTotalPages }, (_, i) => i + 1)
+              "
+              @page-change="changeCommentPage"
+            />
           </div>
         </div>
       </div>
     </GradientScroll>
 
     <div class="comment_footer">
-      <div class="comment_input_wrap" :style="{ height: commentInputHeight + 48 + 'px' }">
-        <GradientScroll :width="'100%'" :height="parseInt(commentInputHeight) >= 80 ? 'auto' : '80px'"
-          direction="vertical" gradient-color="rgb(207, 195, 217,1.5)"
-          :show-gradient="parseInt(commentInputHeight) >= 80">
-          <textarea v-model="comment" class="comment_textarea" placeholder="댓글을 입력해 주세요" maxlength="490"
-            id="comment_text" @input="updateLength" @keydown.enter.prevent="handleEnter" rows="1"></textarea>
+      <div
+        class="comment_input_wrap"
+        :style="{ height: commentInputHeight + 48 + 'px' }"
+      >
+        <GradientScroll
+          :width="'100%'"
+          :height="parseInt(commentInputHeight) >= 80 ? 'auto' : '80px'"
+          direction="vertical"
+          gradient-color="rgb(207, 195, 217,1.5)"
+          :show-gradient="parseInt(commentInputHeight) >= 80"
+        >
+          <textarea
+            v-model="comment"
+            class="comment_textarea"
+            placeholder="댓글을 입력해 주세요"
+            maxlength="490"
+            id="comment_text"
+            @input="updateLength"
+            @keydown.enter.prevent="handleEnter"
+            rows="1"
+          ></textarea>
         </GradientScroll>
         <span class="char_count">{{ comment.length }}/490</span>
       </div>
-      <button class="comment_submit_button" @click="submitComment">댓글 쓰기</button>
+      <button class="comment_submit_button" @click="submitComment">
+        댓글 쓰기
+      </button>
     </div>
   </div>
 
@@ -114,18 +205,32 @@
   <BaseAlertPopup v-if="showCommentPopup" @confirm="showCommentPopup = false">
     <p>댓글이 등록되었습니다.</p>
   </BaseAlertPopup>
-  <BaseAlertPopup v-if="showReportSuccesePopup" title="신고를 완료했습니다." @confirm="showReportSuccesePopup = false">
-    <p>사이트 운영진의 검토가 끝나면<br />등록하신 이메일로 관련 조치를 알려드려요<br />해당 안내는 3~14일정도 소요될 수 있습니다.</p>
+  <BaseAlertPopup
+    v-if="showReportSuccesePopup"
+    title="신고를 완료했습니다."
+    @confirm="showReportSuccesePopup = false"
+  >
+    <p>
+      사이트 운영진의 검토가 끝나면<br />등록하신 이메일로 관련 조치를
+      알려드려요<br />해당 안내는 3~14일정도 소요될 수 있습니다.
+    </p>
   </BaseAlertPopup>
   <BaseAlertPopup v-if="showSelfLikePopup" @confirm="showSelfLikePopup = false">
     <p>본인의 댓글에 좋아요를 누를 수 없습니다.</p>
   </BaseAlertPopup>
-  <BaseAlertPopup v-if="showCommentLoadErrorPopup" @confirm="showCommentLoadErrorPopup = false">
+  <BaseAlertPopup
+    v-if="showCommentLoadErrorPopup"
+    @confirm="showCommentLoadErrorPopup = false"
+  >
     <p>댓글 불러오기에 실패했습니다.<br />다시 시도해주세요.</p>
   </BaseAlertPopup>
   <CommonPopup :visible="showReportPopup" @close="closeReportPopup">
-    <CommunityPostReportForm :type="reportTarget.type" :id="reportTarget.id" @close="closeReportPopup"
-      @report-complete="onReportComplete" />
+    <CommunityPostReportForm
+      :type="reportTarget.type"
+      :id="reportTarget.id"
+      @close="closeReportPopup"
+      @report-complete="onReportComplete"
+    />
   </CommonPopup>
 </template>
 
@@ -137,7 +242,12 @@ import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
 import CommunityPostReportForm from '@/components/communityPopup/CommunityPostReportForm.vue';
 import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
 import { boardsApi } from '@/api/boards';
-import { createComment, getCommentsByBoardId, likeComment, deleteComment } from '@/api/comments';
+import {
+  createComment,
+  getCommentsByBoardId,
+  likeComment,
+  deleteComment,
+} from '@/api/comments';
 import { useAuthStore } from '@/store/useAuthStore';
 
 defineEmits(['close']);
@@ -148,12 +258,23 @@ const props = defineProps({
 
 const formatDate = (dateString) => {
   if (!dateString) return '';
-  return new Date(dateString).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\./g, '-').replace(/-$/, '');
+  return new Date(dateString)
+    .toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    })
+    .replace(/\./g, '-')
+    .replace(/-$/, '');
 };
 
 const formatTime = (dateString) => {
   if (!dateString) return '';
-  return new Date(dateString).toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit', hour12: true });
+  return new Date(dateString).toLocaleTimeString('ko-KR', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
 };
 
 const comment = ref('');
@@ -219,7 +340,7 @@ const handleCommentLike = async (commentId) => {
     const response = await likeComment(commentId);
     if (response?.data) {
       const { isLiked, likeCount } = response.data;
-      const comment = comments.value.find(c => c.id === commentId);
+      const comment = comments.value.find((c) => c.id === commentId);
       if (comment) {
         comment.likes = likeCount;
         comment.isLiked = isLiked;
@@ -253,7 +374,8 @@ const updateLength = () => {
 const handleEnter = (e) => {
   if (e.shiftKey) {
     const pos = e.target.selectionStart;
-    comment.value = comment.value.slice(0, pos) + '\n' + comment.value.slice(pos);
+    comment.value =
+      comment.value.slice(0, pos) + '\n' + comment.value.slice(pos);
     nextTick(() => {
       e.target.selectionStart = e.target.selectionEnd = pos + 1;
     });
@@ -310,7 +432,9 @@ const paginatedComments = computed(() => {
   const start = (commentsPage.value - 1) * commentsPerPage;
   return comments.value.slice(start, start + commentsPerPage);
 });
-const commentsTotalPages = computed(() => Math.ceil(comments.value.length / commentsPerPage));
+const commentsTotalPages = computed(() =>
+  Math.ceil(comments.value.length / commentsPerPage),
+);
 
 const changeCommentPage = (page) => {
   commentsPage.value = page;
@@ -333,15 +457,14 @@ watch(
 
     await loadComments();
   },
-  { immediate: true }
+  { immediate: true },
 );
-
 </script>
 
 <style scoped lang="scss">
 .slider_detail_wrap {
   background-color: #404040;
-  padding: 40px 30px;
+  padding: 28px 18px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -356,52 +479,53 @@ watch(
 
 .detail_title {
   font-weight: bold;
-  font-size: 32px;
+  font-size: 26px;
   line-height: 1.2;
   display: flex;
-  padding-top: 40px;
+  padding-top: 24px;
 }
 
 .profile_img_wrap {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  padding-top: 20px;
+  padding-top: 14px;
 }
 
 .profile_detail_img_box {
   display: flex;
   float: 0 0 auto;
-  margin-right: 15px;
+  width: 56px;
+  margin-right: 8px;
 }
 
 .detail_top_profile {
   display: flex;
   width: 100%;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 .detail_nickname {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: bold;
   color: #a190df;
   display: flex;
   align-items: center;
   line-height: 1.5;
-  max-width: 196px;
+  max-width: 138px;
 }
 
 .detail_content_wrap {
-  padding-left: 95px;
+  padding-left: 64px;
 }
 
 .detail_count_wrap {
-  padding-top: 10px;
+  padding-top: 6px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  font-size: 12px;
+  gap: 6px;
+  font-size: 11px;
   color: #fff;
 }
 
@@ -411,20 +535,33 @@ watch(
   gap: 5px;
 }
 
+.detail_comment,
+.detail_likes,
+.detail_view {
+  font-size: 10px;
+}
+
 .detail_content {
   white-space: pre-wrap;
   word-break: break-word;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  line-height: 1.6;
+  line-height: 1.5;
+  font-size: 13px;
 }
 
 .detail_icon_wrap {
-  padding: 30px 0;
+  padding: 20px 0;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 5px;
+}
+
+.detail_icon_button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .detail_icon_text {
@@ -434,7 +571,7 @@ watch(
 
 .comments_list_wrap {
   border-top: 1px solid #fff;
-  padding: 20px 0;
+  padding: 14px 0;
   margin-bottom: 60px;
 }
 
@@ -447,25 +584,25 @@ watch(
 .comments_item {
   display: flex;
   justify-content: space-between;
-  padding-top: 15px;
+  padding-top: 12px;
   position: relative;
 }
 
 .comment_profile {
   display: flex;
-  width: 100px;
+  width: 88px;
   flex-wrap: nowrap;
 }
 
 .comment_nickname {
-  font-size: 12px;
+  font-size: 11px;
   color: #bdb2e9;
   word-break: break-word;
-  margin-left: 8px;
+  margin-left: 6px;
 }
 
 .comment_bubble_wrap {
-  width: calc(100% - 110px);
+  width: calc(100% - 94px);
   display: flex;
   flex-direction: column;
 }
@@ -473,7 +610,7 @@ watch(
 .comment_data_wrap {
   display: flex;
   align-self: flex-end;
-  gap: 5px;
+  gap: 4px;
   position: absolute;
   right: 3px;
   top: -5px;
@@ -481,13 +618,13 @@ watch(
 
 .comment_data {
   color: #9886dc;
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .comment_bubble {
   background-color: #292929;
   border-radius: 6px;
-  padding: 20px;
+  padding: 14px;
   display: block;
   width: 100%;
   box-sizing: border-box;
@@ -495,15 +632,15 @@ watch(
 
 .comment_content {
   line-height: 1.4;
-  font-size: 14px;
+  font-size: 12px;
   word-break: break-word;
 }
 
 .comment_icons {
   display: flex;
   align-self: flex-end;
-  gap: 10px;
-  padding-top: 10px;
+  gap: 8px;
+  padding-top: 8px;
 }
 
 .comment_pagination_wrap {
@@ -513,7 +650,7 @@ watch(
 
 .comment_input_wrap {
   background-color: #cfc3d9;
-  padding: 15px;
+  padding: 12px;
   border-radius: 12px;
   min-height: 80px;
   max-height: 145px;
@@ -540,14 +677,15 @@ watch(
   display: flex;
   flex-direction: column;
   position: absolute;
-  bottom: 40px;
-  width: calc(100% - 60px);
+  bottom: 19px;
+  gap: 7px;
+  width: calc(100% - 36px);
   background-color: #404040;
   z-index: 100;
 }
 
 .char_count {
-  font-size: 14px;
+  font-size: 12px;
   color: #735bcf;
   display: flex;
   align-items: center;
@@ -555,18 +693,18 @@ watch(
 }
 
 .comment_submit_button {
-  width: 138px;
-  height: 40px;
+  width: 120px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: #000;
   color: #fff;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: bold;
   border: 2px solid #f1cfc8;
   border-radius: 42px;
-  margin-top: 15px;
+  margin-top: 12px;
   align-self: flex-end;
 }
 </style>

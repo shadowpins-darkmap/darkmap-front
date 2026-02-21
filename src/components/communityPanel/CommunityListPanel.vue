@@ -1,17 +1,36 @@
 <template>
   <div class="slider_wrap">
     <button class="slider_colse_button" @click="$emit('close')">
-      <img src="@/assets/sliderCloseIcon.svg" alt="slider close icon" width="36" height="36" />
+      <img
+        src="@/assets/sliderCloseIcon.svg"
+        alt="slider close icon"
+        width="36"
+        height="36"
+      />
     </button>
     <strong class="community__hot_title">🔥 지금 가장 뜨거운 글이에요!</strong>
     <div class="community__card_wrap">
       <div class="community__card">
-        <CarouselWrap :green="true" :items-to-show="1.66" :gap="0" :onCardClick="openDetail" />
+        <CarouselWrap
+          :green="true"
+          :items-to-show="1.14"
+          :gap="4"
+          :onCardClick="openDetail"
+        />
       </div>
     </div>
-    <GradientScroll :width="'350px'" :height="'55px'" gradient-color="rgba(0,0,0,1)">
+    <GradientScroll
+      :width="'100%'"
+      :height="'48px'"
+      gradient-color="rgba(0,0,0,1)"
+    >
       <ul class="sort_list_wrap">
-        <li v-for="(cat, i) in categories" :key="i" class="sort_list" :class="{ on: selectedCategory === cat }">
+        <li
+          v-for="(cat, i) in categories"
+          :key="i"
+          class="sort_list"
+          :class="{ on: selectedCategory === cat }"
+        >
           <button class="sort_list_button" @click="handleCategoryChange(cat)">
             <span>{{ cat }}</span>
           </button>
@@ -19,25 +38,46 @@
       </ul>
     </GradientScroll>
     <ul class="community_list_wrap">
-      <GradientScroll :width="'100%'" :height="'100%'" gradient-color="rgba(0,0,0,1)" direction="vertical">
-        <li class="community_list" v-for="item in currentItems" :key="item.boardId ?? item.id">
+      <GradientScroll
+        :width="'100%'"
+        :height="'100%'"
+        gradient-color="rgba(0,0,0,1)"
+        direction="vertical"
+      >
+        <li
+          class="community_list"
+          v-for="item in currentItems"
+          :key="item.boardId ?? item.id"
+        >
           <button class="community_list_button" @click="openDetail(item)">
             <span class="community_list_profile">
-              <img src="@/assets/profileDefault.svg" alt="profile default image" width="40" height="40" />
+              <img
+                src="@/assets/profileDefaultOutline.svg"
+                alt="profile default image"
+                width="34"
+                height="34"
+              />
             </span>
-            <strong class="community_list_nickname">{{ item.authorNickname }}</strong>
+            <strong class="community_list_nickname">{{
+              item.authorNickname
+            }}</strong>
             <span class="community_list_contents">
               <span class="list_contents_tag">
-                <img src="@/assets/tagBulletIcon.svg" alt="tag bullet icon" width="8" height="8" />
-                {{ item.tag }}
+                <img
+                  src="@/assets/tagBulletIcon.svg"
+                  alt="tag bullet icon"
+                  width="8"
+                  height="8"
+                />
+                {{ item.category || item.tag || '미분류' }}
               </span>
               <span class="ellipsis__2 list_contents_title">
                 {{ item.title }}
               </span>
               <span class="list_contents_conut_wrap">
-                <span class="comment_count">댓글 {{ item.commentCount }}</span>
-                <span class="like_count">좋아요 {{ item.likeCount }}</span>
                 <span class="views_count">조회 {{ item.viewCount }}</span>
+                <span class="like_count">좋아요 {{ item.likeCount }}</span>
+                <span class="comment_count">댓글 {{ item.commentCount }}</span>
               </span>
             </span>
           </button>
@@ -45,32 +85,60 @@
       </GradientScroll>
     </ul>
 
-    <PaginationWrap :currentPage="currentPage" :pageNumbers="pageNumbers" @page-change="pageChange" @prev="clickPrev"
-      @next="clickNext" />
+    <PaginationWrap
+      :currentPage="currentPage"
+      :pageNumbers="pageNumbers"
+      @page-change="pageChange"
+      @prev="clickPrev"
+      @next="clickNext"
+    />
   </div>
   <!-- 글등록 버튼  -->
   <div class="write_button_wrap">
     <button class="write_button" @click="isWritePopupOpen = true">
       광장에 글쓰기
-      <img src="@/assets/slideCardArrow.svg" class="button_arrow_icon" alt="button arrow icon" width="14" height="14" />
+      <img
+        src="@/assets/slideCardArrow.svg"
+        class="button_arrow_icon"
+        alt="button arrow icon"
+        width="14"
+        height="14"
+      />
     </button>
     <button class="write_button" @click="isReportPopupOpen = true">
       길거리 괴롭힘 제보하기
-      <img src="@/assets/slideCardArrow.svg" class="button_arrow_icon" alt="button arrow icon" width="14" height="14" />
+      <img
+        src="@/assets/slideCardArrow.svg"
+        class="button_arrow_icon"
+        alt="button arrow icon"
+        width="14"
+        height="14"
+      />
     </button>
   </div>
 
   <!-- 팝업  -->
   <CommonPopup :visible="isWritePopupOpen" @close="isWritePopupOpen = false">
-    <CommunityWriteForm @close="isWritePopupOpen = false" @submit="handleWriteComplete" />
+    <CommunityWriteForm
+      @close="isWritePopupOpen = false"
+      @submit="handleWriteComplete"
+    />
   </CommonPopup>
   <CommonPopup :visible="isReportPopupOpen" @close="handleReportClose">
     <CommunityReportForm @close="handleReportClose" />
   </CommonPopup>
 
   <!-- SlidePanel s -->
-  <SlidePanel :width="'510px'" :visible="isDetailPanelOpen" :right="'510px'" @close="isDetailPanelOpen = false">
-    <CommunityListDetailPanel :post="selectedPost" @close="isDetailPanelOpen = false" />
+  <SlidePanel
+    :width="'380px'"
+    :visible="isDetailPanelOpen"
+    :right="'380px'"
+    @close="isDetailPanelOpen = false"
+  >
+    <CommunityListDetailPanel
+      :post="selectedPost"
+      @close="isDetailPanelOpen = false"
+    />
   </SlidePanel>
 </template>
 
@@ -117,7 +185,6 @@ const handleCategoryChange = (category) => {
   currentPage.value = 1;
 };
 
-
 const postList = ref([]);
 const loading = ref(false);
 const pageSize = computed(() => pageInfo.value.pageSize || defaultPageSize);
@@ -135,10 +202,14 @@ const loadRecentBoards = async (page = 0) => {
       const responseData = response.data || {};
       const boards = responseData.boards || [];
       const info = responseData.pageInfo || {};
-      const current = typeof info.currentPage === 'number' ? info.currentPage : page;
-      const size = typeof info.pageSize === 'number' ? info.pageSize : pageSize.value;
+      const current =
+        typeof info.currentPage === 'number' ? info.currentPage : page;
+      const size =
+        typeof info.pageSize === 'number' ? info.pageSize : pageSize.value;
       const totalElements =
-        typeof info.totalElements === 'number' ? info.totalElements : boards.length;
+        typeof info.totalElements === 'number'
+          ? info.totalElements
+          : boards.length;
       const totalPages =
         typeof info.totalPages === 'number'
           ? info.totalPages
@@ -146,10 +217,13 @@ const loadRecentBoards = async (page = 0) => {
             ? Math.ceil(totalElements / size)
             : 0;
       const hasNext =
-        typeof info.hasNext === 'boolean' ? info.hasNext : current + 1 < totalPages;
+        typeof info.hasNext === 'boolean'
+          ? info.hasNext
+          : current + 1 < totalPages;
       const hasPrevious =
         typeof info.hasPrevious === 'boolean' ? info.hasPrevious : current > 0;
-      const isFirst = typeof info.isFirst === 'boolean' ? info.isFirst : current === 0;
+      const isFirst =
+        typeof info.isFirst === 'boolean' ? info.isFirst : current === 0;
       const isLast = typeof info.isLast === 'boolean' ? info.isLast : !hasNext;
 
       postList.value = boards;
@@ -201,7 +275,9 @@ const filteredPosts = computed(() => {
   if (selectedCategory.value === '전체') {
     return postList.value;
   }
-  return postList.value.filter(post => post.category === selectedCategory.value);
+  return postList.value.filter(
+    (post) => post.category === selectedCategory.value,
+  );
 });
 
 const currentItems = computed(() => {
@@ -242,15 +318,14 @@ const handleReportClose = () => {
 onMounted(() => {
   loadRecentBoards();
 });
-
 </script>
 
 <style scoped lang="scss">
 /* 사이드 슬라이더 */
 .slider_wrap {
   background-color: #000;
-  padding: 40px 30px;
-  height: calc(100% - 90px);
+  padding: 28px 18px;
+  height: calc(100% - 72px);
   display: flex;
   flex-direction: column;
 }
@@ -270,44 +345,36 @@ onMounted(() => {
 }
 
 .community__hot_title {
-  font-size: 24px;
+  font-size: 21px;
   font-weight: bold;
   color: #a190df;
   display: flex;
-  padding-top: 20px;
+  padding-top: 14px;
 }
 
 .community__card_wrap {
   display: flex;
-  transform: translateX(8px);
+  margin-top: 4px;
   position: relative;
 }
 
 .community__card_wrap::before {
-  content: '';
-  display: flex;
-  width: 25px;
-  height: 172px;
-  background-color: #000;
-  position: absolute;
-  left: -40px;
-  top: 14px;
-  z-index: 1;
+  content: none;
 }
 
 .community__card {
-  width: calc(100% + 120px);
-  transform: translateX(-99px);
+  width: 100%;
 }
 
 // 리스트 솔팅 탭
 .sort_list_wrap {
   display: flex;
   flex-direction: row;
-  gap: 8px;
-  margin-top: 15px;
-  margin-bottom: 10px;
-  padding-right: 40px;
+  gap: 6px;
+  margin-top: 12px;
+  margin-bottom: 8px;
+  padding-right: 18px;
+  padding-left: 2px;
   min-width: max-content;
 }
 
@@ -315,16 +382,16 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 10px;
+  padding: 4px 9px;
   border-radius: 24px;
   background-color: #017357;
   font-family: 'Roboto';
   color: #fff;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
 }
 
-.sort_list.on>.sort_list_button {
+.sort_list.on > .sort_list_button {
   background-color: #00ffc2;
   font-family: 'Roboto';
   color: #000;
@@ -334,13 +401,13 @@ onMounted(() => {
 .community_list_wrap {
   border-top: 2px solid #00ffc2;
   border-bottom: 2px solid #00ffc2;
-  height: calc(100% - 390px);
+  height: calc(100% - 356px);
   overflow-y: scroll;
 }
 
 .community_list {
-  height: 94px;
-  padding: 15px 0;
+  height: 82px;
+  padding: 12px 0;
   display: flex;
   position: relative;
 }
@@ -360,19 +427,23 @@ onMounted(() => {
 .community_list_button {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  width: 100%;
 }
 
 .community_list_profile {
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .community_list_nickname {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: #a190df;
   display: flex;
-  width: 100px;
+  width: 72px;
   flex: 0 0 auto;
   text-align: left;
 }
@@ -380,35 +451,48 @@ onMounted(() => {
 .community_list_contents {
   display: flex;
   flex-direction: column;
+  padding-top: 4px;
   text-align: left;
-  gap: 2px;
+  gap: 3px;
   flex: 1;
+  min-width: 0;
 }
 
 .list_contents_tag {
   color: #00ffc2;
+  font-size: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
 }
 
 .list_contents_title {
   color: #fff;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: bold;
   line-height: 1.4;
-  width: 280px;
-  min-height: 30px;
+  display: block;
+  width: auto;
+  min-height: 20px;
+  max-width: 100%;
+  padding-top: 5px;
 }
 
 .list_contents_conut_wrap {
   color: #fff;
   display: flex;
-  flex-direction: row-reverse;
-  gap: 6px;
-  margin-left: auto;
-  align-self: flex-end;
+  flex-direction: row;
+  gap: 4px;
+  width: 100%;
+  justify-content: flex-end;
+  align-self: stretch;
+  white-space: nowrap;
+  text-align: right;
 }
 
-.list_contents_conut_wrap>span {
-  font-size: 12px;
+.list_contents_conut_wrap > span {
+  font-size: 9px;
+  line-height: 1.3;
   font-weight: normal;
 }
 
@@ -418,20 +502,23 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   background-color: #00ffc2;
-  padding: 25px 30px;
+  padding: 16px 14px;
+  gap: 8px;
 }
 
 .write_button {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 30px;
+  padding: 10px 8px;
   background-color: #000;
   color: #fff;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 12px;
   height: 40px;
-  min-width: 214px;
+  min-width: 0;
+  width: calc(50% - 4px);
   border-radius: 40px;
+  white-space: nowrap;
 }
 </style>
