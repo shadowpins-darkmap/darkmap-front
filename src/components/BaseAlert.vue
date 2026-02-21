@@ -1,6 +1,9 @@
 <template>
   <div class="base_alert_backdrop">
-    <div class="base_alert_popup" :style="{ height: props.height, width: props.width }">
+    <div
+      class="base_alert_popup"
+      :style="{ height: props.height, width: props.width }"
+    >
       <p v-if="title" class="popup_title">{{ title }}</p>
       <div class="popup_description">
         <slot></slot>
@@ -9,11 +12,22 @@
         <button class="cancel_button" type="button" @click="$emit('cancel')">
           {{ cancelText }}
         </button>
-        <button class="confirm_button" type="button" :disabled="confirmDisabled" @click="$emit('confirm')">
+        <button
+          class="confirm_button"
+          type="button"
+          :disabled="confirmDisabled"
+          @click="$emit('confirm')"
+        >
           {{ confirmText }}
         </button>
       </div>
-      <button v-else class="confirm_button" type="button" :disabled="confirmDisabled" @click="$emit('confirm')">
+      <button
+        v-else
+        class="confirm_button"
+        type="button"
+        :disabled="confirmDisabled"
+        @click="$emit('confirm')"
+      >
         {{ confirmText }}
       </button>
     </div>
@@ -68,7 +82,7 @@ defineEmits(['confirm', 'cancel']);
   background: #6d54ce;
   border-radius: 16px;
   border: 2px solid #f1cfc8;
-  padding: 30px;
+  padding: 25px;
   text-align: center;
   color: #fff;
   min-width: 300px;
