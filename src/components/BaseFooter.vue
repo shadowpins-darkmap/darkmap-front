@@ -37,7 +37,7 @@
 <style lang="scss" scoped>
 .BaseFooter {
   font-family: 'Roboto', sans-serif;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   color: #ffefeb;
   margin-top: 20px;
@@ -46,7 +46,7 @@
   &intro {
     display: flex;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
 
   &container {
@@ -57,7 +57,7 @@
 
   .BaseFooterlink {
     font-family: 'Roboto', sans-serif;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 500;
     color: #ffefeb;
     text-decoration: underline;
