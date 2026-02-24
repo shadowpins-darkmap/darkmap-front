@@ -23,13 +23,18 @@
         <p>{{ loaderMessage }}</p>
       </div>
     </div>
-    <BaseAlertPopup v-if="showLoginFailAlert" @confirm="showLoginFailAlert = false" confirmText="확인" height="169px">
-      <p>로그인/가입에 실패했습니다.<br /> 정보를 다시 확인해주세요.</p>
+    <BaseAlertPopup
+      v-if="showLoginFailAlert"
+      @confirm="showLoginFailAlert = false"
+      confirmText="확인"
+      height="169px"
+    >
+      <p style="white-space: pre-line">{{ loginFailMessage }}</p>
     </BaseAlertPopup>
   </div>
 </template>
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { debounce } from 'lodash';
 import { OAUTH_PROVIDERS, getOAuthLoginUrl } from '@/utils/oauth';
@@ -45,6 +50,9 @@ const emit = defineEmits(['close']);
 
 const isLoading = ref(false);
 const showLoginFailAlert = ref(false);
+const loginFailMessage = ref(
+  '로그인/가입에 실패했습니다.\n정보를 다시 확인해주세요.',
+);
 const loaderMessage = ref('로그인 창을 여는 중이에요...');
 
 const router = useRouter();
@@ -68,7 +76,31 @@ const persistRecentLoginInfo = (userData) => {
   );
 };
 
+const resolveLoginError = (error) => {
+  const payload = error?.payload || error?.detail?.payload || error?.detail || {};
+  const code = error?.code || payload?.error || error?.error || null;
+  const message =
+    error?.message ||
+    payload?.message ||
+    payload?.error ||
+    '로그인/가입에 실패했습니다.\n정보를 다시 확인해주세요.';
+
+  return { code, message };
+};
+
 const triggerLoginFailAlert = (error) => {
+  const { code, message } = resolveLoginError(error);
+  if (code === 'WITHDRAWN_MEMBER') {
+    auth.clearAccessToken();
+    if (message === 'WITHDRAWN_MEMBER' || !message) {
+      loginFailMessage.value = '탈퇴한 회원입니다.\n재가입 유보 기간이 지난 후 다시 시도해 주세요.';
+      showLoginFailAlert.value = true;
+      isLoading.value = false;
+      return;
+    }
+  }
+
+  loginFailMessage.value = message;
   console.error('[LoginPage] 소셜 로그인 실패:', error);
   showLoginFailAlert.value = true;
   isLoading.value = false;
@@ -87,7 +119,7 @@ const allowedOrigins = (() => {
     origins.add(window.location.origin);
   }
 
-[API_BASE_URL, BASE_URL].forEach((url) => {
+  [API_BASE_URL, BASE_URL].forEach((url) => {
     if (!url) return;
     try {
       const origin = new URL(url).origin;
@@ -99,6 +131,18 @@ const allowedOrigins = (() => {
 
   return Array.from(origins);
 })();
+
+const handleHashError = (event) => {
+  triggerLoginFailAlert(event?.detail || event);
+};
+
+onMounted(() => {
+  window.addEventListener('auth:hash-error', handleHashError);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('auth:hash-error', handleHashError);
+});
 
 const authenticateWithProvider = async (provider) => {
   try {
