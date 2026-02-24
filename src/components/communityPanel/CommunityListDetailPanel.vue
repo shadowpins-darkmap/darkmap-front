@@ -48,6 +48,7 @@
       :height="'calc(100% - 300px)'"
       direction="vertical"
       gradient-color="rgba(64,64,64,1.5)"
+      :showScrollbar="true"
     >
       <div class="detail_scroll_wrap">
         <div class="detail_content_wrap">

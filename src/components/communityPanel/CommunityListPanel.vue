@@ -408,7 +408,7 @@ onMounted(() => {
   border-top: 2px solid #00ffc2;
   border-bottom: 2px solid #00ffc2;
   height: calc(100% - 356px);
-  overflow-y: scroll;
+  overflow: hidden;
 }
 
 .community_list {

@@ -14,6 +14,7 @@ const props = defineProps({
   gradientColor: { type: String, default: 'rgba(0, 0, 0, 0.6)' },
   direction: { type: String, default: 'horizontal' },
   showGradient: { type: Boolean, default: true },
+  showScrollbar: { type: Boolean, default: false },
 });
 
 const scrollArea = ref(null);
@@ -88,7 +89,10 @@ onBeforeUnmount(() => {
     <div
       class="scroll_area"
       ref="scrollArea"
-      :class="isHorizontal ? 'horizontal' : 'vertical'"
+      :class="[
+        isHorizontal ? 'horizontal' : 'vertical',
+        { show_scrollbar: showScrollbar },
+      ]"
     >
       <slot></slot>
     </div>
@@ -164,5 +168,37 @@ onBeforeUnmount(() => {
 /* scroll reset */
 .scroll_area::-webkit-scrollbar {
   display: none;
+}
+
+.scroll_area.show_scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+
+  &:hover {
+    scrollbar-color: #ffefeb transparent;
+  }
+}
+
+.scroll_area.show_scrollbar::-webkit-scrollbar {
+  display: block;
+  width: 10px;
+  height: 10px;
+}
+.scroll_area.show_scrollbar::-webkit-scrollbar-button {
+  display: none;
+}
+.scroll_area.show_scrollbar::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 6px;
+}
+.scroll_area.show_scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: #d9d9d9;
+}
+.scroll_area.show_scrollbar::-webkit-scrollbar-track {
+  background-color: transparent;
+  border-radius: 6px;
+}
+.scroll_area.show_scrollbar:hover::-webkit-scrollbar-track {
+  background-color: transparent;
 }
 </style>

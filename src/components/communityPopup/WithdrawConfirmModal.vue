@@ -15,7 +15,7 @@
         한번 탈퇴하면 향후 재가입 등에 있어 제약을 받습니다. 정책을 먼저 숙지 후
         신중히 진행해주세요.
       </p>
-      <div class="withdraw_scroll">
+      <div class="withdraw_scroll scroll_area">
         <div class="withdraw_content">
           <p class="withdraw_content_title">회원탈퇴 및 이용제한</p>
           <ol class="withdraw_policy_list">
@@ -195,6 +195,10 @@ const handleConfirm = () => {
   margin-bottom: 18px;
   overflow-y: auto;
   color: #000;
+}
+
+.withdraw_scroll.scroll_area {
+  height: auto;
 }
 
 .withdraw_content {

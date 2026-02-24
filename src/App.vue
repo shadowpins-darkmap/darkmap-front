@@ -177,6 +177,10 @@ mark {
   overflow-y: auto;
   overflow-x: hidden;
   height: fit-content;
+  scrollbar-color: transparent transparent; /* Firefox: hidden by default */
+}
+.scroll_area:hover {
+  scrollbar-color: #ffefeb transparent; /* Firefox: show on hover */
 }
 
 .scroll_area_wrap {
@@ -190,35 +194,25 @@ mark {
   height: 10px;
 }
 
-.scroll_area::-webkit-scrollbar:hover {
-  width: 10px;
-  height: 10px;
-}
-
 .scroll_area::-webkit-scrollbar-button {
   display: none;
 }
 
+/* Default: transparent (invisible) */
 .scroll_area::-webkit-scrollbar-thumb {
-  background-color: #ffefeb;
+  background-color: transparent;
   border-radius: 6px;
 }
-
-/* 스크롤바 뒷 배경 설정*/
 .scroll_area::-webkit-scrollbar-track {
-  background-color: rgba(255, 239, 235, 0.65);
+  background-color: transparent;
   border-radius: 6px;
 }
 
-/* 스크롤바 뒷 배경 설정*/
-/* .scroll_area::-webkit-scrollbar-track {
-  border-radius: 10px;
+/* On hover: show peach scrollbar */
+.scroll_area:hover::-webkit-scrollbar-thumb {
+  background-color: #ffefeb;
+}
+.scroll_area:hover::-webkit-scrollbar-track {
   background-color: transparent;
 }
-.scroll_area::-webkit-scrollbar-track:hover {
-  background-color: transparent;
-}
-.scroll_area::-webkit-scrollbar-button {
-  display: none;
-} */
 </style>
