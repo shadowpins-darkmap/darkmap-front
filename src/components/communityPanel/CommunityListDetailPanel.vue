@@ -691,6 +691,7 @@ watch(
 .comment_textarea {
   background-color: #cfc3d9;
   border: none;
+  outline: none;
   width: 100%;
   display: flex;
   line-height: 1.2;

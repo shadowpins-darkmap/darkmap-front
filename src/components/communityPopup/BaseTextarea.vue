@@ -67,6 +67,7 @@ const model = defineModel();
   font-size: 14px;
   background: transparent;
   color: #000;
+  outline: none;
 }
 .form_textarea::placeholder {
   color: #c7c7cc;
