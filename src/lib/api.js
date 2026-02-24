@@ -79,11 +79,21 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    if (
+      response.status === 403 &&
+      response.data?.error === 'WITHDRAWN_MEMBER'
+    ) {
+      const authStore = getAuthStore();
+      authStore.clearAccessToken?.();
+      return Promise.reject(error);
+    }
+
     if (response.status !== 401) {
       return Promise.reject(error);
     }
 
     const isRefreshRequest = config.url?.includes(REFRESH_ENDPOINT);
+
     if (isRefreshRequest) {
       await forceLogout();
       return Promise.reject(error);

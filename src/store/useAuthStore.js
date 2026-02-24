@@ -147,6 +147,11 @@ export const useAuthStore = defineStore('auth', {
       this.refreshTokenExpiresAt = null;
     },
 
+    clearAccessToken() {
+      this.accessToken = null;
+      this.accessTokenExpiresAt = null;
+    },
+
     setProfile(profileData) {
       this.profile = profileData.data;
       this.message = profileData.message;
