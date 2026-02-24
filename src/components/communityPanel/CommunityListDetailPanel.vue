@@ -55,7 +55,7 @@
             {{ props.post?.content || '내용이 없습니다.' }}
           </p>
           <div class="detail_icon_wrap">
-            <template v-if="!props.post?.authorDeleted && !props.post?.authorAnonymized">
+            <template v-if="!isPostWithdrawn && !isOwnPost">
               <button class="detail_icon_button" @click="handleBoardLike">
                 <img
                   :src="
@@ -121,7 +121,7 @@
                 <span class="comment_bubble">
                   <p class="comment_content">{{ comment.content }}</p>
                 </span>
-                <span v-if="!comment.authorDeleted && !comment.authorAnonymized" class="comment_icons">
+                <span v-if="!isWithdrawn(comment)" class="comment_icons">
                   <button
                     class="icon_button"
                     @click="handleCommentLike(comment.commentId)"
@@ -175,7 +175,7 @@
       </div>
     </GradientScroll>
 
-    <div class="comment_footer">
+    <div v-if="!isPostWithdrawn" class="comment_footer">
       <div
         class="comment_input_wrap"
         :style="{ height: commentInputHeight + 48 + 'px' }"
@@ -311,6 +311,10 @@ const isWithdrawn = (item) =>
   item?.authorDeleted || item?.authorAnonymized || item?.authorNickname === '알수없음';
 
 const isPostWithdrawn = computed(() => isWithdrawn(props.post));
+
+const isOwnPost = computed(() =>
+  auth.id != null && props.post?.authorId != null && props.post.authorId === auth.id
+);
 
 const openReportPopup = (type, id) => {
   reportTarget.value = { type, id };
