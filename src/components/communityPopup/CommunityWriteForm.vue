@@ -109,7 +109,7 @@ const submitPost = async () => {
     formData.append('title', title.value);
     formData.append('content', content.value);
     if (imageFile.value) {
-      formData.append('image', imageFile.value);
+      formData.append('imageFile', imageFile.value);
     }
 
     const response = await boardsApi.createBoard(formData);

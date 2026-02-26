@@ -55,6 +55,12 @@
           <p class="detail_content">
             {{ props.post?.content || '내용이 없습니다.' }}
           </p>
+          <img
+            v-if="props.post?.imageUrl"
+            :src="props.post.imageUrl"
+            alt="post image"
+            class="detail_image"
+          />
           <div class="detail_icon_wrap">
             <template v-if="!isPostWithdrawn && !isOwnPost">
               <button class="detail_icon_button" @click="handleBoardLike">
@@ -735,6 +741,14 @@ watch(
   border-radius: 42px;
   margin-top: 12px;
   align-self: flex-end;
+}
+
+.detail_image {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 6px;
+  margin-top: 12px;
 }
 
 /* 탈퇴한 회원 표시 */
