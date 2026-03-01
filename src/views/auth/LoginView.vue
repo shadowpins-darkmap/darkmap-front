@@ -1,19 +1,40 @@
 <template>
   <div class="login_modal_backdrop" @click.self="handleClose">
     <div class="login_modal">
-      <button class="login_close_button" @click="handleClose" aria-label="로그인 창 닫기">
+      <button
+        class="login_close_button"
+        @click="handleClose"
+        aria-label="로그인 창 닫기"
+      >
         ✕
       </button>
       <div class="form_wrap">
         <div class="top_logo_img_wrap">
-          <img width="146" height="152" src="@/assets/loginLogoImg.svg" alt="login logo image" />
+          <img
+            width="146"
+            height="152"
+            src="@/assets/loginLogoImg.svg"
+            alt="login logo image"
+          />
         </div>
         <div class="login_buttons_wrap">
-          <button class="yellow_button" @click="handleSocialLogin(OAUTH_PROVIDERS.KAKAO)">
-            <img width="20" height="18" src="@/assets/kakaoIcon.svg" alt="kakao icon" class="kakao_icon" />
+          <button
+            class="yellow_button"
+            @click="handleSocialLogin(OAUTH_PROVIDERS.KAKAO)"
+          >
+            <img
+              width="20"
+              height="18"
+              src="@/assets/kakaoIcon.svg"
+              alt="kakao icon"
+              class="kakao_icon"
+            />
             카카오로 계속하기
           </button>
-          <button class="black_button" @click="handleSocialLogin(OAUTH_PROVIDERS.GOOGLE)">
+          <button
+            class="black_button"
+            @click="handleSocialLogin(OAUTH_PROVIDERS.GOOGLE)"
+          >
             Google 계정으로 계속하기
           </button>
         </div>
@@ -26,10 +47,11 @@
     <BaseAlertPopup
       v-if="showLoginFailAlert"
       @confirm="showLoginFailAlert = false"
+      :title="loginFailTitle"
       confirmText="확인"
-      height="169px"
+      :height="loginFailTitle ? '196px' : '169px'"
     >
-      <p style="white-space: pre-line">{{ loginFailMessage }}</p>
+      <p class="login_fail_message">{{ loginFailMessage }}</p>
     </BaseAlertPopup>
   </div>
 </template>
@@ -50,6 +72,7 @@ const emit = defineEmits(['close']);
 
 const isLoading = ref(false);
 const showLoginFailAlert = ref(false);
+const loginFailTitle = ref('');
 const loginFailMessage = ref(
   '로그인/가입에 실패했습니다.\n정보를 다시 확인해주세요.',
 );
@@ -77,7 +100,8 @@ const persistRecentLoginInfo = (userData) => {
 };
 
 const resolveLoginError = (error) => {
-  const payload = error?.payload || error?.detail?.payload || error?.detail || {};
+  const payload =
+    error?.payload || error?.detail?.payload || error?.detail || {};
   const code = error?.code || payload?.error || error?.error || null;
   const message =
     error?.message ||
@@ -93,13 +117,16 @@ const triggerLoginFailAlert = (error) => {
   if (code === 'WITHDRAWN_MEMBER') {
     auth.clearAccessToken();
     if (message === 'WITHDRAWN_MEMBER' || !message) {
-      loginFailMessage.value = '탈퇴한 회원입니다.\n재가입 유보 기간이 지난 후 다시 시도해 주세요.';
+      loginFailTitle.value = '가입이 불가합니다.';
+      loginFailMessage.value =
+        '탈퇴한 회원의 재가입은\n일주일 이상 시일 경과 후에만 가능해요.';
       showLoginFailAlert.value = true;
       isLoading.value = false;
       return;
     }
   }
 
+  loginFailTitle.value = '';
   loginFailMessage.value = message;
   console.error('[LoginPage] 소셜 로그인 실패:', error);
   showLoginFailAlert.value = true;
@@ -125,7 +152,10 @@ const allowedOrigins = (() => {
       const origin = new URL(url).origin;
       origins.add(origin);
     } catch (error) {
-      console.warn('[LoginPage] 잘못된 URL로 인해 origin을 계산하지 못했습니다:', url);
+      console.warn(
+        '[LoginPage] 잘못된 URL로 인해 origin을 계산하지 못했습니다:',
+        url,
+      );
     }
   });
 
@@ -290,5 +320,9 @@ const handleSocialLogin = debounce(
   gap: 12px;
   color: #fff;
   text-align: center;
+}
+
+.login_fail_message {
+  white-space: pre-line;
 }
 </style>
