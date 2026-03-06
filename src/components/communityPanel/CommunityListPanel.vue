@@ -141,6 +141,7 @@
     <CommunityListDetailPanel
       :post="selectedPost"
       @close="isDetailPanelOpen = false"
+      @deleted="handlePostDeleted"
     />
   </SlidePanel>
 </template>
@@ -315,6 +316,12 @@ const clickNext = () => {
 
 const handleWriteComplete = () => {
   loadRecentBoards(0);
+};
+
+const handlePostDeleted = () => {
+  isDetailPanelOpen.value = false;
+  selectedPost.value = null;
+  loadRecentBoards(pageInfo.value.currentPage);
 };
 
 const handleReportClose = () => {

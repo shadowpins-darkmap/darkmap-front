@@ -427,6 +427,7 @@
       <CommunityListDetailPanel
         :post="selectedArticleDetail"
         @close="handleArticleDetailClose"
+        @deleted="handleArticleDetailDeleted"
       />
     </SlidePanel>
   </div>
@@ -843,6 +844,17 @@ const handleOpenArticleDetail = (article) => {
 const handleArticleDetailClose = () => {
   isArticleDetailOpen.value = false;
   selectedArticleDetail.value = null;
+};
+
+const handleArticleDetailDeleted = async () => {
+  isArticleDetailOpen.value = false;
+  selectedArticleDetail.value = null;
+  if (!auth.isLoggedIn) return;
+  try {
+    await auth.getMyBoards();
+  } catch (error) {
+    console.error('내 게시글 새로고침 실패:', error);
+  }
 };
 
 /* ========== 로그인 관련 핸들러 ========== */

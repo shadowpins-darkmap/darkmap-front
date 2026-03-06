@@ -61,35 +61,44 @@
             alt="post image"
             class="detail_image"
           />
-          <div class="detail_icon_wrap">
-            <template v-if="!isPostWithdrawn && !isOwnPost">
-              <button class="detail_icon_button" @click="handleBoardLike">
-                <img
-                  :src="
-                    isPostLiked
-                      ? require('@/assets/commentHeartIconOn.svg')
-                      : require('@/assets/commentHeartIconOff.svg')
-                  "
-                  alt="like"
-                />
-                <span class="detail_icon_text">이 글을 추천해요</span>
-              </button>
-              <button
-                class="detail_icon_button"
-                @click="openReportPopup('post', getPostBoardId(props.post))"
-              >
-                <img
-                  :src="
-                    isPostReport
-                      ? require('@/assets/commentReportIconOn.svg')
-                      : require('@/assets/commentReportIconOff.svg')
-                  "
-                  alt="report"
-                />
-                <span class="detail_icon_text">이 글을 신고하고 싶어요</span>
-              </button>
-            </template>
-          </div>
+    <div class="detail_icon_wrap" v-if="!isPostWithdrawn">
+      <template v-if="!isOwnPost">
+        <button class="detail_icon_button" @click="handleBoardLike">
+          <img
+            :src="
+              isPostLiked
+                ? require('@/assets/commentHeartIconOn.svg')
+                : require('@/assets/commentHeartIconOff.svg')
+            "
+            alt="like"
+          />
+          <span class="detail_icon_text">이 글을 추천해요</span>
+        </button>
+        <button
+          class="detail_icon_button"
+          @click="openReportPopup('post', getPostBoardId(props.post))"
+        >
+          <img
+            :src="
+              isPostReport
+                ? require('@/assets/commentReportIconOn.svg')
+                : require('@/assets/commentReportIconOff.svg')
+            "
+            alt="report"
+          />
+          <span class="detail_icon_text">이 글을 신고하고 싶어요</span>
+        </button>
+      </template>
+      <template v-else>
+        <button
+          class="detail_icon_button detail_delete_button"
+          @click="showDeletePostConfirm = true"
+        >
+          <img src="@/assets/commentDeleteIcon.svg" alt="delete" />
+          <span class="detail_icon_text">삭제하기</span>
+        </button>
+      </template>
+    </div>
         </div>
 
         <div class="comments_list_wrap">
@@ -216,6 +225,29 @@
   <BaseAlertPopup v-if="showDeletePopup" @confirm="showDeletePopup = false">
     <p>댓글이 삭제되었습니다.</p>
   </BaseAlertPopup>
+  <BaseAlertPopup
+    v-if="showDeletePostConfirm"
+    title="게시글을 삭제할까요?"
+    :showTwoButtons="true"
+    confirmText="삭제"
+    cancelText="취소"
+    @confirm="handleDeletePost"
+    @cancel="showDeletePostConfirm = false"
+  >
+    <p>삭제 후 복구할 수 없습니다.</p>
+  </BaseAlertPopup>
+  <BaseAlertPopup
+    v-if="showPostDeletedPopup"
+    @confirm="handlePostDeletedConfirm"
+  >
+    <p>게시글이 삭제되었습니다.</p>
+  </BaseAlertPopup>
+  <BaseAlertPopup
+    v-if="showDeletePostErrorPopup"
+    @confirm="showDeletePostErrorPopup = false"
+  >
+    <p>게시글 삭제에 실패했습니다.<br />다시 시도해주세요.</p>
+  </BaseAlertPopup>
   <BaseAlertPopup v-if="showLikePopup" @confirm="showLikePopup = false">
     <p>추천했습니다!</p>
   </BaseAlertPopup>
@@ -267,7 +299,7 @@ import {
 } from '@/api/comments';
 import { useAuthStore } from '@/store/useAuthStore';
 
-defineEmits(['close']);
+const emit = defineEmits(['close', 'deleted']);
 
 const props = defineProps({
   post: { type: Object, required: true },
@@ -296,6 +328,9 @@ const formatTime = (dateString) => {
 
 const comment = ref('');
 const showDeletePopup = ref(false);
+const showDeletePostConfirm = ref(false);
+const showPostDeletedPopup = ref(false);
+const showDeletePostErrorPopup = ref(false);
 const showLikePopup = ref(false);
 const showCommentPopup = ref(false);
 const showReportSuccesePopup = ref(false);
@@ -313,15 +348,23 @@ const commentsPage = ref(1);
 const likedComments = ref(new Set());
 const auth = useAuthStore();
 const getPostBoardId = (post) => post?.boardId ?? post?.id ?? post?.board?.boardId;
+const getPostAuthorId = (post) =>
+  post?.authorId ??
+  post?.author?.id ??
+  post?.author?.userId ??
+  post?.userId ??
+  post?.writerId;
 
 const isWithdrawn = (item) =>
   item?.authorDeleted || item?.authorAnonymized || item?.authorNickname === '알수없음';
 
 const isPostWithdrawn = computed(() => isWithdrawn(props.post));
 
-const isOwnPost = computed(() =>
-  auth.id != null && props.post?.authorId != null && props.post.authorId === auth.id
-);
+const isOwnPost = computed(() => {
+  if (props.post?.isAuthor === true) return true;
+  const authorId = getPostAuthorId(props.post);
+  return auth.id != null && authorId != null && authorId === auth.id;
+});
 
 const openReportPopup = (type, id) => {
   reportTarget.value = { type, id };
@@ -460,6 +503,29 @@ const handleDeleteComment = async (commentId) => {
   } catch (error) {
     console.error('댓글 삭제 실패:', error);
   }
+};
+
+const handleDeletePost = async () => {
+  try {
+    const boardId = getPostBoardId(props.post);
+    if (!boardId) return;
+    await boardsApi.deleteBoard(boardId);
+    showDeletePostConfirm.value = false;
+    showPostDeletedPopup.value = true;
+    if (auth.isLoggedIn) {
+      await auth.getMyBoards();
+    }
+    emit('deleted', boardId);
+  } catch (error) {
+    console.error('게시글 삭제 실패:', error);
+    showDeletePostConfirm.value = false;
+    showDeletePostErrorPopup.value = true;
+  }
+};
+
+const handlePostDeletedConfirm = () => {
+  showPostDeletedPopup.value = false;
+  emit('close');
 };
 
 const paginatedComments = computed(() => {
@@ -601,6 +667,10 @@ watch(
 .detail_icon_text {
   font-size: 10px;
   color: #00ffc2;
+}
+
+.detail_delete_button .detail_icon_text {
+  color: #ff6b6b;
 }
 
 .comments_list_wrap {
