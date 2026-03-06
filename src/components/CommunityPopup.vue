@@ -428,6 +428,7 @@
         :post="selectedArticleDetail"
         @close="handleArticleDetailClose"
         @deleted="handleArticleDetailDeleted"
+        @updated="handleArticleDetailUpdated"
       />
     </SlidePanel>
   </div>
@@ -849,6 +850,15 @@ const handleArticleDetailClose = () => {
 const handleArticleDetailDeleted = async () => {
   isArticleDetailOpen.value = false;
   selectedArticleDetail.value = null;
+  if (!auth.isLoggedIn) return;
+  try {
+    await auth.getMyBoards();
+  } catch (error) {
+    console.error('내 게시글 새로고침 실패:', error);
+  }
+};
+
+const handleArticleDetailUpdated = async () => {
   if (!auth.isLoggedIn) return;
   try {
     await auth.getMyBoards();

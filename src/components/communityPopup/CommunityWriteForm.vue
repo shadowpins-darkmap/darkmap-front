@@ -26,27 +26,47 @@
       :accept="'image/png, image/jpeg, image/gif'"
       :onChange="handleImage"
     />
-    <button class="submit_button" @click="submitPost">글쓰기</button>
+    <div v-if="isEditMode && existingImageUrl" class="edit_image_tools">
+      <img :src="existingImageUrl" alt="existing image" class="existing_image" />
+      <label class="delete_image_toggle">
+        <input v-model="deleteImage" type="checkbox" />
+        기존 이미지 삭제
+      </label>
+      <p class="edit_image_hint">
+        새 이미지를 선택하면 교체됩니다.
+      </p>
+    </div>
+    <button class="submit_button" @click="submitPost">
+      {{ submitButtonLabel }}
+    </button>
   </div>
 
   <BaseAlertPopup
     v-if="showSuccessAlert"
     @confirm="handleSuccessConfirm"
-    title="글쓰기를 완료했습니다."
+    :title="successTitle"
     confirmText="확인"
   >
     <p>
-      감사합니다! K-다크맵 투어는 시민들의 기억과<br />이야기를 지키는 안전한
-      공간이 되겠습니다.
+      <template v-if="isEditMode">
+        게시글 수정이 완료되었습니다.
+      </template>
+      <template v-else>
+        감사합니다! K-다크맵 투어는 시민들의 기억과<br />이야기를 지키는 안전한
+        공간이 되겠습니다.
+      </template>
     </p>
   </BaseAlertPopup>
   <BaseAlertPopup
     v-if="showErrorAlert"
     @confirm="showErrorAlert = false"
-    title="게시글 작성 실패"
+    :title="errorTitle"
     confirmText="확인"
   >
-    <p>게시글 작성에 실패했습니다.<br />다시 시도해주세요.</p>
+    <p>
+      {{ errorMessageLine1 }}<br />
+      다시 시도해주세요.
+    </p>
   </BaseAlertPopup>
   <BaseAlertPopup
     v-if="showValidationAlert"
@@ -59,7 +79,7 @@
 </template>
 
 <script setup>
-import { ref, defineEmits } from 'vue';
+import { ref, defineEmits, defineProps, watch, computed } from 'vue';
 import BaseDropdown from '@/components/BaseDropdown.vue';
 import BaseInput from '@/components/communityPopup/BaseInput.vue';
 import BaseTextarea from '@/components/communityPopup/BaseTextarea.vue';
@@ -67,22 +87,44 @@ import BaseAlertPopup from '@/components/BaseAlert.vue';
 import { boardsApi } from '@/api/boards';
 import { useAuthStore } from '@/store/useAuthStore';
 
+const props = defineProps({
+  mode: {
+    type: String,
+    default: 'create',
+  },
+  initialPost: {
+    type: Object,
+    default: null,
+  },
+  boardId: {
+    type: [Number, String],
+    default: null,
+  },
+});
+
 const auth = useAuthStore();
-const categories = ['기억', '고민', '질문', '미분류'];
-const selectedCategory = ref(categories[0]);
+const baseCategories = ['기억', '고민', '질문', '미분류'];
+const categories = ref([...baseCategories]);
+const selectedCategory = ref(categories.value[0]);
 const title = ref('');
 const content = ref('');
 const imageFile = ref(null);
 const previewUrl = ref('');
+const existingImageUrl = ref('');
+const deleteImage = ref(false);
 const showSuccessAlert = ref(false);
 const showErrorAlert = ref(false);
 const showValidationAlert = ref(false);
+const emit = defineEmits(['submit', 'close']);
 
 const handleImage = (event) => {
   const file = event.target.files[0];
   if (file && file.size < 10 * 1024 * 1024) {
     imageFile.value = file;
     previewUrl.value = URL.createObjectURL(file);
+    if (isEditMode.value && existingImageUrl.value) {
+      deleteImage.value = true;
+    }
   } else {
     alert('10MB 이하의 이미지만 첨부할 수 있습니다.');
   }
@@ -96,7 +138,127 @@ const handleSuccessConfirm = () => {
   showSuccessAlert.value = false;
   emit('close');
 };
-const emit = defineEmits(['submit', 'close']);
+
+const isEditMode = computed(() => props.mode === 'edit');
+const submitButtonLabel = computed(() =>
+  isEditMode.value ? '수정하기' : '글쓰기',
+);
+const successTitle = computed(() =>
+  isEditMode.value ? '수정을 완료했습니다.' : '글쓰기를 완료했습니다.',
+);
+const errorTitle = computed(() =>
+  isEditMode.value ? '게시글 수정 실패' : '게시글 작성 실패',
+);
+const errorMessageLine1 = computed(() =>
+  isEditMode.value ? '게시글 수정에 실패했습니다.' : '게시글 작성에 실패했습니다.',
+);
+
+const resolveBoardId = () =>
+  props.boardId ??
+  props.initialPost?.boardId ??
+  props.initialPost?.id ??
+  props.initialPost?.board?.boardId;
+
+const ALLOWED_CATEGORY_VALUES = new Set([
+  'general',
+  'notice',
+  'qna',
+  'tech',
+  'free',
+  'review',
+  'incidentreport',
+]);
+
+const LEGACY_TO_ALLOWED = {
+  기억: 'review',
+  고민: 'free',
+  질문: 'qna',
+  미분류: 'general',
+  공지: 'notice',
+  기술: 'tech',
+  자유: 'free',
+  리뷰: 'review',
+  제보: 'incidentreport',
+  MEMORY: 'review',
+  memory: 'review',
+  WORRY: 'free',
+  worry: 'free',
+  ASK: 'qna',
+  ask: 'qna',
+  ETC: 'general',
+  etc: 'general',
+  GENERAL: 'general',
+  general: 'general',
+  NOTICE: 'notice',
+  notice: 'notice',
+  QNA: 'qna',
+  qna: 'qna',
+  TECH: 'tech',
+  tech: 'tech',
+  FREE: 'free',
+  free: 'free',
+  REVIEW: 'review',
+  review: 'review',
+  INCIDENTREPORT: 'incidentreport',
+  incidentreport: 'incidentreport',
+};
+
+const ALLOWED_TO_DISPLAY = {
+  general: '미분류',
+  notice: '공지',
+  qna: '질문',
+  tech: '기술',
+  free: '고민',
+  review: '기억',
+  incidentreport: '제보',
+};
+
+const normalizeCategoryValue = (raw) => {
+  if (!raw) return null;
+  const normalized = LEGACY_TO_ALLOWED[raw] || raw;
+  if (ALLOWED_CATEGORY_VALUES.has(normalized)) {
+    return normalized;
+  }
+  return null;
+};
+
+const toDisplayCategory = (raw) => {
+  if (!raw) return baseCategories[0];
+  const normalized = normalizeCategoryValue(raw);
+  if (normalized && ALLOWED_TO_DISPLAY[normalized]) {
+    return ALLOWED_TO_DISPLAY[normalized];
+  }
+  if (typeof raw === 'string' && baseCategories.includes(raw)) {
+    return raw;
+  }
+  return baseCategories[0];
+};
+
+const applyInitialPost = (post) => {
+  if (!post) return;
+  const nextCategory = toDisplayCategory(post.category);
+  if (!categories.value.includes(nextCategory)) {
+    categories.value = [nextCategory, ...baseCategories];
+  }
+  selectedCategory.value = nextCategory;
+  title.value = post.title || '';
+  content.value = post.content || '';
+  imageFile.value = null;
+  previewUrl.value = '';
+  existingImageUrl.value = post.imageUrl || '';
+  deleteImage.value = false;
+};
+
+watch(
+  () => props.initialPost,
+  (next) => {
+    if (isEditMode.value && next) {
+      applyInitialPost(next);
+    }
+  },
+  { immediate: true },
+);
+
 const submitPost = async () => {
   try {
     if (!title.value.trim() || !content.value.trim()) {
@@ -105,27 +267,46 @@ const submitPost = async () => {
     }
 
     const formData = new FormData();
-    formData.append('category', selectedCategory.value);
+    const normalizedCategory = normalizeCategoryValue(selectedCategory.value);
+    if (normalizedCategory) {
+      formData.append('category', normalizedCategory);
+    }
     formData.append('title', title.value);
     formData.append('content', content.value);
     if (imageFile.value) {
-      formData.append('imageFile', imageFile.value);
+      formData.append(
+        isEditMode.value ? 'newImageFile' : 'imageFile',
+        imageFile.value,
+      );
+    }
+    if (isEditMode.value && deleteImage.value) {
+      formData.append('deleteImage', 'true');
     }
 
-    const response = await boardsApi.createBoard(formData);
+    const targetBoardId = resolveBoardId();
+    if (isEditMode.value && !targetBoardId) {
+      showErrorAlert.value = true;
+      return;
+    }
+
+    const response = isEditMode.value
+      ? await boardsApi.updateBoard(targetBoardId, formData)
+      : await boardsApi.createBoard(formData);
 
     await auth.getMyBoards();
 
-    title.value = '';
-    content.value = '';
-    imageFile.value = null;
-    previewUrl.value = '';
-    selectedCategory.value = categories[0];
+    if (!isEditMode.value) {
+      title.value = '';
+      content.value = '';
+      imageFile.value = null;
+      previewUrl.value = '';
+      selectedCategory.value = categories.value[0];
+    }
 
     showSuccessAlert.value = true;
     emit('submit', response.data);
   } catch (error) {
-    console.error('게시글 작성 실패:', {
+    console.error(isEditMode.value ? '게시글 수정 실패:' : '게시글 작성 실패:', {
       message: error.message,
       status: error.response?.status,
       statusText: error.response?.statusText,
@@ -194,5 +375,35 @@ const submitPost = async () => {
   border: 2px solid #f1cfc8;
   border-radius: 42px;
   align-self: self-end;
+}
+
+.edit_image_tools {
+  margin-top: 8px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #fff;
+  font-size: 12px;
+}
+
+.existing_image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid #f1cfc8;
+}
+
+.delete_image_toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.edit_image_hint {
+  color: #cfc7ff;
+  margin: 0;
 }
 </style>

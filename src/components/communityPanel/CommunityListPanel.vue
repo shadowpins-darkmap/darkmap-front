@@ -142,6 +142,7 @@
       :post="selectedPost"
       @close="isDetailPanelOpen = false"
       @deleted="handlePostDeleted"
+      @updated="handlePostUpdated"
     />
   </SlidePanel>
 </template>
@@ -321,6 +322,10 @@ const handleWriteComplete = () => {
 const handlePostDeleted = () => {
   isDetailPanelOpen.value = false;
   selectedPost.value = null;
+  loadRecentBoards(pageInfo.value.currentPage);
+};
+
+const handlePostUpdated = () => {
   loadRecentBoards(pageInfo.value.currentPage);
 };
 

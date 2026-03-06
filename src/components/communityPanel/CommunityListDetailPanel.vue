@@ -91,6 +91,12 @@
       </template>
       <template v-else>
         <button
+          class="detail_icon_button detail_edit_button"
+          @click="showEditPopup = true"
+        >
+          <span class="detail_icon_text">수정하기</span>
+        </button>
+        <button
           class="detail_icon_button detail_delete_button"
           @click="showDeletePostConfirm = true"
         >
@@ -225,6 +231,15 @@
   <BaseAlertPopup v-if="showDeletePopup" @confirm="showDeletePopup = false">
     <p>댓글이 삭제되었습니다.</p>
   </BaseAlertPopup>
+  <CommonPopup :visible="showEditPopup" @close="showEditPopup = false">
+    <CommunityWriteForm
+      mode="edit"
+      :initialPost="props.post"
+      :boardId="getPostBoardId(props.post)"
+      @submit="handlePostUpdated"
+      @close="showEditPopup = false"
+    />
+  </CommonPopup>
   <BaseAlertPopup
     v-if="showDeletePostConfirm"
     title="게시글을 삭제할까요?"
@@ -289,6 +304,7 @@ import GradientScroll from '@/components/gradientScroll/GradientScroll.vue';
 import BaseAlertPopup from '@/components/BaseAlert.vue';
 import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
 import CommunityPostReportForm from '@/components/communityPopup/CommunityPostReportForm.vue';
+import CommunityWriteForm from '@/components/communityPopup/CommunityWriteForm.vue';
 import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
 import { boardsApi } from '@/api/boards';
 import {
@@ -299,7 +315,7 @@ import {
 } from '@/api/comments';
 import { useAuthStore } from '@/store/useAuthStore';
 
-const emit = defineEmits(['close', 'deleted']);
+const emit = defineEmits(['close', 'deleted', 'updated']);
 
 const props = defineProps({
   post: { type: Object, required: true },
@@ -331,6 +347,7 @@ const showDeletePopup = ref(false);
 const showDeletePostConfirm = ref(false);
 const showPostDeletedPopup = ref(false);
 const showDeletePostErrorPopup = ref(false);
+const showEditPopup = ref(false);
 const showLikePopup = ref(false);
 const showCommentPopup = ref(false);
 const showReportSuccesePopup = ref(false);
@@ -521,6 +538,15 @@ const handleDeletePost = async () => {
     showDeletePostConfirm.value = false;
     showDeletePostErrorPopup.value = true;
   }
+};
+
+const handlePostUpdated = (payload) => {
+  const updated = payload?.data ?? payload ?? null;
+  if (updated && props.post) {
+    Object.assign(props.post, updated);
+  }
+  showEditPopup.value = false;
+  emit('updated', getPostBoardId(props.post));
 };
 
 const handlePostDeletedConfirm = () => {
