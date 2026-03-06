@@ -149,6 +149,12 @@
                   <p class="comment_content">{{ comment.content }}</p>
                 </span>
                 <span v-if="!isWithdrawn(comment)" class="comment_icons">
+                  <img
+                    v-if="comment.isAuthor"
+                    src="@/assets/EditIcon.svg"
+                    alt="edit"
+                    class="comment_edit_icon"
+                  />
                   <button
                     class="icon_button"
                     @click="handleCommentLike(comment.commentId)"
@@ -180,11 +186,6 @@
                     class="icon_button"
                     @click="handleDeleteComment(comment.commentId)"
                   >
-                    <img
-                      src="@/assets/EditIcon.svg"
-                      alt="edit"
-                      class="comment_edit_icon"
-                    />
                     <img src="@/assets/commentDeleteIcon.svg" alt="delete" />
                   </button>
                 </span>
