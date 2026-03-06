@@ -1,4 +1,4 @@
-export const BASE_URL = 'https://darkmap-front-five.vercel.app';
+export const BASE_URL = 'https://kdark.weareshadowpins.com';
 
 export const IS_DEVELOPMENT = process.env.VUE_APP_IS_DEVELOPMENT === 'true';
 export const DEFAULT_API_URL = 'https://api.kdark.weareshadowpins.com';
