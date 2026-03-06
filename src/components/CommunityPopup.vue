@@ -651,27 +651,42 @@ onBeforeUnmount(() => {
 /* ========== Computed ========== */
 const alarmList = computed(() => {
   if (!auth.notifications) return [];
+  const isDeletedAlarm = (item, type) => {
+    if (!item) return true;
+    if (item.deleted || item.isDeleted) return true;
+    if (item.boardDeleted || item.isBoardDeleted) return true;
+    if (type === 'comment' && (item.commentDeleted || item.isCommentDeleted))
+      return true;
+    if (!item.boardId || !item.boardTitle) return true;
+    if (type === 'comment' && !item.content) return true;
+    return false;
+  };
+
   const comments =
-    auth.notifications.newComments?.map((item) => ({
-      id: item.commentId,
-      type: 'comment',
-      nickname: item.commenterNickname,
-      title: item.boardTitle,
-      content: item.content,
-      createdAt: item.createdAt,
-      boardId: item.boardId,
-    })) || [];
+    auth.notifications.newComments
+      ?.filter((item) => !isDeletedAlarm(item, 'comment'))
+      ?.map((item) => ({
+        id: item.commentId,
+        type: 'comment',
+        nickname: item.commenterNickname,
+        title: item.boardTitle,
+        content: item.content,
+        createdAt: item.createdAt,
+        boardId: item.boardId,
+      })) || [];
 
   const likes =
-    auth.notifications.newLikes?.map((item) => ({
-      id: item.likeId,
-      type: 'like',
-      nickname: item.likerNickname,
-      title: item.boardTitle,
-      content: '',
-      createdAt: item.createdAt,
-      boardId: item.boardId,
-    })) || [];
+    auth.notifications.newLikes
+      ?.filter((item) => !isDeletedAlarm(item, 'like'))
+      ?.map((item) => ({
+        id: item.likeId,
+        type: 'like',
+        nickname: item.likerNickname,
+        title: item.boardTitle,
+        content: '',
+        createdAt: item.createdAt,
+        boardId: item.boardId,
+      })) || [];
 
   const result = [...comments, ...likes].sort(
     (a, b) => new Date(b.createdAt) - new Date(a.createdAt),

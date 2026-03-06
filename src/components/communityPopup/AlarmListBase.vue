@@ -27,6 +27,9 @@
     :showTwoButtons="true" cancelText="아니요" confirmText="보러 가기">
     <p>해당 글의 페이지로 이동할까요?</p>
   </BaseAlertPopup>
+  <BaseAlertPopup v-if="showPostDeletedAlert" @confirm="handlePostDeletedConfirm">
+    <p>삭제된 게시글입니다.</p>
+  </BaseAlertPopup>
   <SlidePanel :width="'510px'" :visible="isArticleDetailOpen" @close="isArticleDetailOpen = false">
     <CommunityListDetailPanel :post="selectedArticle" @close="handleListPanelClose"
       @openDetail="isArticleDetailOpen = true" />
@@ -42,6 +45,7 @@ import iconComment from '@/assets/alarmComment.svg';
 import iconLike from '@/assets/alarmLike.svg';
 import iconMarker from '@/assets/alarmMarker.svg';
 import CommunityListDetailPanel from '@/components/communityPanel/CommunityListDetailPanel.vue';
+import { useAuthStore } from '@/store/useAuthStore';
 
 const props = defineProps({
   currentTab: String,
@@ -66,6 +70,8 @@ const getIcon = (tag) => {
 const showMoveToPostAlert = ref(false);
 const selectedArticle = ref(null);
 const isArticleDetailOpen = ref(false);
+const showPostDeletedAlert = ref(false);
+const auth = useAuthStore();
 
 const getListClass = (index) => {
   const globalIndex = (props.currentPage - 1) * props.itemsPerPage + index;
@@ -101,11 +107,37 @@ const handleMoveToPost = async () => {
   } catch (error) {
     console.error('게시글 조회 실패:', error);
     showMoveToPostAlert.value = false;
+    if (error?.response?.status === 404) {
+      if (auth.notifications && selectedArticle.value) {
+        if (selectedArticle.value.type === 'comment') {
+          auth.notifications.newComments =
+            auth.notifications.newComments?.filter(
+              (item) => item.commentId !== selectedArticle.value.id,
+            ) || [];
+        } else if (selectedArticle.value.type === 'like') {
+          auth.notifications.newLikes =
+            auth.notifications.newLikes?.filter(
+              (item) => item.likeId !== selectedArticle.value.id,
+            ) || [];
+        }
+      }
+      showPostDeletedAlert.value = true;
+      if (auth.isLoggedIn) {
+        auth.fetchNotifications().catch((err) => {
+          console.error('알림 API 실패:', err);
+        });
+      }
+    }
   }
 };
 
 const handleCancelMoveToPost = () => {
   showMoveToPostAlert.value = false;
+  selectedArticle.value = null;
+};
+
+const handlePostDeletedConfirm = () => {
+  showPostDeletedAlert.value = false;
   selectedArticle.value = null;
 };
 
