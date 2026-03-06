@@ -94,6 +94,11 @@
           class="detail_icon_button detail_edit_button"
           @click="showEditPopup = true"
         >
+          <img
+            src="@/assets/EditIcon.svg"
+            alt="edit"
+            class="detail_edit_icon"
+          />
           <span class="detail_icon_text">수정하기</span>
         </button>
         <button
@@ -175,6 +180,11 @@
                     class="icon_button"
                     @click="handleDeleteComment(comment.commentId)"
                   >
+                    <img
+                      src="@/assets/EditIcon.svg"
+                      alt="edit"
+                      class="comment_edit_icon"
+                    />
                     <img src="@/assets/commentDeleteIcon.svg" alt="delete" />
                   </button>
                 </span>
@@ -697,6 +707,18 @@ watch(
 
 .detail_delete_button .detail_icon_text {
   color: #00ffc2;
+}
+
+.detail_edit_icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.comment_edit_icon {
+  width: 12px;
+  height: 12px;
+  object-fit: contain;
 }
 
 .comments_list_wrap {
