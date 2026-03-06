@@ -670,7 +670,7 @@ watch(
 }
 
 .detail_delete_button .detail_icon_text {
-  color: #ff6b6b;
+  color: #00ffc2;
 }
 
 .comments_list_wrap {
