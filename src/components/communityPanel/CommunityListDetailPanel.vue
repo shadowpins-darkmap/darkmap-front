@@ -149,12 +149,6 @@
                   <p class="comment_content">{{ comment.content }}</p>
                 </span>
                 <span v-if="!isWithdrawn(comment)" class="comment_icons">
-                  <img
-                    v-if="comment.isAuthor"
-                    src="@/assets/EditIcon.svg"
-                    alt="edit"
-                    class="comment_edit_icon"
-                  />
                   <button
                     class="icon_button"
                     @click="handleCommentLike(comment.commentId)"
@@ -716,11 +710,6 @@ watch(
   object-fit: contain;
 }
 
-.comment_edit_icon {
-  width: 12px;
-  height: 12px;
-  object-fit: contain;
-}
 
 .comments_list_wrap {
   border-top: 1px solid #fff;
