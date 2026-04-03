@@ -28,6 +28,7 @@ const loadPopularBoards = async () => {
         authorNickname: board.authorNickname,
         authorDeleted: board.authorDeleted,
         authorAnonymized: board.authorAnonymized,
+        authorId: board.authorId ?? board.userId ?? board.writerId,
         createdAt: board.createdAt,
         viewCount: board.viewCount || 0,
         likeCount: board.likeCount || 0,
