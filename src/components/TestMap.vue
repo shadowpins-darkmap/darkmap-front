@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, createApp } from 'vue';
+import { ref, onMounted, createApp, watch } from 'vue';
 import { Loader } from '@googlemaps/js-api-loader';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import { storeToRefs } from 'pinia';
@@ -7,12 +7,14 @@ import { useNewsListStore } from '@/store/newsListStore';
 import MarkerPopup from './MarkerPopup.vue';
 import ControlPopup from './ControlPopup.vue';
 import BaseLoader from './BaseLoader.vue';
+import { useTourModeStore } from '@/store/useTourModeStore';
 
 const { loadArticles } = useNewsListStore();
 const { articles, filteredArticles } = storeToRefs(useNewsListStore());
 
 const mapDiv = ref(null);
 const isLoading = ref(false);
+const tourModeStore = useTourModeStore();
 
 const loader = new Loader({
   apiKey: process.env.VUE_APP_GOOGLE_MAP_API_KEY,
@@ -201,6 +203,8 @@ const createMarkersBatched = async (articlesList, batchSize = 50) => {
 // 서울시청 기본 좌표
 const SEOUL_CITY_HALL = { lat: 37.5663, lng: 126.9779 };
 const DEFAULT_ZOOM = 14; // 더 가까운 줌 레벨
+const WORLD_CENTER = { lat: 20, lng: 0 };
+const WORLD_ZOOM = 2.2;
 
 // 사용자 위치 가져오기 (실패 시 서울시청 반환)
 const getUserLocation = () => {
@@ -305,8 +309,8 @@ onMounted(async () => {
 
     // 3. 지도를 즉시 생성하고 표시
     map = new library.Map(mapDiv.value, {
-      center: userLocation,
-      zoom: DEFAULT_ZOOM,
+      center: tourModeStore.isWorldTour ? WORLD_CENTER : userLocation,
+      zoom: tourModeStore.isWorldTour ? WORLD_ZOOM : DEFAULT_ZOOM,
       mapId: '503c7df556477029',
       fullscreenControl: false,
       mapTypeControl: false,
@@ -328,6 +332,22 @@ onMounted(async () => {
     isLoading.value = false;
   }
 });
+
+watch(
+  () => tourModeStore.mode,
+  () => {
+    if (!map) return;
+
+    if (tourModeStore.isWorldTour) {
+      map.setCenter(WORLD_CENTER);
+      map.setZoom(WORLD_ZOOM);
+      return;
+    }
+
+    map.setCenter(SEOUL_CITY_HALL);
+    map.setZoom(DEFAULT_ZOOM);
+  },
+);
 
 const changeFilter = (crimeTypes, selectedSido, dongList) => {
   filteredArticles.value = [];

@@ -7,7 +7,7 @@
         class="BaseFooterlink"
       >
         셰도우 핀즈 </a
-      >의 K-다크맵 투어 Ver.1.1
+      >의 {{ isWorldTour ? 'W-Darkmap Tour Ver.1.1' : 'K-다크맵 투어 Ver.1.1' }}
     </div>
     <div class="BaseFootercontainer">
       <a
@@ -33,6 +33,15 @@
     </div>
   </footer>
 </template>
+
+<script setup>
+defineProps({
+  isWorldTour: {
+    type: Boolean,
+    default: false,
+  },
+});
+</script>
 
 <style lang="scss" scoped>
 .BaseFooter {
