@@ -13,6 +13,7 @@
   height: 130px;
   flex-shrink: 0;
   position: relative;
+  overflow: visible;
 }
 
 .logo img {
@@ -32,6 +33,22 @@
   border: #f1cfc8 2px solid;
   background-color: #6d54ce;
   flex-shrink: 0;
+}
+
+.cyber_flashing_banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 320px;
+  min-height: 40px;
+  border-radius: 16px;
+  border: #f1cfc8 2px solid;
+  background-color: #6d54ce;
+  color: #fff;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 8px 12px;
+  line-height: 1.3;
 }
 .panel_item {
   display: flex;
@@ -344,6 +361,14 @@
   justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
+
+  &.world-mode {
+    justify-content: flex-end;
+
+    .search_button {
+      width: 320px;
+    }
+  }
 }
 .search_button {
   position: relative;

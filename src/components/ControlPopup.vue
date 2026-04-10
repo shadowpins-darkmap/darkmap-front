@@ -1,13 +1,23 @@
 <template>
   <div class="popup_wrap">
-    <!-- 로고 영역 -->
     <div class="logo">
-      <img alt="다크맵 투어 로고" src="../assets/logo.svg" />
+      <img
+        :alt="t('logo.alt')"
+        :src="
+          tourModeStore.isWorldTour
+            ? require('../assets/worldtour-logo.svg')
+            : require('../assets/logo.svg')
+        "
+      />
+      <TourModeToggle />
     </div>
 
-    <!-- 검색 영역  -->
-    <div class="search_wrap">
-      <button class="report_guide_button" @click="showReportGuide = true">
+    <div class="search_wrap" :class="{ 'world-mode': tourModeStore.isWorldTour }">
+      <button
+        v-if="tourModeStore.isKoreaTour"
+        class="report_guide_button"
+        @click="showReportGuide = true"
+      >
         <img
           width="53"
           height="53"
@@ -22,13 +32,11 @@
           alt="검색 아이콘"
           src="../assets/mainSearchIcon.svg"
         />
-        <span class="search_button_text"
-          >내가 사는 동네의 괴롭힘 사건을 한 번 알아보세요.</span
-        >
+        <span class="search_button_text">{{ t('search.placeholder') }}</span>
       </button>
     </div>
-    <!-- 컨텐츠 솔팅  -->
-    <div class="head_panel">
+
+    <div class="head_panel" v-if="tourModeStore.isKoreaTour">
       <button class="panel_item" @click="clickCrimeLogo(0)">
         <span class="crime_logo" style="background: #ffa8a8">
           <img src="../assets/flasherLogo.svg" />
@@ -54,97 +62,118 @@
         <span class="panel_item_text">폭행</span>
       </button>
     </div>
+    <div v-else class="cyber_flashing_banner">
+      <span class="crime_logo" style="background: #ffa8a8">
+        <img src="../assets/flasherLogo.svg" alt="cyber flashing" />
+      </span>
+      <span>{{ t('cyberFlashing.banner') }}</span>
+    </div>
+
     <div class="scroll_area_wrap body_panel_wrap">
       <div class="body_panel scroll_area">
-        <strong class="body_title"><span>테마 투어</span></strong>
-        <div class="select_all">
-          <div @click="clickAllCrime">
-            <img
-              v-if="allCrimeChecked"
-              class="check"
-              src="../assets/checkbox.svg"
-            />
-            <img
-              v-if="!allCrimeChecked"
-              class="check"
-              src="../assets/unchecked.svg"
-            />
-          </div>
-          <div class="checkbox_text">길거리 괴롭힘 전체</div>
-        </div>
-        <div class="checkboxes">
-          <div class="checkbox" v-for="(c, idx) in crimeTypes" v-bind:key="idx">
-            <span class="checkbox_wrap" @click="clickCrimeType(idx)">
+        <template v-if="tourModeStore.isKoreaTour">
+          <strong class="body_title"><span>테마 투어</span></strong>
+          <div class="select_all">
+            <div @click="clickAllCrime">
               <img
-                v-if="c.checked"
+                v-if="allCrimeChecked"
                 class="check"
                 src="../assets/checkbox.svg"
               />
               <img
-                v-if="!c.checked"
+                v-if="!allCrimeChecked"
                 class="check"
                 src="../assets/unchecked.svg"
               />
-            </span>
-            <div class="checkbox_text">{{ c.crimeType }}</div>
+            </div>
+            <div class="checkbox_text">길거리 괴롭힘 전체</div>
           </div>
-        </div>
-        <div class="body_title_wrap">
-          <strong class="body_title"><span>지역 투어</span></strong>
-          <AddressFilter :addressData="addressData" @change="changeGu" />
-        </div>
-        <div class="select_all">
-          <div @click="clickAllDong">
-            <img
-              v-if="allDongChecked"
-              class="check"
-              src="../assets/checkbox.svg"
-            />
-            <img
-              v-if="!allDongChecked"
-              class="check"
-              src="../assets/unchecked.svg"
-            />
+          <div class="checkboxes">
+            <div class="checkbox" v-for="(c, idx) in crimeTypes" :key="idx">
+              <span class="checkbox_wrap" @click="clickCrimeType(idx)">
+                <img
+                  v-if="c.checked"
+                  class="check"
+                  src="../assets/checkbox.svg"
+                />
+                <img
+                  v-if="!c.checked"
+                  class="check"
+                  src="../assets/unchecked.svg"
+                />
+              </span>
+              <div class="checkbox_text">{{ c.crimeType }}</div>
+            </div>
           </div>
-          <div class="checkbox_text">{{ selectGu }} 전체</div>
-        </div>
-        <div class="checkboxes">
-          <div class="checkbox" v-for="(d, idx) in dongList" v-bind:key="idx">
-            <div @click="clickDong(idx)">
+          <div class="body_title_wrap">
+            <strong class="body_title"><span>지역 투어</span></strong>
+            <AddressFilter :addressData="addressData" @change="changeGu" />
+          </div>
+          <div class="select_all">
+            <div @click="clickAllDong">
               <img
-                v-if="d.checked"
+                v-if="allDongChecked"
                 class="check"
                 src="../assets/checkbox.svg"
               />
               <img
-                v-if="!d.checked"
+                v-if="!allDongChecked"
                 class="check"
                 src="../assets/unchecked.svg"
               />
             </div>
-            <div
-              class="checkbox_text"
-              :class="{ 'long-name': d.name.length > 4 }"
-            >
-              {{ d.name }}
+            <div class="checkbox_text">{{ selectGu }} 전체</div>
+          </div>
+          <div class="checkboxes">
+            <div class="checkbox" v-for="(d, idx) in dongList" :key="idx">
+              <div @click="clickDong(idx)">
+                <img
+                  v-if="d.checked"
+                  class="check"
+                  src="../assets/checkbox.svg"
+                />
+                <img
+                  v-if="!d.checked"
+                  class="check"
+                  src="../assets/unchecked.svg"
+                />
+              </div>
+              <div
+                class="checkbox_text"
+                :class="{ 'long-name': d.name.length > 4 }"
+              >
+                {{ d.name }}
+              </div>
             </div>
           </div>
-        </div>
+        </template>
+        <template v-else>
+          <div class="body_title_wrap">
+            <strong class="body_title"><span>{{ t('countries.label') }}</span></strong>
+            <BaseDropdown
+              :list="worldCountries"
+              :selected="selectedCountry"
+              :onSelect="changeCountry"
+            />
+          </div>
+        </template>
+
         <div class="body_title_wrap">
-          <strong class="body_title"><span>뉴스 투어</span></strong>
+          <strong class="body_title"
+            ><span>{{
+              tourModeStore.isKoreaTour ? '뉴스 투어' : 'Cyber Flashing Cases'
+            }}</span></strong
+          >
         </div>
         <div class="news_table_wrap">
           <div class="news_table_line top"></div>
-          <div
-            v-for="(tArticle, i) in tableArticles"
-            :key="i"
-            class="article_table"
-          >
-            <div class="table_position">
-              {{ tArticle.address || '-' }}
-            </div>
-            <div class="table_title" @click="clickTitle(tArticle.url)">
-              {{ tArticle.title || '-' }}
+          <div v-for="(row, i) in currentRows" :key="i" class="article_table">
+            <div class="table_position">{{ row.address || row.date || '-' }}</div>
+            <div
+              class="table_title"
+              @click="row.url ? clickTitle(row.url) : undefined"
+            >
+              {{ row.title || row.summary || '-' }}
             </div>
           </div>
           <div class="news_table_line bottom"></div>
@@ -169,12 +198,11 @@
           </button>
         </div>
         <div class="footer">
-          <BaseFooter />
+          <BaseFooter :is-world-tour="tourModeStore.isWorldTour" />
         </div>
       </div>
     </div>
   </div>
-  <!-- 검색창 SlidePanel -->
   <SlidePanel
     :width="'510px'"
     :visible="isListPanelOpen"
@@ -184,7 +212,6 @@
   >
     <SearchListPanel @close="handleListPanelClose" />
   </SlidePanel>
-  <!-- 팝업 -->
   <ReportGuidePopup v-if="showReportGuide" @close="showReportGuide = false" />
 </template>
 
@@ -199,9 +226,17 @@ import BaseFooter from '@/components/BaseFooter.vue';
 import ReportGuidePopup from '@/components/searchArea/ReportGuidePopup.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
 import SearchListPanel from '@/components/searchArea/SearchListPanel.vue';
+import BaseDropdown from './BaseDropdown.vue';
+import TourModeToggle from './TourModeToggle.vue';
+import { useTourModeStore } from '@/store/useTourModeStore';
+import { useTranslation } from '@/composables/useTranslation';
+import { cyberFlashingCases, worldCountries } from '@/constant/worldTourData';
 
 const showReportGuide = ref(false);
 const isListPanelOpen = ref(false);
+const selectedCountry = ref(worldCountries[0]);
+const tourModeStore = useTourModeStore();
+const { t } = useTranslation();
 
 const handleListPanelClose = () => {
   isListPanelOpen.value = false;
@@ -221,29 +256,59 @@ const tableArticles = ref([
   { title: '', address: '', url: '' },
   { title: '', address: '', url: '' },
 ]);
-const pageNumbers = ref([1]);
-const totalPages = computed(
-  () => parseInt(filteredArticles.value.length / 4) + 1,
-);
 const currentPage = ref(1);
+const pageNumbers = ref([1]);
+
+const worldRows = computed(
+  () => cyberFlashingCases[selectedCountry.value] || cyberFlashingCases.England,
+);
+
+const rowSource = computed(() => {
+  return tourModeStore.isKoreaTour ? filteredArticles.value : worldRows.value;
+});
+
+const totalPages = computed(() => {
+  const pageCount = Math.ceil(rowSource.value.length / 4);
+  return pageCount > 0 ? pageCount : 1;
+});
 
 watch(filteredArticles, () => {
-  initPage();
+  if (tourModeStore.isKoreaTour) {
+    initPage();
+  }
+});
+watch(
+  () => tourModeStore.mode,
+  () => {
+    initPage();
+  },
+);
+watch(selectedCountry, () => {
+  if (tourModeStore.isWorldTour) {
+    initPage();
+  }
 });
 
 const pageChange = (p) => {
   currentPage.value = p;
 
-  // tableArticles를 현재 페이지에 맞춰서 변경
   for (let i = 0; i < 4; i++) {
-    if ((p - 1) * 4 + i < filteredArticles.value.length) {
-      const tableArticle = filteredArticles.value[(p - 1) * 4 + i];
-      const address = tableArticle.address.split(' ').slice(0, 2).join(' ');
-      tableArticles.value[i] = {
-        title: tableArticle.title,
-        address: address,
-        url: tableArticle.url,
-      };
+    if ((p - 1) * 4 + i < rowSource.value.length) {
+      const row = rowSource.value[(p - 1) * 4 + i];
+      if (tourModeStore.isKoreaTour) {
+        const address = row.address.split(' ').slice(0, 2).join(' ');
+        tableArticles.value[i] = {
+          title: row.title,
+          address,
+          url: row.url,
+        };
+      } else {
+        tableArticles.value[i] = {
+          date: row.date,
+          summary: row.summary,
+          url: '',
+        };
+      }
     } else {
       tableArticles.value[i] = { title: '-', address: '-', url: '-' };
     }
@@ -265,6 +330,10 @@ const chagnePageNumbers = () => {
 const initPage = () => {
   pageChange(1);
   chagnePageNumbers();
+};
+
+const changeCountry = (country) => {
+  selectedCountry.value = country;
 };
 
 const clickPrev = () => {
@@ -316,6 +385,7 @@ const allCrimeChecked = computed(() => {
 });
 
 const clickAllCrime = () => {
+  if (tourModeStore.isWorldTour) return;
   if (allCrimeChecked.value) {
     crimeTypes.value.forEach((c) => {
       c.checked = false;
@@ -330,6 +400,7 @@ const clickAllCrime = () => {
 };
 
 const clickCrimeType = (idx) => {
+  if (tourModeStore.isWorldTour) return;
   // 체크 박스 연동
   crimeTypes.value[idx].checked = !crimeTypes.value[idx].checked;
   // 필터링 로직 넣기
@@ -366,6 +437,7 @@ const allDongChecked = computed(() => {
 });
 
 const clickCrimeLogo = (idx) => {
+  if (tourModeStore.isWorldTour) return;
   for (let i = 0; i < crimeTypes.value.length; i++) {
     crimeTypes.value[i].checked = idx === i;
   }
@@ -373,6 +445,7 @@ const clickCrimeLogo = (idx) => {
 };
 
 const clickAllDong = () => {
+  if (tourModeStore.isWorldTour) return;
   const newCheckedState = !allDongChecked.value;
   dongList.value.forEach((dong) => {
     dong.checked = newCheckedState;
@@ -382,8 +455,13 @@ const clickAllDong = () => {
 };
 
 const clickDong = (idx) => {
+  if (tourModeStore.isWorldTour) return;
   dongList.value[idx].checked = !dongList.value[idx].checked;
   // 필터링 로직 넣기
   emits('changeFilter', crimeTypes.value, selectGu.value, dongList.value);
 };
+
+const currentRows = computed(() => tableArticles.value);
+
+initPage();
 </script>
