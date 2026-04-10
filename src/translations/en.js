@@ -1,12 +1,12 @@
 export default {
   logo: {
-    alt: 'Dark Map Tour Logo',
+    alt: 'W-Darkmap Tour Logo',
   },
   search: {
-    placeholder: 'Find cyber flashing incidents around your area.',
+    placeholder: 'Find cyberflashing incidents around your area.',
   },
   cyberFlashing: {
-    banner: 'Cyber Flashing is Everywhere, All Over The World',
+    banner: 'Cyberflashing is Everywhere, All Over The World',
   },
   countries: {
     label: 'Country',
@@ -16,12 +16,12 @@ export default {
     southKorea: 'South Korea',
   },
   faq: {
-    shadowPins: 'What kind of activities does Shadow Pins do?',
-    cyberFlashing: 'What is cyber flashing?',
-    legal: 'How do different countries handle cyber flashing legally?',
+    shadowPins: 'What kind of activities does ShadowPins do?',
+    cyberFlashing: 'What is cyberflashing?',
+    legal: 'How do different countries handle cyberflashing legally?',
   },
   worldTour: {
-    title: 'W-Dark Map Tour Log',
+    title: 'W-Darkmap Tour Log',
     countLabel: 'There are {n} punishment cases',
   },
 };
