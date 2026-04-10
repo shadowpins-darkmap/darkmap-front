@@ -1,6 +1,9 @@
 <template>
   <div class="BaseCommunity">
-    <section class="BaseCommunity__popup base" v-if="!showAccountSection">
+    <section
+      class="BaseCommunity__popup base"
+      v-if="tourModeStore.isKoreaTour && !showAccountSection"
+    >
       <!-- 아코디언 타이틀 클릭시 토글 -->
       <button class="accordion__header" @click="toggleSection('mypage')">
         <img
@@ -300,14 +303,17 @@
         </div>
       </div>
     </section>
-    <section class="BaseCommunity__popup base" v-if="showAccountSection">
+    <section
+      class="BaseCommunity__popup base"
+      v-if="tourModeStore.isKoreaTour && showAccountSection"
+    >
       <AccountBase
         @back="showAccountSection = false"
         @open-terms-panel="isTermsPanelOpen = true"
       />
     </section>
     <!-- 다크맵 투어 일지 (고정 데이터 로그인이 필요없음) -->
-    <section class="BaseCommunity__popup">
+    <section class="BaseCommunity__popup" v-if="tourModeStore.isKoreaTour">
       <!-- 아코디언 타이틀 클릭시 토글 -->
       <button class="accordion__header" @click="toggleSection('tour')">
         <strong class="accordion__title">K-다크맵 투어 일지</strong>
@@ -366,6 +372,14 @@
       </div>
     </section>
 
+    <section class="BaseCommunity__popup world" v-if="tourModeStore.isWorldTour">
+      <WorldTourInfoPanel
+        :selected-country="selectedWorldCountry"
+        @change-country="selectedWorldCountry = $event"
+        @open-faq="openWorldFaq"
+      />
+    </section>
+
     <!-- SlidePanels -->
     <!--  길거리 괴롭힘이란게 뭔가요? SlidePanel -->
     <SlidePanel
@@ -390,6 +404,20 @@
         @close="isPanel2depsOpen = false"
         :detailType="selectedDetailType"
       />
+    </SlidePanel>
+
+    <SlidePanel
+      :width="'510px'"
+      :visible="isWorldFaqPanelOpen"
+      @close="isWorldFaqPanelOpen = false"
+    >
+      <section class="WorldFaqPanel">
+        <button class="WorldFaqPanel__close" @click="isWorldFaqPanelOpen = false">
+          닫기
+        </button>
+        <strong class="WorldFaqPanel__title">{{ currentWorldFaq?.title }}</strong>
+        <p class="WorldFaqPanel__body">{{ currentWorldFaq?.body }}</p>
+      </section>
     </SlidePanel>
 
     <!-- 광장 커뮤니티  SlidePanel -->
@@ -510,16 +538,22 @@ import AlarmListBase from '@/components/communityPopup/AlarmListBase.vue';
 import AccountBase from '@/components/communityPopup/AccountBase.vue';
 import TabButtons from '@/components/tabButton/TabButtons.vue';
 import EmptyData from '@/components/EmptyData.vue';
+import WorldTourInfoPanel from '@/components/worldTour/WorldTourInfoPanel.vue';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useStatsStore } from '@/store/useStatsStore';
+import { useTourModeStore } from '@/store/useTourModeStore';
 import iconComment from '@/assets/alarmComment.svg';
 import iconLike from '@/assets/alarmLike.svg';
 import iconMarker from '@/assets/alarmMarker.svg';
 import { RECENT_LOGIN_INFO_KEY } from '@/constant/storage';
+import { worldFaqContent, worldCountries } from '@/constant/worldTourData';
+import { useTranslation } from '@/composables/useTranslation';
 
 const auth = useAuthStore();
 const statsStore = useStatsStore();
+const tourModeStore = useTourModeStore();
 const router = useRouter();
+const { locale } = useTranslation();
 
 /* --------- UI 상태 --------- */
 const tabOptions = ['알림', '내 게시글', '내 댓글'];
@@ -555,6 +589,9 @@ const isListPanel2depsOpen = ref(false);
 const isTermsPanelOpen = ref(false);
 const isArticleDetailOpen = ref(false);
 const selectedArticleDetail = ref(null);
+const isWorldFaqPanelOpen = ref(false);
+const selectedWorldFaqKey = ref('shadowPins');
+const selectedWorldCountry = ref(worldCountries[0]);
 
 /* --------- 아코디언 / 인삿말 --------- */
 const openSection = ref('mypage');
@@ -825,6 +862,11 @@ const handlePanelClose = () => {
   isPanel2depsOpen.value = false;
 };
 
+const openWorldFaq = (key) => {
+  selectedWorldFaqKey.value = key;
+  isWorldFaqPanelOpen.value = true;
+};
+
 const handleCarouselClick = (card) => {
   if (!auth.isLoggedIn) {
     showLoginAlert.value = true;
@@ -955,6 +997,27 @@ const handleMarketingSkip = () => {
   loginUserData.value.marketingAgreed = false;
   showMarketingStep.value = false;
 };
+
+const currentWorldFaq = computed(() => {
+  const source = worldFaqContent[selectedWorldFaqKey.value] || worldFaqContent.shadowPins;
+  if (locale.value === 'ko') {
+    return {
+      title:
+        source.title === 'What kind of activities does Shadow Pins do?'
+          ? '셰도우 핀즈는 어떤 활동을 하는 단체인가요?'
+          : source.title === 'What is cyber flashing?'
+            ? '사이버플래싱은 무엇인가요?'
+            : '각 국가에서는 사이버플래싱을 어떻게 법에서 다루고 있나요?',
+      body:
+        source.title === 'What kind of activities does Shadow Pins do?'
+          ? '셰도우 핀즈는 길거리 및 디지털 괴롭힘 문제를 데이터로 기록하고 지도 위에 시각화하는 시민 프로젝트입니다. 제보와 공공 데이터를 바탕으로 위험 패턴을 알리고, 예방을 위한 교육 콘텐츠를 제공합니다.'
+          : source.title === 'What is cyber flashing?'
+            ? '사이버플래싱은 상대의 동의 없이 성적 이미지 또는 영상을 전송하는 행위를 말합니다. 메신저, 근거리 파일 전송, SNS 등 다양한 채널에서 발생하며 피해자에게 공포와 수치심, 장기적인 정신적 피해를 남길 수 있습니다.'
+            : '국가별로 입법 수준은 다르지만, 최근에는 성적 괴롭힘 또는 성폭력 관련 법률로 처벌하는 추세가 확대되고 있습니다. 반복성, 고의성, 피해 규모에 따라 벌금형부터 실형까지 선고될 수 있습니다.',
+    };
+  }
+  return source;
+});
 </script>
 
 <style scoped lang="scss">
@@ -973,6 +1036,13 @@ const handleMarketingSkip = () => {
     border: solid 2px #f1cfc8;
     background-color: #6d54ce;
     border-radius: 16px;
+  }
+
+  &__popup.world {
+    padding: 0;
+    background: transparent;
+    border: 0;
+    width: 320px;
   }
 
   // 알람
@@ -1348,5 +1418,34 @@ const handleMarketingSkip = () => {
     width: 10px;
     height: 10px;
   }
+}
+
+.WorldFaqPanel {
+  padding: 24px 20px;
+  background: #020409;
+  min-height: 100%;
+  color: #fff;
+}
+
+.WorldFaqPanel__close {
+  color: #99fbe0;
+  text-decoration: underline;
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+
+.WorldFaqPanel__title {
+  display: block;
+  font-size: 28px;
+  line-height: 1.3;
+  margin-bottom: 14px;
+  color: #e8ecff;
+}
+
+.WorldFaqPanel__body {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #d5daef;
+  word-break: keep-all;
 }
 </style>
