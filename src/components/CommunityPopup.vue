@@ -609,6 +609,43 @@
       </div>
     </SlidePanel>
 
+    <!-- World Cases 처벌 사례 SlidePanel -->
+    <SlidePanel
+      :width="'380px'"
+      :visible="isWorldCasesPanelOpen"
+      @close="isWorldCasesPanelOpen = false"
+    >
+      <section class="WorldCasesPanel">
+        <button
+          class="WorldCasesPanel__close"
+          @click="isWorldCasesPanelOpen = false"
+        >
+          <img
+            src="@/assets/sliderCloseIcon.svg"
+            alt="slider close icon"
+            width="36"
+            height="36"
+          />
+        </button>
+        <strong class="WorldCasesPanel__title">{{
+          t('worldTour.countLabel', { n: currentWorldCasesCount })
+        }}</strong>
+        <CountryTabs
+          :countries="worldCountries"
+          :selected-country="selectedWorldCasesCountry"
+          @change="changeWorldCasesCountry"
+        />
+        <div class="WorldCasesPanel__list">
+          <CyberFlashingCaseCard
+            v-for="item in currentWorldCases"
+            :key="`${item.date}-${item.summary}`"
+            :date="item.date"
+            :summary="item.summary"
+          />
+        </div>
+      </section>
+    </SlidePanel>
+
     <!-- 광장 커뮤니티  SlidePanel -->
     <SlidePanel
       :width="'380px'"
@@ -735,14 +772,20 @@ import iconComment from '@/assets/alarmComment.svg';
 import iconLike from '@/assets/alarmLike.svg';
 import iconMarker from '@/assets/alarmMarker.svg';
 import { RECENT_LOGIN_INFO_KEY } from '@/constant/storage';
-import { worldFaqContent, cyberFlashingCases } from '@/constant/worldTourData';
+import {
+  worldFaqContent,
+  cyberFlashingCases,
+  worldCountries,
+} from '@/constant/worldTourData';
 import { useTranslation } from '@/composables/useTranslation';
+import CountryTabs from '@/components/worldTour/CountryTabs.vue';
+import CyberFlashingCaseCard from '@/components/worldTour/CyberFlashingCaseCard.vue';
 
 const auth = useAuthStore();
 const statsStore = useStatsStore();
 const tourModeStore = useTourModeStore();
 const router = useRouter();
-const { locale } = useTranslation();
+const { locale, t } = useTranslation();
 
 /* --------- UI 상태 --------- */
 const tabOptions = ['알림', '내 게시글', '내 댓글'];
@@ -782,12 +825,21 @@ const isWorldFaqPanelOpen = ref(false);
 const selectedWorldFaqKey = ref('shadowPins');
 const isWorldLegalDetailOpen = ref(false);
 const selectedWorldLegalCountry = ref('England');
+const isWorldCasesPanelOpen = ref(false);
+const selectedWorldCasesCountry = ref('England');
 
 /* --------- 아코디언 / 인삿말 --------- */
-const openSection = ref('mypage');
+const openSection = ref(tourModeStore.isWorldTour ? 'world-welcome' : 'mypage');
 const toggleSection = (section) => {
   openSection.value = openSection.value === section ? null : section;
 };
+
+watch(
+  () => tourModeStore.isWorldTour,
+  (isWorld) => {
+    openSection.value = isWorld ? 'world-welcome' : 'mypage';
+  },
+);
 
 const currentBubbleIndex = ref(0);
 let bubbleTimer = null;
@@ -1058,8 +1110,21 @@ const openWorldFaq = (key) => {
 };
 
 const openWorldCases = () => {
-  isListPanelOpen.value = true;
+  selectedWorldCasesCountry.value = 'England';
+  isWorldCasesPanelOpen.value = true;
 };
+
+const changeWorldCasesCountry = (country) => {
+  selectedWorldCasesCountry.value = country;
+};
+
+const currentWorldCases = computed(
+  () => cyberFlashingCases[selectedWorldCasesCountry.value] || [],
+);
+
+const currentWorldCasesCount = computed(
+  () => currentWorldCases.value.length,
+);
 
 const openWorldLegalDetail = (countryKey) => {
   selectedWorldLegalCountry.value = countryKey;
@@ -1802,5 +1867,39 @@ const currentWorldLegalCases = computed(
   color: #fff;
   line-height: 1.6;
   word-break: keep-all;
+}
+
+.WorldCasesPanel {
+  background-color: #0f1419;
+  padding: 28px 22px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.WorldCasesPanel__close {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.WorldCasesPanel__title {
+  display: block;
+  font-weight: bold;
+  font-size: 20px;
+  color: #00ffc2;
+  padding-top: 24px;
+  padding-bottom: 16px;
+  word-break: keep-all;
+  line-height: 1.3;
+}
+
+.WorldCasesPanel__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 24px;
+  overflow-y: auto;
+  flex: 1;
 }
 </style>
