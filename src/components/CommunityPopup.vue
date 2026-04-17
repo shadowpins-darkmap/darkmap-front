@@ -488,7 +488,7 @@
     <!-- SlidePanels -->
     <!--  길거리 괴롭힘이란게 뭔가요? SlidePanel -->
     <SlidePanel
-      :width="'510px'"
+      :width="'450px'"
       :visible="isPanelOpen"
       @close="isPanelOpen = false"
     >
@@ -500,7 +500,7 @@
     </SlidePanel>
 
     <SlidePanel
-      :width="'510px'"
+      :width="'450px'"
       :visible="isPanel2depsOpen"
       :right="'510px'"
       @close="isPanel2depsOpen = false"
@@ -512,7 +512,7 @@
     </SlidePanel>
 
     <SlidePanel
-      :width="'510px'"
+      :width="'450px'"
       :visible="isWorldFaqPanelOpen"
       @close="isWorldFaqPanelOpen = false"
     >
@@ -539,6 +539,71 @@
             direction="vertical"
           >
             <p class="WorldFaqPanel__body">{{ currentWorldFaq?.body }}</p>
+          </GradientScroll>
+        </div>
+        <template v-if="currentWorldFaq?.list">
+          <strong class="WorldFaqPanel__sub_title">{{
+            currentWorldFaq.subTitle
+          }}</strong>
+          <ol class="WorldFaqPanel__list">
+            <li v-for="(name, i) in currentWorldFaq.list" :key="i">
+              <button
+                class="WorldFaqPanel__list_button"
+                @click="openWorldLegalDetail(currentWorldFaq.listKeys[i])"
+              >
+                <span>{{ i + 1 }}. {{ name }}</span>
+                <img
+                  src="@/assets/sliderGoDetailIcon.svg"
+                  class="WorldFaqPanel__list_icon"
+                  alt="slider arrow icon"
+                  width="16"
+                  height="16"
+                />
+              </button>
+            </li>
+          </ol>
+        </template>
+      </section>
+    </SlidePanel>
+
+    <!-- World Legal 국가별 세부 SlidePanel -->
+    <SlidePanel
+      :width="'510px'"
+      :visible="isWorldLegalDetailOpen"
+      @close="isWorldLegalDetailOpen = false"
+    >
+      <section class="WorldFaqPanel">
+        <button
+          class="WorldFaqPanel__close"
+          @click="isWorldLegalDetailOpen = false"
+        >
+          <img
+            src="@/assets/sliderCloseIcon.svg"
+            alt="slider close icon"
+            width="36"
+            height="36"
+          />
+        </button>
+        <strong class="WorldFaqPanel__title">{{
+          worldLegalDetailCountryLabel
+        }}</strong>
+        <div class="WorldFaqPanel__contents_wrap">
+          <GradientScroll
+            :width="'100%'"
+            :height="'100%'"
+            gradient-color="rgba(0,0,0,1)"
+            direction="vertical"
+          >
+            <ul class="WorldFaqPanel__case_list">
+              <li
+                v-for="(item, i) in currentWorldLegalCases"
+                :key="i"
+                class="WorldFaqPanel__case_item"
+              >
+                <span class="WorldFaqPanel__case_date">{{ item.date }}</span>
+                <p class="WorldFaqPanel__case_summary">{{ item.summary }}</p>
+              </li>
+            </ul>
           </GradientScroll>
         </div>
       </section>
@@ -715,6 +780,8 @@ const isArticleDetailOpen = ref(false);
 const selectedArticleDetail = ref(null);
 const isWorldFaqPanelOpen = ref(false);
 const selectedWorldFaqKey = ref('shadowPins');
+const isWorldLegalDetailOpen = ref(false);
+const selectedWorldLegalCountry = ref('England');
 
 /* --------- 아코디언 / 인삿말 --------- */
 const openSection = ref('mypage');
@@ -994,6 +1061,11 @@ const openWorldCases = () => {
   isListPanelOpen.value = true;
 };
 
+const openWorldLegalDetail = (countryKey) => {
+  selectedWorldLegalCountry.value = countryKey;
+  isWorldLegalDetailOpen.value = true;
+};
+
 const worldTotalCount = computed(() =>
   Object.values(cyberFlashingCases).reduce(
     (count, cases) => count + (cases?.length || 0),
@@ -1135,6 +1207,15 @@ const handleMarketingSkip = () => {
 const currentWorldFaq = computed(() => {
   const source =
     worldFaqContent[selectedWorldFaqKey.value] || worldFaqContent.shadowPins;
+  const isLegal = selectedWorldFaqKey.value === 'legal';
+  const legalExtra = isLegal
+    ? {
+        subTitle: worldFaqContent.legal.subTitle,
+        list: worldFaqContent.legal.list,
+        listKeys: worldFaqContent.legal.listKeys,
+      }
+    : {};
+
   if (locale.value === 'ko') {
     return {
       title:
@@ -1149,10 +1230,28 @@ const currentWorldFaq = computed(() => {
           : source.title === 'What is cyber flashing?'
             ? '사이버플래싱은 상대의 동의 없이 성적 이미지 또는 영상을 전송하는 행위를 말합니다. 메신저, 근거리 파일 전송, SNS 등 다양한 채널에서 발생하며 피해자에게 공포와 수치심, 장기적인 정신적 피해를 남길 수 있습니다.'
             : '국가별로 입법 수준은 다르지만, 최근에는 성적 괴롭힘 또는 성폭력 관련 법률로 처벌하는 추세가 확대되고 있습니다. 반복성, 고의성, 피해 규모에 따라 벌금형부터 실형까지 선고될 수 있습니다.',
+      ...legalExtra,
     };
   }
-  return source;
+  return { ...source, ...legalExtra };
 });
+
+const countryLabelMap = {
+  England: '영국',
+  USA: '미국',
+  Austria: '오스트리아',
+  'South Korea': '한국',
+};
+
+const worldLegalDetailCountryLabel = computed(
+  () =>
+    countryLabelMap[selectedWorldLegalCountry.value] ||
+    selectedWorldLegalCountry.value,
+);
+
+const currentWorldLegalCases = computed(
+  () => cyberFlashingCases[selectedWorldLegalCountry.value] || [],
+);
 </script>
 
 <style scoped lang="scss">
@@ -1612,5 +1711,62 @@ const currentWorldFaq = computed(() => {
   line-height: 1.8;
   word-break: keep-all;
   white-space: pre-line;
+}
+
+.WorldFaqPanel__sub_title {
+  color: #fff;
+  font-size: 22px;
+  font-weight: bold;
+  padding-bottom: 20px;
+  padding-top: 40px;
+}
+
+.WorldFaqPanel__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.WorldFaqPanel__list_button {
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  > span {
+    padding-top: 4px;
+  }
+}
+
+.WorldFaqPanel__list_icon {
+  margin-left: 5px;
+}
+
+.WorldFaqPanel__case_list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 20px;
+}
+
+.WorldFaqPanel__case_item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.WorldFaqPanel__case_date {
+  font-size: 12px;
+  color: #8270cb;
+  font-weight: bold;
+}
+
+.WorldFaqPanel__case_summary {
+  font-size: 15px;
+  color: #fff;
+  line-height: 1.6;
+  word-break: keep-all;
 }
 </style>

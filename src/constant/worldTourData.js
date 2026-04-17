@@ -73,7 +73,10 @@ export const worldFaqContent = {
     body: 'Cyber flashing is the act of sending sexually explicit images or videos to someone without consent, often through messages, nearby sharing, or social platforms. It causes fear, shame, and emotional harm to victims.',
   },
   legal: {
-    title: 'How do different countries handle cyber flashing legally?',
-    body: 'Many countries now treat cyber flashing as a punishable sexual harassment offense. Penalties vary by jurisdiction, but can include fines, criminal records, and imprisonment depending on severity and repeat conduct.',
+    title: '각 국가에서는 사이버플래싱을 어떻게 법에서 다루고 있나요?',
+    body: '많은 국가들이 사이버플래싱을 처벌 가능한 성희롱 범죄로 규정하고 있습니다. 처벌 수위는 관할 지역에 따라 다르지만, 위반 정도와 재범 여부에 따라 벌금, 전과 기록, 징역형이 부과될 수 있습니다.',
+    subTitle: '국가별 처벌 사례',
+    list: ['영국', '미국', '오스트리아', '한국'],
+    listKeys: ['England', 'USA', 'Austria', 'South Korea'],
   },
 };
