@@ -195,9 +195,6 @@
             <img style="width: 5px" src="../assets/rightArrow.svg" />
           </button>
         </div>
-        <div class="footer">
-          <BaseFooter :is-world-tour="tourModeStore.isWorldTour" />
-        </div>
       </div>
     </div>
   </div>
@@ -221,7 +218,6 @@ import AddressFilter from './AddressFilter.vue';
 import addressData from '@/constant/addresses.json';
 import '@/styles/ControlPopup.scss';
 import { ref, computed, defineEmits, watch } from 'vue';
-import BaseFooter from '@/components/BaseFooter.vue';
 import ReportGuidePopup from '@/components/searchArea/ReportGuidePopup.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
 import SearchListPanel from '@/components/searchArea/SearchListPanel.vue';
@@ -249,12 +245,11 @@ const clickTitle = (url) => {
 
 const { filteredArticles } = storeToRefs(useNewsListStore());
 
-const tableArticles = ref([
-  { title: '', address: '', url: '' },
-  { title: '', address: '', url: '' },
-  { title: '', address: '', url: '' },
-  { title: '', address: '', url: '' },
-]);
+const PAGE_SIZE = 9;
+
+const tableArticles = ref(
+  Array(PAGE_SIZE).fill(null).map(() => ({ title: '', address: '', url: '' })),
+);
 const currentPage = ref(1);
 const pageNumbers = ref([1]);
 
@@ -267,7 +262,7 @@ const rowSource = computed(() => {
 });
 
 const totalPages = computed(() => {
-  const pageCount = Math.ceil(rowSource.value.length / 4);
+  const pageCount = Math.ceil(rowSource.value.length / PAGE_SIZE);
   return pageCount > 0 ? pageCount : 1;
 });
 
@@ -291,9 +286,9 @@ watch(selectedCountry, () => {
 const pageChange = (p) => {
   currentPage.value = p;
 
-  for (let i = 0; i < 4; i++) {
-    if ((p - 1) * 4 + i < rowSource.value.length) {
-      const row = rowSource.value[(p - 1) * 4 + i];
+  for (let i = 0; i < PAGE_SIZE; i++) {
+    if ((p - 1) * PAGE_SIZE + i < rowSource.value.length) {
+      const row = rowSource.value[(p - 1) * PAGE_SIZE + i];
       if (tourModeStore.isKoreaTour) {
         const address = row.address.split(' ').slice(0, 2).join(' ');
         tableArticles.value[i] = {
@@ -315,15 +310,11 @@ const pageChange = (p) => {
 };
 
 const chagnePageNumbers = () => {
-  if (totalPages.value >= currentPage.value + 4) {
-    pageNumbers.value = Array(5)
-      .fill()
-      .map((v, i) => currentPage.value + i);
-  } else {
-    pageNumbers.value = Array(totalPages.value - currentPage.value + 1)
-      .fill()
-      .map((v, i) => currentPage.value + i);
-  }
+  const groupStart = Math.floor((currentPage.value - 1) / 5) * 5 + 1;
+  const groupEnd = Math.min(groupStart + 4, totalPages.value);
+  pageNumbers.value = Array(groupEnd - groupStart + 1)
+    .fill()
+    .map((_, i) => groupStart + i);
 };
 
 const initPage = () => {
@@ -336,27 +327,17 @@ const changeCountry = (country) => {
 };
 
 const clickPrev = () => {
-  // 이전 클릭 불가능 시 바로 return
-  if (parseInt((currentPage.value - 1) / 5) === 0) {
-    return;
-  }
-
-  // 이전 버튼 클릭
-  pageChange(parseInt((currentPage.value - 6) / 5) * 5 + 1);
+  const currentGroup = Math.floor((currentPage.value - 1) / 5);
+  if (currentGroup === 0) return;
+  pageChange(currentGroup * 5 - 4);
   chagnePageNumbers();
 };
 
 const clickNext = () => {
-  //다음 클릭 불가능 시 바로 return
-  if (
-    parseInt((currentPage.value - 1) / 5) ===
-    parseInt((totalPages.value - 1) / 5)
-  ) {
-    return;
-  }
-
-  // 다음 버튼 클릭
-  pageChange(parseInt((currentPage.value + 4) / 5) * 5 + 1);
+  const currentGroup = Math.floor((currentPage.value - 1) / 5);
+  const lastGroup = Math.floor((totalPages.value - 1) / 5);
+  if (currentGroup === lastGroup) return;
+  pageChange((currentGroup + 1) * 5 + 1);
   chagnePageNumbers();
 };
 
