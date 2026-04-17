@@ -514,12 +514,12 @@
     <SlidePanel
       :width="'380px'"
       :visible="isWorldFaqPanelOpen"
-      @close="isWorldFaqPanelOpen = false"
+      @close="closeWorldFaqPanel"
     >
       <section class="WorldFaqPanel">
         <button
           class="WorldFaqPanel__close"
-          @click="isWorldFaqPanelOpen = false"
+          @click="closeWorldFaqPanel"
         >
           <img
             src="@/assets/sliderCloseIcon.svg"
@@ -1064,6 +1064,11 @@ const openWorldCases = () => {
 const openWorldLegalDetail = (countryKey) => {
   selectedWorldLegalCountry.value = countryKey;
   isWorldLegalDetailOpen.value = true;
+};
+
+const closeWorldFaqPanel = () => {
+  isWorldFaqPanelOpen.value = false;
+  isWorldLegalDetailOpen.value = false;
 };
 
 const worldTotalCount = computed(() =>
