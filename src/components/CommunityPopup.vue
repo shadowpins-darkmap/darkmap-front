@@ -488,7 +488,7 @@
     <!-- SlidePanels -->
     <!--  길거리 괴롭힘이란게 뭔가요? SlidePanel -->
     <SlidePanel
-      :width="'450px'"
+      :width="'380px'"
       :visible="isPanelOpen"
       @close="isPanelOpen = false"
     >
@@ -500,7 +500,7 @@
     </SlidePanel>
 
     <SlidePanel
-      :width="'450px'"
+      :width="'380px'"
       :visible="isPanel2depsOpen"
       :right="'510px'"
       @close="isPanel2depsOpen = false"
@@ -512,7 +512,7 @@
     </SlidePanel>
 
     <SlidePanel
-      :width="'450px'"
+      :width="'380px'"
       :visible="isWorldFaqPanelOpen"
       @close="isWorldFaqPanelOpen = false"
     >
@@ -568,45 +568,45 @@
 
     <!-- World Legal 국가별 세부 SlidePanel -->
     <SlidePanel
-      :width="'510px'"
+      :width="'380px'"
+      :right="'380px'"
       :visible="isWorldLegalDetailOpen"
       @close="isWorldLegalDetailOpen = false"
     >
-      <section class="WorldFaqPanel">
+      <div class="WorldLegalDetail">
         <button
-          class="WorldFaqPanel__close"
+          class="WorldLegalDetail__close"
           @click="isWorldLegalDetailOpen = false"
         >
           <img
-            src="@/assets/sliderCloseIcon.svg"
+            src="@/assets/detailCloseArrow.svg"
             alt="slider close icon"
             width="36"
             height="36"
           />
         </button>
-        <strong class="WorldFaqPanel__title">{{
+        <strong class="WorldLegalDetail__title">{{
           worldLegalDetailCountryLabel
         }}</strong>
-        <div class="WorldFaqPanel__contents_wrap">
-          <GradientScroll
-            :width="'100%'"
-            :height="'100%'"
-            gradient-color="rgba(0,0,0,1)"
-            direction="vertical"
-          >
-            <ul class="WorldFaqPanel__case_list">
-              <li
-                v-for="(item, i) in currentWorldLegalCases"
-                :key="i"
-                class="WorldFaqPanel__case_item"
-              >
-                <span class="WorldFaqPanel__case_date">{{ item.date }}</span>
-                <p class="WorldFaqPanel__case_summary">{{ item.summary }}</p>
-              </li>
-            </ul>
-          </GradientScroll>
-        </div>
-      </section>
+        <GradientScroll
+          :width="'100%'"
+          :height="'calc(100% - 120px)'"
+          direction="vertical"
+          gradient-color="rgba(64,64,64,1.5)"
+          :showScrollbar="true"
+        >
+          <ul class="WorldLegalDetail__case_list">
+            <li
+              v-for="(item, i) in currentWorldLegalCases"
+              :key="i"
+              class="WorldLegalDetail__case_item"
+            >
+              <span class="WorldLegalDetail__case_date">{{ item.date }}</span>
+              <p class="WorldLegalDetail__case_summary">{{ item.summary }}</p>
+            </li>
+          </ul>
+        </GradientScroll>
+      </div>
     </SlidePanel>
 
     <!-- 광장 커뮤니티  SlidePanel -->
@@ -1691,7 +1691,7 @@ const currentWorldLegalCases = computed(
 
 .WorldFaqPanel__title {
   font-weight: bold;
-  font-size: 32px;
+  font-size: 25px;
   display: flex;
   padding-top: 40px;
   padding-bottom: 60px;
@@ -1744,26 +1744,52 @@ const currentWorldLegalCases = computed(
   margin-left: 5px;
 }
 
-.WorldFaqPanel__case_list {
+.WorldLegalDetail {
+  background-color: #404040;
+  padding: 28px 18px;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  position: relative;
+}
+
+.WorldLegalDetail__close {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.WorldLegalDetail__title {
+  font-weight: bold;
+  font-size: 26px;
+  line-height: 1.2;
+  display: flex;
+  padding-top: 24px;
+  padding-bottom: 20px;
+  color: #fff;
+}
+
+.WorldLegalDetail__case_list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
   padding-bottom: 20px;
 }
 
-.WorldFaqPanel__case_item {
+.WorldLegalDetail__case_item {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  padding-left: 4px;
 }
 
-.WorldFaqPanel__case_date {
+.WorldLegalDetail__case_date {
   font-size: 12px;
-  color: #8270cb;
+  color: #a190df;
   font-weight: bold;
 }
 
-.WorldFaqPanel__case_summary {
+.WorldLegalDetail__case_summary {
   font-size: 15px;
   color: #fff;
   line-height: 1.6;
