@@ -1,5 +1,6 @@
 <template>
   <div class="BaseCommunity">
+    <!-- 상단 팝업: Korea Tour = 커뮤니티, World Tour = 환영 메시지 -->
     <section
       class="BaseCommunity__popup base"
       v-if="tourModeStore.isKoreaTour && !showAccountSection"
@@ -312,7 +313,60 @@
         @open-terms-panel="isTermsPanelOpen = true"
       />
     </section>
-    <!-- 다크맵 투어 일지 (고정 데이터 로그인이 필요없음) -->
+
+    <!-- World Tour 상단 팝업: 환영 메시지 -->
+    <section class="BaseCommunity__popup base" v-if="tourModeStore.isWorldTour">
+      <button class="accordion__header" @click="toggleSection('world-welcome')">
+        <img
+          src="@/assets/arrowCirlcleButton.svg"
+          class="accordion__toggle"
+          :class="{ open: openSection === 'world-welcome' }"
+          alt="accordion toggle icon"
+          width="36"
+          height="36"
+        />
+      </button>
+      <div class="BaseCommunity__greeting">
+        <div class="BaseCommunity__avatar">
+          <img src="@/assets/eyesBody.svg" alt="avatar body" />
+          <img
+            v-show="currentBubbleIndex === 0"
+            class="BaseCommunity__avatar_eyes"
+            src="@/assets/eyesOn.svg"
+            alt="avatar eyes"
+          />
+          <img
+            v-show="currentBubbleIndex === 1"
+            class="BaseCommunity__avatar_eyes off"
+            src="@/assets/eyesOff.svg"
+            alt="avatar eyes"
+          />
+        </div>
+        <p class="BaseCommunity__bubble world-bubble">
+          <span class="BaseCommunity__bubble_text">
+            안녕하세요, 전세계의 페미니스트 여러분!<br />
+            당신의 국가에선 사이버플래싱이 처벌되고 있나요?
+          </span>
+        </p>
+      </div>
+      <div class="content_text" v-show="openSection === 'world-welcome'">
+        <button
+          class="BaseCommunity__black_button world-cases-button"
+          @click="openWorldCases"
+        >
+          처벌 사례 보러가기
+          <img
+            src="@/assets/slideCardArrow.svg"
+            class="button_arrow_icon"
+            alt="button arrow icon"
+            width="14"
+            height="14"
+          />
+        </button>
+      </div>
+    </section>
+
+    <!-- 다크맵 투어 일지: Korea Tour = K-다크맵, World Tour = W-다크맵 -->
     <section class="BaseCommunity__popup" v-if="tourModeStore.isKoreaTour">
       <!-- 아코디언 타이틀 클릭시 토글 -->
       <button class="accordion__header" @click="toggleSection('tour')">
@@ -372,12 +426,63 @@
       </div>
     </section>
 
-    <section class="BaseCommunity__popup world" v-if="tourModeStore.isWorldTour">
-      <WorldTourInfoPanel
-        :selected-country="selectedWorldCountry"
-        @change-country="selectedWorldCountry = $event"
-        @open-faq="openWorldFaq"
-      />
+    <!-- World Tour 하단 팝업: W-다크맵 투어 일지 -->
+    <section class="BaseCommunity__popup" v-if="tourModeStore.isWorldTour">
+      <button class="accordion__header" @click="toggleSection('world-tour')">
+        <strong class="accordion__title">W-다크맵 투어 일지</strong>
+        <img
+          src="@/assets/arrowCirlcleButton.svg"
+          class="accordion__toggle"
+          :class="{ open: openSection !== 'world-tour' }"
+          alt="accordion toggle icon"
+          width="36"
+          height="36"
+        />
+      </button>
+      <div class="content_text" v-show="openSection === 'world-tour'">
+        <p class="content_text_title">
+          현재까지
+          <span class="highlight">{{ worldTotalCount }}</span
+          >개의 사이버플래싱 사건이 전세계에서 일어나고 있습니다.
+        </p>
+        <div class="tour__links">
+          <button class="tour_link_button" @click="openWorldFaq('shadowPins')">
+            <span>세도우 핀즈는 어떤 활동을 하는 단체인가요?</span>
+            <img
+              src="@/assets/arrowCirlcleButtonRight.svg"
+              class="tour__right__button"
+              alt="본문 바로가기 아코디언 버튼"
+              width="12"
+              height="12"
+            />
+          </button>
+          <button
+            class="tour_link_button"
+            @click="openWorldFaq('cyberFlashing')"
+          >
+            <span>사이버플래싱은 무엇인가요?</span>
+            <img
+              src="@/assets/arrowCirlcleButtonRight.svg"
+              class="tour__right__button"
+              alt="본문 바로가기 아코디언 버튼"
+              width="12"
+              height="12"
+            />
+          </button>
+          <button class="tour_link_button" @click="openWorldFaq('legal')">
+            <span
+              >각 국가에서는 사이버플래싱을 어떻게 법에서 다루고 있나요?</span
+            >
+            <img
+              src="@/assets/arrowCirlcleButtonRight.svg"
+              class="tour__right__button"
+              alt="본문 바로가기 아코디언 버튼"
+              width="12"
+              height="12"
+            />
+          </button>
+        </div>
+      </div>
     </section>
 
     <!-- SlidePanels -->
@@ -412,10 +517,15 @@
       @close="isWorldFaqPanelOpen = false"
     >
       <section class="WorldFaqPanel">
-        <button class="WorldFaqPanel__close" @click="isWorldFaqPanelOpen = false">
+        <button
+          class="WorldFaqPanel__close"
+          @click="isWorldFaqPanelOpen = false"
+        >
           닫기
         </button>
-        <strong class="WorldFaqPanel__title">{{ currentWorldFaq?.title }}</strong>
+        <strong class="WorldFaqPanel__title">{{
+          currentWorldFaq?.title
+        }}</strong>
         <p class="WorldFaqPanel__body">{{ currentWorldFaq?.body }}</p>
       </section>
     </SlidePanel>
@@ -538,7 +648,6 @@ import AlarmListBase from '@/components/communityPopup/AlarmListBase.vue';
 import AccountBase from '@/components/communityPopup/AccountBase.vue';
 import TabButtons from '@/components/tabButton/TabButtons.vue';
 import EmptyData from '@/components/EmptyData.vue';
-import WorldTourInfoPanel from '@/components/worldTour/WorldTourInfoPanel.vue';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useStatsStore } from '@/store/useStatsStore';
 import { useTourModeStore } from '@/store/useTourModeStore';
@@ -546,7 +655,7 @@ import iconComment from '@/assets/alarmComment.svg';
 import iconLike from '@/assets/alarmLike.svg';
 import iconMarker from '@/assets/alarmMarker.svg';
 import { RECENT_LOGIN_INFO_KEY } from '@/constant/storage';
-import { worldFaqContent, worldCountries } from '@/constant/worldTourData';
+import { worldFaqContent, cyberFlashingCases } from '@/constant/worldTourData';
 import { useTranslation } from '@/composables/useTranslation';
 
 const auth = useAuthStore();
@@ -591,7 +700,6 @@ const isArticleDetailOpen = ref(false);
 const selectedArticleDetail = ref(null);
 const isWorldFaqPanelOpen = ref(false);
 const selectedWorldFaqKey = ref('shadowPins');
-const selectedWorldCountry = ref(worldCountries[0]);
 
 /* --------- 아코디언 / 인삿말 --------- */
 const openSection = ref('mypage');
@@ -867,6 +975,17 @@ const openWorldFaq = (key) => {
   isWorldFaqPanelOpen.value = true;
 };
 
+const openWorldCases = () => {
+  isListPanelOpen.value = true;
+};
+
+const worldTotalCount = computed(() =>
+  Object.values(cyberFlashingCases).reduce(
+    (count, cases) => count + (cases?.length || 0),
+    0,
+  ),
+);
+
 const handleCarouselClick = (card) => {
   if (!auth.isLoggedIn) {
     showLoginAlert.value = true;
@@ -999,7 +1118,8 @@ const handleMarketingSkip = () => {
 };
 
 const currentWorldFaq = computed(() => {
-  const source = worldFaqContent[selectedWorldFaqKey.value] || worldFaqContent.shadowPins;
+  const source =
+    worldFaqContent[selectedWorldFaqKey.value] || worldFaqContent.shadowPins;
   if (locale.value === 'ko') {
     return {
       title:
@@ -1038,11 +1158,32 @@ const currentWorldFaq = computed(() => {
     border-radius: 16px;
   }
 
-  &__popup.world {
-    padding: 0;
-    background: transparent;
-    border: 0;
-    width: 320px;
+  .world-bubble {
+    height: fit-content;
+    min-height: 50px;
+
+    &::after {
+      content: '';
+      position: absolute;
+      z-index: 1;
+      top: auto;
+      bottom: -10px;
+      left: 0;
+      width: 20px;
+      height: 16px;
+      transform: none;
+      background-color: inherit;
+      border-radius: 0 0 4px 6px;
+      clip-path: polygon(0 0, 100% 0, 0 100%);
+    }
+  }
+
+  .world-cases-button {
+    width: 100%;
+    margin-top: 12px;
+    height: 40px;
+    justify-content: center;
+    gap: 6px;
   }
 
   // 알람

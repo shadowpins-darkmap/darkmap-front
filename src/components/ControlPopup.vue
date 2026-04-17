@@ -159,11 +159,9 @@
         </template>
 
         <div class="body_title_wrap">
-          <strong class="body_title"
-            ><span>{{
-              tourModeStore.isKoreaTour ? '뉴스 투어' : 'Cyber Flashing Cases'
-            }}</span></strong
-          >
+          <strong class="body_title"><span>{{
+            tourModeStore.isKoreaTour ? '뉴스 투어' : 'Cyber Flashing Cases'
+          }}</span></strong>
         </div>
         <div class="news_table_wrap">
           <div class="news_table_line top"></div>
@@ -203,6 +201,7 @@
       </div>
     </div>
   </div>
+
   <SlidePanel
     :width="'510px'"
     :visible="isListPanelOpen"
