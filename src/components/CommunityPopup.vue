@@ -433,7 +433,7 @@
         <img
           src="@/assets/arrowCirlcleButton.svg"
           class="accordion__toggle"
-          :class="{ open: openSection !== 'world-tour' }"
+          :class="{ open: openSection === 'world-tour' }"
           alt="accordion toggle icon"
           width="36"
           height="36"
