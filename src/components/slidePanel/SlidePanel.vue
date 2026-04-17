@@ -8,20 +8,22 @@ const close = () => emit('close');
 </script>
 
 <template>
-  <Transition name="slide_fade">
-    <div
-      v-if="props.visible"
-      class="slide_panel"
-      @click.self="close"
-      :style="{
-        right: props.right || '0px',
-        left: props.left || 'auto',
-        width: props.width,
-      }"
-    >
-      <slot></slot>
-    </div>
-  </Transition>
+  <Teleport to="body">
+    <Transition name="slide_fade">
+      <div
+        v-if="props.visible"
+        class="slide_panel"
+        @click.self="close"
+        :style="{
+          right: props.right || '0px',
+          left: props.left || 'auto',
+          width: props.width,
+        }"
+      >
+        <slot></slot>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <style scoped lang="scss">

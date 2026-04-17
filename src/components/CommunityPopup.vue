@@ -1263,6 +1263,8 @@ const currentWorldLegalCases = computed(
   flex-direction: column;
   z-index: 9;
   gap: 15px;
+  transform: scale(1.1);
+  transform-origin: top right;
 
   &__popup {
     width: 320px;
@@ -1677,7 +1679,7 @@ const currentWorldLegalCases = computed(
 
 .WorldFaqPanel {
   background-color: #000;
-  padding: 40px 25px;
+  padding: 32px 22px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -1691,10 +1693,10 @@ const currentWorldLegalCases = computed(
 
 .WorldFaqPanel__title {
   font-weight: bold;
-  font-size: 25px;
+  font-size: 20px;
   display: flex;
-  padding-top: 40px;
-  padding-bottom: 60px;
+  padding-top: 24px;
+  padding-bottom: 32px;
   color: #8270cb;
 }
 
@@ -1704,32 +1706,33 @@ const currentWorldLegalCases = computed(
 }
 
 .WorldFaqPanel__body {
-  padding-bottom: 25px;
-  font-size: 16px;
+  padding-bottom: 20px;
+  font-size: 14px;
   color: #fff;
   font-weight: normal;
-  line-height: 1.8;
+  line-height: 1.7;
   word-break: keep-all;
   white-space: pre-line;
 }
 
 .WorldFaqPanel__sub_title {
   color: #fff;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: bold;
-  padding-bottom: 20px;
-  padding-top: 40px;
+  padding-bottom: 14px;
+  padding-top: 24px;
 }
 
 .WorldFaqPanel__list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  padding-bottom: 20px;
 }
 
 .WorldFaqPanel__list_button {
   color: #fff;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: bold;
   display: flex;
   align-items: center;
@@ -1761,36 +1764,36 @@ const currentWorldLegalCases = computed(
 
 .WorldLegalDetail__title {
   font-weight: bold;
-  font-size: 26px;
+  font-size: 22px;
   line-height: 1.2;
   display: flex;
-  padding-top: 24px;
-  padding-bottom: 20px;
+  padding-top: 16px;
+  padding-bottom: 16px;
   color: #fff;
 }
 
 .WorldLegalDetail__case_list {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 18px;
   padding-bottom: 20px;
 }
 
 .WorldLegalDetail__case_item {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   padding-left: 4px;
 }
 
 .WorldLegalDetail__case_date {
-  font-size: 12px;
+  font-size: 11px;
   color: #a190df;
   font-weight: bold;
 }
 
 .WorldLegalDetail__case_summary {
-  font-size: 15px;
+  font-size: 13px;
   color: #fff;
   line-height: 1.6;
   word-break: keep-all;

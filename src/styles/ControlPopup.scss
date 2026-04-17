@@ -4,9 +4,11 @@
   left: 20px;
   z-index: 2;
   display: flex;
-  gap: 24px;
+  gap: 10px;
   flex-direction: column;
-  max-height: calc(100vh - 40px);
+  max-height: calc((100vh - 40px) / 1.15);
+  transform: scale(1.15);
+  transform-origin: top left;
 }
 
 .logo {
@@ -95,7 +97,7 @@
   display: flex;
   flex-direction: column;
   width: 320px;
-  max-height: calc(100vh - 280px);
+  max-height: calc((100vh - 40px) / 1.15 - 280px);
 }
 
 .scroll_area_wrap {
@@ -104,11 +106,11 @@
   padding: 12px 0;
 }
 .body_title_wrap {
-  padding-top: 18px;
-  margin-bottom: 12px;
+  padding-top: 4px;
+  margin-bottom: 11px;
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
 }
 .body_title {
   display: inline-flex;
@@ -266,13 +268,13 @@
 
 .table_position {
   color: #ffefeb;
-  font-size: 11px;
+  font-size: 10px;
   text-align: left;
 }
 
 .table_title {
   color: #ffefeb;
-  font-size: 12px;
+  font-size: 10px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -420,7 +422,7 @@
   font-family: 'Noto Sans KR', sans-serif;
   font-style: normal;
   font-weight: 400;
-  font-size: 11px;
+  font-size: 10px;
   line-height: 1;
   color: #ffffff;
 }
@@ -429,5 +431,3 @@
   margin-top: 40px;
   padding-bottom: 0;
 }
-
-
