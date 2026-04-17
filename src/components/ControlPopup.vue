@@ -195,6 +195,9 @@
             <img style="width: 5px" src="../assets/rightArrow.svg" />
           </button>
         </div>
+        <div class="footer" v-if="tourModeStore.isKoreaTour">
+          <BaseFooter :is-world-tour="false" />
+        </div>
       </div>
     </div>
   </div>
@@ -218,6 +221,7 @@ import AddressFilter from './AddressFilter.vue';
 import addressData from '@/constant/addresses.json';
 import '@/styles/ControlPopup.scss';
 import { ref, computed, defineEmits, watch } from 'vue';
+import BaseFooter from '@/components/BaseFooter.vue';
 import ReportGuidePopup from '@/components/searchArea/ReportGuidePopup.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
 import SearchListPanel from '@/components/searchArea/SearchListPanel.vue';
