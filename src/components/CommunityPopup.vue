@@ -86,7 +86,13 @@
             </button>
           </div>
           <strong class="BaseCommunity__hot_title margin_15">
-            ⚡️ {{ auth.nickname }}님을 위한 브리핑
+            <span class="BaseCommunity__hot_title_text">
+              <span class="hot_title_emoji">⚡️</span>
+              <span class="hot_title_lines">
+                <span class="hot_title_line1">{{ auth.nickname }}님을</span>
+                <span class="hot_title_line2">위한 브리핑</span>
+              </span>
+            </span>
             <button
               class="BaseCommunity__setting"
               @click="showAccountSection = true"
@@ -517,10 +523,7 @@
       @close="closeWorldFaqPanel"
     >
       <section class="WorldFaqPanel">
-        <button
-          class="WorldFaqPanel__close"
-          @click="closeWorldFaqPanel"
-        >
+        <button class="WorldFaqPanel__close" @click="closeWorldFaqPanel">
           <img
             src="@/assets/sliderCloseIcon.svg"
             alt="slider close icon"
@@ -1122,9 +1125,7 @@ const currentWorldCases = computed(
   () => cyberFlashingCases[selectedWorldCasesCountry.value] || [],
 );
 
-const currentWorldCasesCount = computed(
-  () => currentWorldCases.value.length,
-);
+const currentWorldCasesCount = computed(() => currentWorldCases.value.length);
 
 const openWorldLegalDetail = (countryKey) => {
   selectedWorldLegalCountry.value = countryKey;
@@ -1328,11 +1329,11 @@ const currentWorldLegalCases = computed(
 .BaseCommunity {
   position: absolute;
   right: 20px;
-  top: 20px;
+  top: 10px;
   display: flex;
   flex-direction: column;
   z-index: 9;
-  gap: 15px;
+  gap: 9px;
   transform: scale(1.1);
   transform-origin: top right;
 
@@ -1366,7 +1367,7 @@ const currentWorldLegalCases = computed(
 
   .world-cases-button {
     width: 100%;
-    margin-top: 12px;
+    margin-top: 25px;
     height: 40px;
     justify-content: center;
     gap: 6px;
@@ -1384,6 +1385,7 @@ const currentWorldLegalCases = computed(
     margin-left: 6px;
     transform: scale(0.7);
     transform-origin: top left;
+    margin-bottom: -27px;
   }
 
   &__avatar_eyes {
@@ -1462,11 +1464,28 @@ const currentWorldLegalCases = computed(
     align-items: center;
     justify-content: space-between;
     font-weight: 700;
-    font-size: 16px;
+    font-size: 14px;
     letter-spacing: -0.5px;
     vertical-align: middle;
     color: #fff;
     line-height: 1.3;
+  }
+
+  &__hot_title_text {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .hot_title_emoji {
+    flex-shrink: 0;
+    line-height: 1.3;
+  }
+
+  .hot_title_lines {
+    display: flex;
+    flex-direction: column;
   }
 
   &__more {
@@ -1697,7 +1716,7 @@ const currentWorldLegalCases = computed(
   }
 
   .content_text {
-    margin-top: 10px;
+    margin-top: 4px;
     color: white;
     font-size: 11px;
     line-height: 1.8;
