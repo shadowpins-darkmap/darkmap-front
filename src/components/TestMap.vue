@@ -352,6 +352,7 @@ watch(
 const changeFilter = (crimeTypes, selectedSido, dongList) => {
   filteredArticles.value = [];
   const filterSido = selectedSido;
+  const isAllRegions = filterSido === '전국';
   const filterSigungu = dongList
     .filter(({ checked }) => checked)
     .map(({ name }) => name);
@@ -369,11 +370,16 @@ const changeFilter = (crimeTypes, selectedSido, dongList) => {
       return;
     }
     const updatedArticles = articles.value.filter((article) => {
-      if (filterSigungu.length === dongList.length) {
-        return article.category === crimeType && filterSido === article.sido;
+      if (article.category !== crimeType) return false;
+      const allChecked = filterSigungu.length === dongList.length;
+      if (isAllRegions) {
+        // "전국" 선택 시 filterSigungu는 시/도(lv1) 이름 목록
+        return allChecked || filterSigungu.includes(article.sido);
+      }
+      if (allChecked) {
+        return filterSido === article.sido;
       }
       return (
-        article.category === crimeType &&
         filterSido === article.sido &&
         filterSigungu.includes(article.sigungu)
       );

@@ -97,16 +97,16 @@
   display: flex;
   flex-direction: column;
   width: 320px;
-  max-height: calc((100vh - 40px) / 1.15 - 280px);
+  max-height: calc((100vh - 40px) / 1.15 - 100px);
 }
 
 .scroll_area_wrap {
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 12px 0;
+  padding: 9px 0;
 }
 .body_title_wrap {
-  padding-top: 4px;
+  padding-top: 9px;
   margin-bottom: 11px;
   display: flex;
   align-items: center;

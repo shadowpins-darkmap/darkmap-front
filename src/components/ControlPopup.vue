@@ -140,9 +140,9 @@
               </div>
               <div
                 class="checkbox_text"
-                :class="{ 'long-name': d.name.length > 4 }"
+                :class="{ 'long-name': (d.label || d.name).length > 4 }"
               >
-                {{ d.name }}
+                {{ d.label || d.name }}
               </div>
             </div>
           </div>
@@ -219,6 +219,7 @@ import { useNewsListStore } from '@/store/newsListStore';
 import { storeToRefs } from 'pinia';
 import AddressFilter from './AddressFilter.vue';
 import addressData from '@/constant/addresses.json';
+import { SIDO_SHORT_ORDER } from '@/constant/sidoShort';
 import '@/styles/ControlPopup.scss';
 import { ref, computed, defineEmits, watch } from 'vue';
 import BaseFooter from '@/components/BaseFooter.vue';
@@ -392,11 +393,25 @@ const clickCrimeType = (idx) => {
 };
 
 // Address handling
-const selectGu = ref(addressData[0].lv1);
+const ALL_REGIONS = '전국';
+const selectGu = ref(ALL_REGIONS);
 const dongList = ref([]);
 
 // Initialize dongList with checked property
 const initializeDongList = (lv1) => {
+  if (lv1 === ALL_REGIONS) {
+    // "전국" 선택 시 시/도(lv1) 목록을 지정된 순서 + 축약명으로 노출
+    // name은 필터 매칭용(원본 lv1), label은 화면 표시용(축약명)
+    const availableSidos = new Set(addressData.map((addr) => addr.lv1));
+    dongList.value = SIDO_SHORT_ORDER
+      .filter(({ full }) => availableSidos.has(full))
+      .map(({ full, short }) => ({
+        name: full,
+        label: short,
+        checked: true,
+      }));
+    return;
+  }
   const selectedAddress = addressData.find((addr) => addr.lv1 === lv1);
   if (selectedAddress) {
     dongList.value = selectedAddress.lv2.map((dong) => ({

@@ -1,7 +1,9 @@
 <script setup>
-import { ref, defineEmits, defineProps } from 'vue';
+import { ref, computed, defineEmits, defineProps } from 'vue';
 import '@/styles/AddressFilter.scss';
 import BaseDropdown from './BaseDropdown.vue';
+
+const ALL_REGIONS = '전국';
 
 const props = defineProps({
   addressData: {
@@ -10,22 +12,22 @@ const props = defineProps({
   },
 });
 
-const selectedGu = ref(props.addressData[0].lv1);
+const selectedGu = ref(ALL_REGIONS);
 const openDropdown = ref(false);
 const emit = defineEmits(['change']);
+
+const guList = computed(() => [
+  ALL_REGIONS,
+  ...props.addressData.map((item) => item.lv1),
+]);
 
 const clickGu = (lv1) => {
   selectedGu.value = lv1;
   openDropdown.value = false;
   emit('change', lv1);
-	console.log('Gu !') 
 };
 </script>
 
 <template>
-  <BaseDropdown
-    :list="addressData.map((item) => item.lv1)"
-    :onSelect="clickGu"
-    :selected="selectedGu"
-  />
+  <BaseDropdown :list="guList" :onSelect="clickGu" :selected="selectedGu" />
 </template>
