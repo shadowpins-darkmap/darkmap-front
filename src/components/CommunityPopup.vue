@@ -521,12 +521,26 @@
           class="WorldFaqPanel__close"
           @click="isWorldFaqPanelOpen = false"
         >
-          닫기
+          <img
+            src="@/assets/sliderCloseIcon.svg"
+            alt="slider close icon"
+            width="36"
+            height="36"
+          />
         </button>
         <strong class="WorldFaqPanel__title">{{
           currentWorldFaq?.title
         }}</strong>
-        <p class="WorldFaqPanel__body">{{ currentWorldFaq?.body }}</p>
+        <div class="WorldFaqPanel__contents_wrap">
+          <GradientScroll
+            :width="'100%'"
+            :height="'100%'"
+            gradient-color="rgba(0,0,0,1)"
+            direction="vertical"
+          >
+            <p class="WorldFaqPanel__body">{{ currentWorldFaq?.body }}</p>
+          </GradientScroll>
+        </div>
       </section>
     </SlidePanel>
 
@@ -648,6 +662,7 @@ import AlarmListBase from '@/components/communityPopup/AlarmListBase.vue';
 import AccountBase from '@/components/communityPopup/AccountBase.vue';
 import TabButtons from '@/components/tabButton/TabButtons.vue';
 import EmptyData from '@/components/EmptyData.vue';
+import GradientScroll from '@/components/gradientScroll/GradientScroll.vue';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useStatsStore } from '@/store/useStatsStore';
 import { useTourModeStore } from '@/store/useTourModeStore';
@@ -1562,31 +1577,40 @@ const currentWorldFaq = computed(() => {
 }
 
 .WorldFaqPanel {
-  padding: 24px 20px;
-  background: #020409;
-  min-height: 100%;
-  color: #fff;
+  background-color: #000;
+  padding: 40px 25px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .WorldFaqPanel__close {
-  color: #99fbe0;
-  text-decoration: underline;
-  font-size: 12px;
-  margin-bottom: 16px;
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .WorldFaqPanel__title {
-  display: block;
-  font-size: 28px;
-  line-height: 1.3;
-  margin-bottom: 14px;
-  color: #e8ecff;
+  font-weight: bold;
+  font-size: 32px;
+  display: flex;
+  padding-top: 40px;
+  padding-bottom: 60px;
+  color: #8270cb;
+}
+
+.WorldFaqPanel__contents_wrap {
+  overflow-y: auto;
+  flex: 1;
 }
 
 .WorldFaqPanel__body {
-  font-size: 14px;
+  padding-bottom: 25px;
+  font-size: 16px;
+  color: #fff;
+  font-weight: normal;
   line-height: 1.8;
-  color: #d5daef;
   word-break: keep-all;
+  white-space: pre-line;
 }
 </style>

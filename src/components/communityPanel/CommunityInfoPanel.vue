@@ -8,7 +8,7 @@
         height="36"
       />
     </button>
-    <strong class="slider_title ponit_color"
+    <strong class="slider_title point_color"
       >길거리 괴롭힘이란게 뭔가요?</strong
     >
 
@@ -106,7 +106,7 @@ const titles = ['바바리맨', '폭행', '헌팅', '미행', '그 외'];
   padding-top: 40px;
   padding-bottom: 60px;
 }
-.ponit_color {
+.point_color {
   color: #8270cb;
 }
 .slider_contents {
