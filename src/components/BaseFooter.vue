@@ -50,7 +50,7 @@ defineProps({
   font-weight: 500;
   color: #ffefeb;
   margin-top: 20px;
-  padding-bottom: 5px;
+  padding-bottom: 30px;
 
   &intro {
     display: flex;
