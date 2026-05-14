@@ -228,7 +228,7 @@ import ReportGuidePopup from '@/components/searchArea/ReportGuidePopup.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
 import SearchListPanel from '@/components/searchArea/SearchListPanel.vue';
 import BaseDropdown from './BaseDropdown.vue';
-import TourModeToggle from './TourModeToggle.vue';
+// import TourModeToggle from './TourModeToggle.vue'; // 임시 숨김
 import { useTourModeStore } from '@/store/useTourModeStore';
 import { useTranslation } from '@/composables/useTranslation';
 import { cyberFlashingCases, worldCountries } from '@/constant/worldTourData';
