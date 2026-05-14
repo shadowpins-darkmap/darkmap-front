@@ -9,7 +9,8 @@
             : require('../assets/logo.svg')
         "
       />
-      <TourModeToggle />
+      <!-- TourModeToggle 임시 숨김 (world tour 작업 완료 후 복원) -->
+      <!-- <TourModeToggle /> -->
     </div>
 
     <div class="search_wrap" :class="{ 'world-mode': tourModeStore.isWorldTour }">
