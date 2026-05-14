@@ -1,7 +1,7 @@
 <template>
   <div class="ControlMobile">
     <div class="ControlMobile__header">
-      <img width="60" height="60" src="../assets/mobile-logo.png" />
+      <img width="90" src="../assets/mobile-logo.png" />
       <div class="ControlMobile__guide">
         테마와 지역을 선택 후 어떤 길거리 괴롭힘이 일어나고 있는지 살펴보세요
       </div>
@@ -383,6 +383,7 @@ const changeFilter = () => {
 .ControlMobile {
   background: #000000;
   box-sizing: border-box;
+  min-height: 100vh;
 
   &__header {
     padding: 20px;
@@ -391,12 +392,18 @@ const changeFilter = () => {
     align-items: center;
     font-size: 12px;
     font-weight: 500;
+
+    img {
+      height: auto;
+      flex-shrink: 0;
+    }
   }
 
   &__guide {
     margin-left: 10px;
     padding: 20px;
     background-color: #00ffc2;
+    border-radius: 16px;
     position: relative;
 
     &::before {
@@ -443,7 +450,17 @@ const changeFilter = () => {
 
   &__section {
     display: flex;
+    align-items: center;
+    gap: 12px;
     margin: 32px 0 16px 0;
+
+    .body_title {
+      margin-bottom: 0;
+    }
+  }
+
+  .body_title_wrap {
+    margin-top: 32px;
   }
 
   &__select-all {
@@ -552,7 +569,11 @@ const changeFilter = () => {
   }
 
   &__prev-next {
-    width: 4px;
+    width: 24px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:hover {
       cursor: pointer;
