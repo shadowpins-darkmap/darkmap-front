@@ -33,7 +33,11 @@
     </div>
 
     <div class="WorldTourMapPopup__paging">
-      <button type="button" :disabled="currentPage <= 1" @click="movePage(currentPage - 1)">
+      <button
+        type="button"
+        :disabled="currentPage <= 1"
+        @click="movePage(currentPage - 1)"
+      >
         &lsaquo;
       </button>
       <button
@@ -118,8 +122,8 @@ onMounted(() => {
 <style scoped lang="scss">
 .WorldTourMapPopup {
   position: relative;
-  width: min(684px, calc(100vw - 48px));
-  padding: 82px 22px 36px;
+  width: min(520px, calc(100vw - 48px));
+  padding: 42px 18px 22px;
   border: 2px solid #4c527c;
   border-radius: 4px;
   background: #303556;
@@ -131,9 +135,9 @@ onMounted(() => {
   content: '';
   position: absolute;
   left: 46%;
-  bottom: -58px;
-  width: 86px;
-  height: 58px;
+  bottom: -36px;
+  width: 56px;
+  height: 36px;
   background: #303556;
   border-left: 2px solid #4c527c;
   border-bottom: 2px solid #4c527c;
@@ -142,58 +146,59 @@ onMounted(() => {
 
 .WorldTourMapPopup__close {
   position: absolute;
-  top: 27px;
-  right: 25px;
-  width: 36px;
-  height: 36px;
+  top: 16px;
+  right: 16px;
+  width: 28px;
+  height: 28px;
   border: 0;
   background: transparent;
   color: #fff5f3;
-  font-size: 58px;
-  line-height: 32px;
+  font-size: 42px;
+  line-height: 24px;
   font-weight: 200;
 }
 
 .WorldTourMapPopup__title {
   display: block;
-  font-size: 28px;
+  padding-right: 44px;
+  font-size: 22px;
   line-height: 1;
   font-weight: 700;
 }
 
 .WorldTourMapPopup__divider {
   height: 2px;
-  margin: 22px 0 58px;
+  margin: 18px 0 34px;
   background: #555b85;
 }
 
 .WorldTourMapPopup__summary {
-  margin: 0 0 42px;
-  font-size: 20px;
+  margin: 0 0 28px;
+  font-size: 15px;
   line-height: 1.5;
   font-weight: 700;
 }
 
 .WorldTourMapPopup__summary span {
   display: inline-block;
-  border-bottom: 10px solid #ff7272;
+  border-bottom: 7px solid #ff7272;
   line-height: 0.72;
 }
 
 .WorldTourMapPopup__table {
-  min-height: 232px;
+  min-height: 176px;
   border-top: 3px solid #00e6c4;
 }
 
 .WorldTourMapPopup__row {
   display: grid;
-  grid-template-columns: 150px 1fr;
-  min-height: 46px;
+  grid-template-columns: 112px 1fr;
+  min-height: 35px;
   align-items: center;
   border-bottom: 2px solid #00e6c4;
   color: #fff5f3;
   text-decoration: none;
-  font-size: 20px;
+  font-size: 14px;
   line-height: 1.3;
 }
 
@@ -209,27 +214,27 @@ onMounted(() => {
 }
 
 .WorldTourMapPopup__empty {
-  padding: 28px 0;
+  padding: 22px 0;
   color: #dce4ff;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .WorldTourMapPopup__paging {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 26px;
-  margin-top: 38px;
+  gap: 18px;
+  margin-top: 24px;
 }
 
 .WorldTourMapPopup__paging button {
-  min-width: 46px;
-  height: 50px;
+  min-width: 34px;
+  height: 36px;
   border: 0;
   border-radius: 50%;
   background: transparent;
   color: #dce4ff;
-  font-size: 24px;
+  font-size: 18px;
 }
 
 .WorldTourMapPopup__paging button.active {

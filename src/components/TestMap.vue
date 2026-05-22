@@ -238,27 +238,33 @@ const createMarkersBatched = async (articlesList, batchSize = 50) => {
 // 서울시청 기본 좌표
 const SEOUL_CITY_HALL = { lat: 37.5663, lng: 126.9779 };
 const DEFAULT_ZOOM = 14; // 더 가까운 줌 레벨
-const WORLD_CENTER = { lat: 20, lng: 0 };
-const WORLD_ZOOM = 2.2;
+const WORLD_CENTER = { lat: 48, lng: 14 };
+const WORLD_ZOOM = 4.1;
+const WORLD_USER_ZOOM = 4.4;
+let initialLocation = SEOUL_CITY_HALL;
+let hasGpsLocation = false;
 
 // 사용자 위치 가져오기 (실패 시 서울시청 반환)
 const getUserLocation = () => {
   return new Promise((resolve) => {
     if (!navigator.geolocation) {
-      resolve(SEOUL_CITY_HALL);
+      resolve({ location: SEOUL_CITY_HALL, fromGps: false });
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         resolve({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
+          location: {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          },
+          fromGps: true,
         });
       },
       () => {
         // 위치 권한 거부 또는 오류 시 서울시청으로 fallback
-        resolve(SEOUL_CITY_HALL);
+        resolve({ location: SEOUL_CITY_HALL, fromGps: false });
       },
       {
         enableHighAccuracy: false,
@@ -326,7 +332,7 @@ const createClusters = () => {
 
 const getWorldMarkerSize = (count) => {
   if (!count) return 0;
-  return Math.max(34, Math.min(360, 24 + Math.sqrt(count) * 22));
+  return Math.max(22, Math.min(160, 16 + Math.sqrt(count) * 7));
 };
 
 const createWorldTourMarkerContent = (country) => {
@@ -338,7 +344,10 @@ const createWorldTourMarkerContent = (country) => {
   markerTag.style.height = `${size}px`;
   markerTag.style.lineHeight = `${size}px`;
   markerTag.textContent = String(country.count);
-  markerTag.setAttribute('aria-label', `${country.countryName}: ${country.count} cyberflashing cases`);
+  markerTag.setAttribute(
+    'aria-label',
+    `${country.countryName}: ${country.count} cyberflashing cases`,
+  );
   return markerTag;
 };
 
@@ -352,6 +361,8 @@ const createWorldTourMarkers = () => {
       map: tourModeStore.isWorldTour ? map : null,
       position,
       content: createWorldTourMarkerContent(country),
+      anchorLeft: '-50%',
+      anchorTop: '-50%',
       zIndex: 2000 + country.count,
     });
 
@@ -377,14 +388,14 @@ const applyTourModeToMap = () => {
   closeOverlay();
 
   if (tourModeStore.isWorldTour) {
-    map.setCenter(WORLD_CENTER);
-    map.setZoom(WORLD_ZOOM);
+    map.setCenter(hasGpsLocation ? initialLocation : WORLD_CENTER);
+    map.setZoom(hasGpsLocation ? WORLD_USER_ZOOM : WORLD_ZOOM);
     setKoreaMarkersVisible(false);
     setWorldTourMarkersVisible(true);
     return;
   }
 
-  map.setCenter(SEOUL_CITY_HALL);
+  map.setCenter(initialLocation);
   map.setZoom(DEFAULT_ZOOM);
   setWorldTourMarkersVisible(false);
   setKoreaMarkersVisible(true);
@@ -396,12 +407,14 @@ onMounted(async () => {
     const locationPromise = getUserLocation();
 
     // 2. Google Maps 라이브러리 로드
-    const [{ Map, OverlayView }, { AdvancedMarkerElement }, userLocation] =
+    const [{ Map, OverlayView }, { AdvancedMarkerElement }, userLocationResult] =
       await Promise.all([
         loader.importLibrary('maps'),
         loader.importLibrary('marker'),
         locationPromise,
       ]);
+    initialLocation = userLocationResult.location;
+    hasGpsLocation = userLocationResult.fromGps;
 
     initCustomOverlay(OverlayView);
 
@@ -410,13 +423,22 @@ onMounted(async () => {
 
     // 3. 지도를 즉시 생성하고 표시
     map = new library.Map(mapDiv.value, {
-      center: tourModeStore.isWorldTour ? WORLD_CENTER : userLocation,
-      zoom: tourModeStore.isWorldTour ? WORLD_ZOOM : DEFAULT_ZOOM,
+      center: tourModeStore.isWorldTour
+        ? hasGpsLocation
+          ? initialLocation
+          : WORLD_CENTER
+        : initialLocation,
+      zoom: tourModeStore.isWorldTour
+        ? hasGpsLocation
+          ? WORLD_USER_ZOOM
+          : WORLD_ZOOM
+        : DEFAULT_ZOOM,
       mapId: '503c7df556477029',
       fullscreenControl: false,
       mapTypeControl: false,
       streetViewControl: false,
     });
+    map.addListener('click', closeOverlay);
 
     // 4. 지도가 표시된 후 백그라운드에서 기사 로딩
     isLoading.value = true;
@@ -551,7 +573,6 @@ div:deep(.world-tour-marker) {
   text-align: center;
   box-shadow: none;
   cursor: pointer;
-  transform: translate(-50%, -50%);
 }
 
 .map {
