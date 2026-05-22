@@ -1,15 +1,48 @@
 <template>
   <footer class="BaseFooter">
-    <div class="BaseFooterintro">
+    <div v-if="isWorldTour" class="BaseFooterintro">
+      <span>W-Dark Map Tour of</span>
+      <a
+        :href="'https://weareshadowpins.com/'"
+        target="_blank"
+        class="BaseFooterlink"
+      >
+        Shadow Pins
+      </a>
+      <span>Ver.1.1</span>
+    </div>
+    <div v-else class="BaseFooterintro">
       <a
         :href="'https://weareshadowpins.com/'"
         target="_blank"
         class="BaseFooterlink"
       >
         셰도우 핀즈 </a
-      >의 {{ isWorldTour ? 'W-Darkmap Tour Ver.1.1' : 'K-다크맵 투어 Ver.1.1' }}
+      >의 K-다크맵 투어 Ver.1.1
     </div>
-    <div class="BaseFootercontainer">
+    <div v-if="isWorldTour" class="BaseFootercontainer">
+      <a
+        :href="'https://dune-purple-f80.notion.site/21325ce1e4e9803393abfe29d60323b4'"
+        target="_blank"
+        class="BaseFooterlink"
+        >About Our Services</a
+      >
+      <a
+        :href="'https://www.notion.so/20025ce1e4e980689f25e1db1373fd9c'"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="BaseFooterlink"
+      >
+        Privacy Policy
+      </a>
+      <a
+        :href="'https://forms.gle/Kr93YqK5ZjsiqvpF6'"
+        target="_blank"
+        class="BaseFooterlink"
+        >Contact Us</a
+      >
+    </div>
+    <div v-else class="BaseFootercontainer">
       <a
         :href="'https://www.notion.so/20025ce1e4e980689f25e1db1373fd9c'"
         target="_blank"
@@ -49,13 +82,14 @@ defineProps({
   font-size: 12px;
   font-weight: 500;
   color: #ffefeb;
-  margin-top: 20px;
-  padding-bottom: 30px;
+  margin-top: 0;
+  padding-bottom: 8px;
 
   &intro {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    gap: 4px;
+    margin-bottom: 4px;
   }
 
   &container {
