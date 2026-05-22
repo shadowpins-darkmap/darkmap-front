@@ -1499,7 +1499,7 @@ const currentWorldLegalDetail = computed(
 
   .world-tour-popup .tour_link_button {
     width: 100%;
-    justify-content: flex-start;
+    display: block;
     text-align: left;
     padding: 4px 0;
     font-size: 12px;
@@ -1509,13 +1509,13 @@ const currentWorldLegalDetail = computed(
 
   .world-tour-popup .tour_link_button > span {
     display: inline;
-    flex: 0 1 auto;
     text-align: left;
   }
 
   .world-tour-popup .tour__right__button {
-    flex: 0 0 10px;
+    display: inline-block;
     margin-left: 5px;
+    vertical-align: -1px;
   }
 
   // 알람
