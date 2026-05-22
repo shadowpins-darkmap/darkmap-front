@@ -8,6 +8,9 @@ import MarkerPopup from './MarkerPopup.vue';
 import ControlPopup from './ControlPopup.vue';
 import BaseLoader from './BaseLoader.vue';
 import { useTourModeStore } from '@/store/useTourModeStore';
+import { useCyberFlashingStore } from '@/store/useCyberFlashingStore';
+import WorldTourMapPopup from '@/components/worldTour/WorldTourMapPopup.vue';
+import pinia from '@/store';
 
 const { loadArticles } = useNewsListStore();
 const { articles, filteredArticles } = storeToRefs(useNewsListStore());
@@ -15,6 +18,7 @@ const { articles, filteredArticles } = storeToRefs(useNewsListStore());
 const mapDiv = ref(null);
 const isLoading = ref(false);
 const tourModeStore = useTourModeStore();
+const cyberFlashingStore = useCyberFlashingStore();
 
 const loader = new Loader({
   apiKey: process.env.VUE_APP_GOOGLE_MAP_API_KEY,
@@ -42,12 +46,43 @@ const clusters = {
 };
 
 let overlay = null;
+let worldTourMarkers = [];
 
 const closeOverlay = () => {
   if (overlay) {
     overlay.close();
     overlay = null;
   }
+};
+
+const setKoreaMarkersVisible = (visible) => {
+  articles.value.forEach(({ marker }) => {
+    if (marker) {
+      marker.map = visible ? map : null;
+    }
+  });
+
+  Object.values(clusters).forEach((cluster) => {
+    if (!cluster) return;
+    cluster.clearMarkers();
+  });
+
+  if (visible) {
+    Object.keys(clusters).forEach((crimeType) => {
+      if (!clusters[crimeType]) return;
+      clusters[crimeType].addMarkers(
+        articles.value
+          .filter(({ category, marker }) => category === crimeType && marker)
+          .map(({ marker }) => marker),
+      );
+    });
+  }
+};
+
+const setWorldTourMarkersVisible = (visible) => {
+  worldTourMarkers.forEach((marker) => {
+    marker.map = visible ? map : null;
+  });
 };
 
 // CustomOverlay 클래스를 onMounted 밖에서 정의 (OverlayView를 받아서 생성)
@@ -289,6 +324,72 @@ const createClusters = () => {
   filteredArticles.value = [...articles.value];
 };
 
+const getWorldMarkerSize = (count) => {
+  if (!count) return 0;
+  return Math.max(34, Math.min(360, 24 + Math.sqrt(count) * 22));
+};
+
+const createWorldTourMarkerContent = (country) => {
+  const markerTag = document.createElement('button');
+  const size = getWorldMarkerSize(country.count);
+  markerTag.classList.add('world-tour-marker');
+  markerTag.type = 'button';
+  markerTag.style.width = `${size}px`;
+  markerTag.style.height = `${size}px`;
+  markerTag.style.lineHeight = `${size}px`;
+  markerTag.textContent = String(country.count);
+  markerTag.setAttribute('aria-label', `${country.countryName}: ${country.count} cyberflashing cases`);
+  return markerTag;
+};
+
+const createWorldTourMarkers = () => {
+  worldTourMarkers.forEach((marker) => {
+    marker.map = null;
+  });
+  worldTourMarkers = cyberFlashingStore.countrySummaries.map((country) => {
+    const position = { lat: country.lat, lng: country.lng };
+    const marker = new library.AdvancedMarkerElement({
+      map: tourModeStore.isWorldTour ? map : null,
+      position,
+      content: createWorldTourMarkerContent(country),
+      zIndex: 2000 + country.count,
+    });
+
+    marker.addListener('click', () => {
+      closeOverlay();
+
+      const container = document.createElement('div');
+      const app = createApp(WorldTourMapPopup, {
+        closeWindow: closeOverlay,
+        country,
+      });
+      app.use(pinia);
+      app.mount(container);
+
+      overlay = new CustomOverlay(position, container, map, country.count);
+    });
+
+    return marker;
+  });
+};
+
+const applyTourModeToMap = () => {
+  closeOverlay();
+
+  if (tourModeStore.isWorldTour) {
+    map.setCenter(WORLD_CENTER);
+    map.setZoom(WORLD_ZOOM);
+    setKoreaMarkersVisible(false);
+    setWorldTourMarkersVisible(true);
+    return;
+  }
+
+  map.setCenter(SEOUL_CITY_HALL);
+  map.setZoom(DEFAULT_ZOOM);
+  setWorldTourMarkersVisible(false);
+  setKoreaMarkersVisible(true);
+};
+
 onMounted(async () => {
   try {
     // 1. 위치 가져오기와 Google Maps 라이브러리를 병렬로 로드
@@ -319,7 +420,7 @@ onMounted(async () => {
 
     // 4. 지도가 표시된 후 백그라운드에서 기사 로딩
     isLoading.value = true;
-    await loadArticles();
+    await Promise.all([loadArticles(), cyberFlashingStore.fetchAllCases()]);
     isLoading.value = false;
 
     // 5. 마커를 배치로 생성 (UI 블로킹 방지)
@@ -327,6 +428,8 @@ onMounted(async () => {
 
     // 6. 모든 마커 생성 완료 후 클러스터 생성
     createClusters();
+    createWorldTourMarkers();
+    applyTourModeToMap();
   } catch (error) {
     console.error('Google Maps 로딩 실패:', error);
     isLoading.value = false;
@@ -337,15 +440,7 @@ watch(
   () => tourModeStore.mode,
   () => {
     if (!map) return;
-
-    if (tourModeStore.isWorldTour) {
-      map.setCenter(WORLD_CENTER);
-      map.setZoom(WORLD_ZOOM);
-      return;
-    }
-
-    map.setCenter(SEOUL_CITY_HALL);
-    map.setZoom(DEFAULT_ZOOM);
+    applyTourModeToMap();
   },
 );
 
@@ -443,6 +538,20 @@ div:deep(.cluster) {
   font-size: 15px;
   font-weight: bold;
   text-align: center;
+}
+
+div:deep(.world-tour-marker) {
+  display: block;
+  border: 0;
+  border-radius: 50%;
+  background: #ff626d;
+  color: #000;
+  font-size: 18px;
+  font-weight: 800;
+  text-align: center;
+  box-shadow: none;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
 }
 
 .map {
