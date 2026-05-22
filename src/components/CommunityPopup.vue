@@ -320,58 +320,6 @@
       />
     </section>
 
-    <!-- World Tour 상단 팝업: 환영 메시지 -->
-    <section class="BaseCommunity__popup base" v-if="tourModeStore.isWorldTour">
-      <button class="accordion__header" @click="toggleSection('world-welcome')">
-        <img
-          src="@/assets/arrowCirlcleButton.svg"
-          class="accordion__toggle"
-          :class="{ open: openSection === 'world-welcome' }"
-          alt="accordion toggle icon"
-          width="36"
-          height="36"
-        />
-      </button>
-      <div class="BaseCommunity__greeting">
-        <div class="BaseCommunity__avatar">
-          <img src="@/assets/eyesBody.svg" alt="avatar body" />
-          <img
-            v-show="currentBubbleIndex === 0"
-            class="BaseCommunity__avatar_eyes"
-            src="@/assets/eyesOn.svg"
-            alt="avatar eyes"
-          />
-          <img
-            v-show="currentBubbleIndex === 1"
-            class="BaseCommunity__avatar_eyes off"
-            src="@/assets/eyesOff.svg"
-            alt="avatar eyes"
-          />
-        </div>
-        <p class="BaseCommunity__bubble world-bubble">
-          <span class="BaseCommunity__bubble_text">
-            Hello feminists worldwide!<br />
-            Any cyberflashing cases in your country?
-          </span>
-        </p>
-      </div>
-      <div class="content_text" v-show="openSection === 'world-welcome'">
-        <button
-          class="BaseCommunity__black_button world-cases-button"
-          @click="openWorldCases"
-        >
-          View Punishment Cases
-          <img
-            src="@/assets/slideCardArrow.svg"
-            class="button_arrow_icon"
-            alt="button arrow icon"
-            width="14"
-            height="14"
-          />
-        </button>
-      </div>
-    </section>
-
     <!-- 다크맵 투어 일지: Korea Tour = K-다크맵, World Tour = W-다크맵 -->
     <section class="BaseCommunity__popup" v-if="tourModeStore.isKoreaTour">
       <!-- 아코디언 타이틀 클릭시 토글 -->
@@ -432,10 +380,12 @@
       </div>
     </section>
 
-    <!-- World Tour 하단 팝업: W-다크맵 투어 일지 -->
-    <section class="BaseCommunity__popup" v-if="tourModeStore.isWorldTour">
+    <!-- World Tour 통합 팝업 -->
+    <section
+      class="BaseCommunity__popup base world-tour-popup"
+      v-if="tourModeStore.isWorldTour"
+    >
       <button class="accordion__header" @click="toggleSection('world-tour')">
-        <strong class="accordion__title">{{ t('worldTour.title') }}</strong>
         <img
           src="@/assets/arrowCirlcleButton.svg"
           class="accordion__toggle"
@@ -445,13 +395,38 @@
           height="36"
         />
       </button>
-      <div class="content_text" v-show="openSection === 'world-tour'">
+      <div class="world-tour-content" v-show="openSection === 'world-tour'">
+        <div class="BaseCommunity__greeting">
+          <div class="BaseCommunity__avatar">
+            <img src="@/assets/eyesBody.svg" alt="avatar body" />
+            <img
+              v-show="currentBubbleIndex === 0"
+              class="BaseCommunity__avatar_eyes"
+              src="@/assets/eyesOn.svg"
+              alt="avatar eyes"
+            />
+            <img
+              v-show="currentBubbleIndex === 1"
+              class="BaseCommunity__avatar_eyes off"
+              src="@/assets/eyesOff.svg"
+              alt="avatar eyes"
+            />
+          </div>
+          <p class="BaseCommunity__bubble world-bubble">
+            <span class="BaseCommunity__bubble_text">
+              <span class="world-bubble-nowrap">Hello feminists worldwide!</span><br />
+              Any cyberflashing cases in your country?
+            </span>
+          </p>
+        </div>
+
+        <strong class="accordion__title world-tour-title">{{
+          t('worldTour.title')
+        }}</strong>
         <p class="content_text_title">
-          {{
-            t('worldTour.countLabel', {
-              n: worldTotalCount,
-            })
-          }}
+          To date, there have been
+          <span class="highlight">{{ worldTotalCount }}</span>
+          cyberflashing incidents worldwide.
         </p>
         <div class="tour__links">
           <button class="tour_link_button" @click="openWorldFaq('shadowPins')">
@@ -877,10 +852,12 @@ import {
 import { useTranslation } from '@/composables/useTranslation';
 import CountryTabs from '@/components/worldTour/CountryTabs.vue';
 import CyberFlashingCaseCard from '@/components/worldTour/CyberFlashingCaseCard.vue';
+import { useCyberFlashingStore } from '@/store/useCyberFlashingStore';
 
 const auth = useAuthStore();
 const statsStore = useStatsStore();
 const tourModeStore = useTourModeStore();
+const cyberFlashingStore = useCyberFlashingStore();
 const router = useRouter();
 const { locale, t } = useTranslation();
 
@@ -927,7 +904,7 @@ const isWorldCasesPanelOpen = ref(false);
 const selectedWorldCasesCountry = ref('England');
 
 /* --------- 아코디언 / 인삿말 --------- */
-const openSection = ref(tourModeStore.isWorldTour ? 'world-welcome' : 'mypage');
+const openSection = ref(tourModeStore.isWorldTour ? 'world-tour' : 'mypage');
 const toggleSection = (section) => {
   openSection.value = openSection.value === section ? null : section;
 };
@@ -935,7 +912,7 @@ const toggleSection = (section) => {
 watch(
   () => tourModeStore.isWorldTour,
   (isWorld) => {
-    openSection.value = isWorld ? 'world-welcome' : 'mypage';
+    openSection.value = isWorld ? 'world-tour' : 'mypage';
   },
 );
 
@@ -977,7 +954,10 @@ const fetchAccountData = async () => {
 /* ========== 초기 데이터 로딩 ========== */
 const loadInitialData = async () => {
   try {
-    await statsStore.fetchStats();
+    await Promise.all([
+      statsStore.fetchStats(),
+      cyberFlashingStore.fetchAllCases(),
+    ]);
   } catch (error) {
     console.error('초기 데이터 로딩 실패:', error);
   }
@@ -1210,11 +1190,6 @@ const openWorldFaq = (key) => {
   isWorldFaqPanelOpen.value = true;
 };
 
-const openWorldCases = () => {
-  selectedWorldCasesCountry.value = 'England';
-  isWorldCasesPanelOpen.value = true;
-};
-
 const changeWorldCasesCountry = (country) => {
   selectedWorldCasesCountry.value = country;
 };
@@ -1244,12 +1219,7 @@ const closeWorldFaqPanel = () => {
   isWorldUsListOpen.value = false;
 };
 
-const worldTotalCount = computed(() =>
-  Object.values(cyberFlashingCases).reduce(
-    (count, cases) => count + (cases?.length || 0),
-    0,
-  ),
-);
+const worldTotalCount = computed(() => cyberFlashingStore.totalCount || 0);
 
 const handleCarouselClick = (card) => {
   if (!auth.isLoggedIn) {
@@ -1491,11 +1461,90 @@ const currentWorldLegalDetail = computed(
     gap: 6px;
   }
 
+  .world-tour-popup {
+    padding: 20px 18px 24px;
+
+    .accordion__header {
+      justify-content: flex-end;
+      min-height: 24px;
+    }
+
+    .accordion__toggle {
+      right: 0;
+      top: 0;
+    }
+  }
+
+  .world-tour-content {
+    color: #fff;
+  }
+
+  .world-tour-title {
+    display: block;
+    margin-top: 18px;
+    margin-bottom: 22px;
+    font-size: 18px;
+    line-height: 1.3;
+  }
+
+  .world-tour-popup .content_text_title {
+    font-size: 13px;
+    line-height: 1.8;
+    font-weight: 600;
+  }
+
+  .world-tour-popup .tour__links {
+    margin-top: 22px;
+  }
+
+  .world-tour-popup .tour_link_button {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+    padding: 4px 0;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .world-tour-popup .tour_link_button > span {
+    display: inline;
+    flex: 0 1 auto;
+    text-align: left;
+  }
+
+  .world-tour-popup .tour__right__button {
+    flex: 0 0 10px;
+    margin-left: 5px;
+  }
+
   // 알람
   &__greeting {
     display: flex;
     justify-content: space-between;
     padding-top: 6px;
+  }
+
+  .world-tour-popup &__greeting {
+    align-items: center;
+    gap: 6px;
+    padding-top: 8px;
+  }
+
+  .world-tour-popup &__avatar {
+    width: 92px;
+    flex-shrink: 0;
+    margin-left: 0;
+    margin-bottom: -34px;
+    transform: scale(0.62);
+    transform-origin: center top;
+    display: flex;
+    justify-content: center;
+  }
+
+  .world-tour-popup &__avatar_eyes {
+    left: -15px;
+    top: 28px;
   }
 
   &__avatar {
@@ -1548,6 +1597,24 @@ const currentWorldLegalDetail = computed(
     line-height: 1.5;
     position: relative;
     z-index: 2;
+  }
+
+  .world-tour-popup &__bubble {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+    min-height: 56px;
+    padding: 12px 12px;
+    border-radius: 10px 10px 10px 0;
+  }
+
+  .world-tour-popup &__bubble_text {
+    font-size: 11px;
+    line-height: 1.55;
+  }
+
+  .world-bubble-nowrap {
+    white-space: nowrap;
   }
 
   &__bubble_text > span {
