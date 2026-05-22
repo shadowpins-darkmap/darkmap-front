@@ -10,10 +10,13 @@
         "
       />
       <!-- TourModeToggle 임시 숨김 (world tour 작업 완료 후 복원) -->
-      <!-- <TourModeToggle /> -->
+      <TourModeToggle />
     </div>
 
-    <div class="search_wrap" :class="{ 'world-mode': tourModeStore.isWorldTour }">
+    <div
+      class="search_wrap"
+      :class="{ 'world-mode': tourModeStore.isWorldTour }"
+    >
       <button
         v-if="tourModeStore.isKoreaTour"
         class="report_guide_button"
@@ -150,9 +153,11 @@
         </template>
         <template v-else>
           <div class="body_title_wrap">
-            <strong class="body_title"><span>{{ t('countries.label') }}</span></strong>
+            <strong class="body_title"
+              ><span>{{ t('countries.label') }}</span></strong
+            >
             <BaseDropdown
-              :list="worldCountries"
+              :list="availableWorldCountries"
               :selected="selectedCountry"
               :onSelect="changeCountry"
             />
@@ -160,14 +165,18 @@
         </template>
 
         <div class="body_title_wrap">
-          <strong class="body_title"><span>{{
-            tourModeStore.isKoreaTour ? '뉴스 투어' : 'Cyber Flashing Cases'
-          }}</span></strong>
+          <strong class="body_title"
+            ><span>{{
+              tourModeStore.isKoreaTour ? '뉴스 투어' : 'Cyber Flashing Cases'
+            }}</span></strong
+          >
         </div>
         <div class="news_table_wrap">
           <div class="news_table_line top"></div>
           <div v-for="(row, i) in currentRows" :key="i" class="article_table">
-            <div class="table_position">{{ row.address || row.date || '-' }}</div>
+            <div class="table_position">
+              {{ row.address || row.date || '-' }}
+            </div>
             <div
               class="table_title"
               @click="row.url ? clickTitle(row.url) : undefined"
@@ -196,8 +205,8 @@
             <img style="width: 5px" src="../assets/rightArrow.svg" />
           </button>
         </div>
-        <div class="footer" v-if="tourModeStore.isKoreaTour">
-          <BaseFooter :is-world-tour="false" />
+        <div class="footer">
+          <BaseFooter :is-world-tour="tourModeStore.isWorldTour" />
         </div>
       </div>
     </div>
@@ -222,22 +231,24 @@ import AddressFilter from './AddressFilter.vue';
 import addressData from '@/constant/addresses.json';
 import { SIDO_SHORT_ORDER } from '@/constant/sidoShort';
 import '@/styles/ControlPopup.scss';
-import { ref, computed, defineEmits, watch } from 'vue';
+import { ref, computed, defineEmits, watch, onMounted } from 'vue';
 import BaseFooter from '@/components/BaseFooter.vue';
 import ReportGuidePopup from '@/components/searchArea/ReportGuidePopup.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
 import SearchListPanel from '@/components/searchArea/SearchListPanel.vue';
 import BaseDropdown from './BaseDropdown.vue';
-// import TourModeToggle from './TourModeToggle.vue'; // 임시 숨김
+import TourModeToggle from './TourModeToggle.vue';
 import { useTourModeStore } from '@/store/useTourModeStore';
 import { useTranslation } from '@/composables/useTranslation';
-import { cyberFlashingCases, worldCountries } from '@/constant/worldTourData';
+import { worldCountries } from '@/constant/worldTourData';
+import { useCyberFlashingStore } from '@/store/useCyberFlashingStore';
 
 const showReportGuide = ref(false);
 const isListPanelOpen = ref(false);
-const selectedCountry = ref(worldCountries[0]);
 const tourModeStore = useTourModeStore();
+const cyberFlashingStore = useCyberFlashingStore();
 const { t } = useTranslation();
+const selectedCountry = ref(worldCountries[0]);
 
 const handleListPanelClose = () => {
   isListPanelOpen.value = false;
@@ -254,14 +265,22 @@ const { filteredArticles } = storeToRefs(useNewsListStore());
 const PAGE_SIZE = 9;
 
 const tableArticles = ref(
-  Array(PAGE_SIZE).fill(null).map(() => ({ title: '', address: '', url: '' })),
+  Array(PAGE_SIZE)
+    .fill(null)
+    .map(() => ({ title: '', address: '', url: '' })),
 );
 const currentPage = ref(1);
 const pageNumbers = ref([1]);
 
-const worldRows = computed(
-  () => cyberFlashingCases[selectedCountry.value] || cyberFlashingCases.England,
-);
+const availableWorldCountries = computed(() => {
+  return cyberFlashingStore.countryNames.length
+    ? cyberFlashingStore.countryNames
+    : worldCountries;
+});
+
+const worldRows = computed(() => {
+  return cyberFlashingStore.casesByCountryName[selectedCountry.value] || [];
+});
 
 const rowSource = computed(() => {
   return tourModeStore.isKoreaTour ? filteredArticles.value : worldRows.value;
@@ -280,6 +299,12 @@ watch(filteredArticles, () => {
 watch(
   () => tourModeStore.mode,
   () => {
+    if (
+      tourModeStore.isWorldTour &&
+      !availableWorldCountries.value.includes(selectedCountry.value)
+    ) {
+      selectedCountry.value = availableWorldCountries.value[0] || worldCountries[0];
+    }
     initPage();
   },
 );
@@ -306,7 +331,7 @@ const pageChange = (p) => {
         tableArticles.value[i] = {
           date: row.date,
           summary: row.summary,
-          url: '',
+          url: row.url,
         };
       }
     } else {
@@ -331,6 +356,17 @@ const initPage = () => {
 const changeCountry = (country) => {
   selectedCountry.value = country;
 };
+
+onMounted(async () => {
+  await cyberFlashingStore.fetchAllCases();
+  if (
+    tourModeStore.isWorldTour &&
+    !availableWorldCountries.value.includes(selectedCountry.value)
+  ) {
+    selectedCountry.value = availableWorldCountries.value[0] || selectedCountry.value;
+  }
+  initPage();
+});
 
 const clickPrev = () => {
   const currentGroup = Math.floor((currentPage.value - 1) / 5);
@@ -404,13 +440,13 @@ const initializeDongList = (lv1) => {
     // "전국" 선택 시 시/도(lv1) 목록을 지정된 순서 + 축약명으로 노출
     // name은 필터 매칭용(원본 lv1), label은 화면 표시용(축약명)
     const availableSidos = new Set(addressData.map((addr) => addr.lv1));
-    dongList.value = SIDO_SHORT_ORDER
-      .filter(({ full }) => availableSidos.has(full))
-      .map(({ full, short }) => ({
-        name: full,
-        label: short,
-        checked: true,
-      }));
+    dongList.value = SIDO_SHORT_ORDER.filter(({ full }) =>
+      availableSidos.has(full),
+    ).map(({ full, short }) => ({
+      name: full,
+      label: short,
+      checked: true,
+    }));
     return;
   }
   const selectedAddress = addressData.find((addr) => addr.lv1 === lv1);
