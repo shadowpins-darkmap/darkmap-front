@@ -350,8 +350,8 @@
         </div>
         <p class="BaseCommunity__bubble world-bubble">
           <span class="BaseCommunity__bubble_text">
-            안녕하세요, 전세계의 페미니스트 여러분!<br />
-            당신의 국가에선 사이버플래싱이 처벌되고 있나요?
+            Hello feminists worldwide!<br />
+            Any cyberflashing cases in your country?
           </span>
         </p>
       </div>
@@ -360,7 +360,7 @@
           class="BaseCommunity__black_button world-cases-button"
           @click="openWorldCases"
         >
-          처벌 사례 보러가기
+          View Punishment Cases
           <img
             src="@/assets/slideCardArrow.svg"
             class="button_arrow_icon"
@@ -435,7 +435,7 @@
     <!-- World Tour 하단 팝업: W-다크맵 투어 일지 -->
     <section class="BaseCommunity__popup" v-if="tourModeStore.isWorldTour">
       <button class="accordion__header" @click="toggleSection('world-tour')">
-        <strong class="accordion__title">W-다크맵 투어 일지</strong>
+        <strong class="accordion__title">{{ t('worldTour.title') }}</strong>
         <img
           src="@/assets/arrowCirlcleButton.svg"
           class="accordion__toggle"
@@ -447,13 +447,15 @@
       </button>
       <div class="content_text" v-show="openSection === 'world-tour'">
         <p class="content_text_title">
-          현재까지
-          <span class="highlight">{{ worldTotalCount }}</span
-          >개의 사이버플래싱 사건이 전세계에서 일어나고 있습니다.
+          {{
+            t('worldTour.countLabel', {
+              n: worldTotalCount,
+            })
+          }}
         </p>
         <div class="tour__links">
           <button class="tour_link_button" @click="openWorldFaq('shadowPins')">
-            <span>세도우 핀즈는 어떤 활동을 하는 단체인가요?</span>
+            <span>{{ t('faq.shadowPins') }}</span>
             <img
               src="@/assets/arrowCirlcleButtonRight.svg"
               class="tour__right__button"
@@ -466,7 +468,7 @@
             class="tour_link_button"
             @click="openWorldFaq('cyberFlashing')"
           >
-            <span>사이버플래싱은 무엇인가요?</span>
+            <span>{{ t('faq.cyberFlashing') }}</span>
             <img
               src="@/assets/arrowCirlcleButtonRight.svg"
               class="tour__right__button"
@@ -477,7 +479,7 @@
           </button>
           <button class="tour_link_button" @click="openWorldFaq('legal')">
             <span
-              >각 국가에서는 사이버플래싱을 어떻게 법에서 다루고 있나요?</span
+              >{{ t('faq.legal') }}</span
             >
             <img
               src="@/assets/arrowCirlcleButtonRight.svg"
@@ -542,6 +544,15 @@
             direction="vertical"
           >
             <p class="WorldFaqPanel__body">{{ currentWorldFaq?.body }}</p>
+            <a
+              v-if="currentWorldFaq?.sourceUrl"
+              class="WorldFaqPanel__source"
+              :href="currentWorldFaq.sourceUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {{ currentWorldFaq.sourceLabel }}
+            </a>
           </GradientScroll>
         </div>
         <template v-if="currentWorldFaq?.list">
@@ -552,7 +563,7 @@
             <li v-for="(name, i) in currentWorldFaq.list" :key="i">
               <button
                 class="WorldFaqPanel__list_button"
-                @click="openWorldLegalDetail(currentWorldFaq.listKeys[i])"
+                @click="handleWorldLegalListClick(currentWorldFaq.listKeys[i])"
               >
                 <span>{{ i + 1 }}. {{ name }}</span>
                 <img
@@ -563,6 +574,31 @@
                   height="16"
                 />
               </button>
+              <ol
+                v-if="
+                  currentWorldFaq.listKeys[i] === 'USA' && isWorldUsListOpen
+                "
+                class="WorldFaqPanel__sub_list"
+              >
+                <li
+                  v-for="(stateName, stateIndex) in worldUsLegalOptions"
+                  :key="stateName.key"
+                >
+                  <button
+                    class="WorldFaqPanel__sub_list_button"
+                    @click="openWorldLegalDetail(stateName.key)"
+                  >
+                    <span>{{ i + 1 }}-{{ stateIndex + 1 }}. {{ stateName.label }}</span>
+                    <img
+                      src="@/assets/sliderGoDetailIcon.svg"
+                      class="WorldFaqPanel__list_icon"
+                      alt="slider arrow icon"
+                      width="14"
+                      height="14"
+                    />
+                  </button>
+                </li>
+              </ol>
             </li>
           </ol>
         </template>
@@ -598,16 +634,73 @@
           gradient-color="rgba(64,64,64,1.5)"
           :showScrollbar="true"
         >
-          <ul class="WorldLegalDetail__case_list">
-            <li
-              v-for="(item, i) in currentWorldLegalCases"
-              :key="i"
-              class="WorldLegalDetail__case_item"
+          <div class="WorldLegalDetail__content">
+            <section class="WorldLegalDetail__meta">
+              <span class="WorldLegalDetail__label">
+                Date of Enactment / Name of Legislation
+              </span>
+              <p>
+                <template
+                  v-for="(part, index) in parseBoldText(currentWorldLegalDetail.meta)"
+                  :key="`meta-${index}`"
+                >
+                  <strong v-if="part.bold" class="WorldLegalDetail__emphasis">
+                    {{ part.text }}
+                  </strong>
+                  <span v-else>{{ part.text }}</span>
+                </template>
+              </p>
+            </section>
+
+            <section class="WorldLegalDetail__statute">
+              <span class="WorldLegalDetail__label">Statutory Text</span>
+              <p>
+                <template
+                  v-for="(part, index) in parseBoldText(currentWorldLegalDetail.statute)"
+                  :key="`statute-${index}`"
+                >
+                  <strong v-if="part.bold" class="WorldLegalDetail__emphasis">
+                    {{ part.text }}
+                  </strong>
+                  <span v-else>{{ part.text }}</span>
+                </template>
+              </p>
+            </section>
+
+            <section
+              v-for="section in currentWorldLegalDetail.sections"
+              :key="section.heading"
+              class="WorldLegalDetail__section"
             >
-              <span class="WorldLegalDetail__case_date">{{ item.date }}</span>
-              <p class="WorldLegalDetail__case_summary">{{ item.summary }}</p>
-            </li>
-          </ul>
+              <h3>{{ section.heading }}</h3>
+              <p>
+                <template
+                  v-for="(part, index) in parseBoldText(section.body)"
+                  :key="`${section.heading}-${index}`"
+                >
+                  <strong v-if="part.bold" class="WorldLegalDetail__emphasis">
+                    {{ part.text }}
+                  </strong>
+                  <span v-else>{{ part.text }}</span>
+                </template>
+              </p>
+            </section>
+
+            <section class="WorldLegalDetail__penalty">
+              <span class="WorldLegalDetail__label">Penalty</span>
+              <p>
+                <template
+                  v-for="(part, index) in parseBoldText(currentWorldLegalDetail.penalty)"
+                  :key="`penalty-${index}`"
+                >
+                  <strong v-if="part.bold" class="WorldLegalDetail__emphasis">
+                    {{ part.text }}
+                  </strong>
+                  <span v-else>{{ part.text }}</span>
+                </template>
+              </p>
+            </section>
+          </div>
         </GradientScroll>
       </div>
     </SlidePanel>
@@ -631,7 +724,7 @@
           />
         </button>
         <strong class="WorldCasesPanel__title">{{
-          t('worldTour.countLabel', { n: currentWorldCasesCount })
+          t('worldTour.casesCountLabel', { n: currentWorldCasesCount })
         }}</strong>
         <CountryTabs
           :countries="worldCountries"
@@ -779,6 +872,7 @@ import {
   worldFaqContent,
   cyberFlashingCases,
   worldCountries,
+  worldLegalTexts,
 } from '@/constant/worldTourData';
 import { useTranslation } from '@/composables/useTranslation';
 import CountryTabs from '@/components/worldTour/CountryTabs.vue';
@@ -828,6 +922,7 @@ const isWorldFaqPanelOpen = ref(false);
 const selectedWorldFaqKey = ref('shadowPins');
 const isWorldLegalDetailOpen = ref(false);
 const selectedWorldLegalCountry = ref('England');
+const isWorldUsListOpen = ref(false);
 const isWorldCasesPanelOpen = ref(false);
 const selectedWorldCasesCountry = ref('England');
 
@@ -1109,6 +1204,9 @@ const handlePanelClose = () => {
 
 const openWorldFaq = (key) => {
   selectedWorldFaqKey.value = key;
+  if (key !== 'legal') {
+    isWorldUsListOpen.value = false;
+  }
   isWorldFaqPanelOpen.value = true;
 };
 
@@ -1132,9 +1230,18 @@ const openWorldLegalDetail = (countryKey) => {
   isWorldLegalDetailOpen.value = true;
 };
 
+const handleWorldLegalListClick = (countryKey) => {
+  if (countryKey === 'USA') {
+    isWorldUsListOpen.value = !isWorldUsListOpen.value;
+    return;
+  }
+  openWorldLegalDetail(countryKey);
+};
+
 const closeWorldFaqPanel = () => {
   isWorldFaqPanelOpen.value = false;
   isWorldLegalDetailOpen.value = false;
+  isWorldUsListOpen.value = false;
 };
 
 const worldTotalCount = computed(() =>
@@ -1275,6 +1382,24 @@ const handleMarketingSkip = () => {
   showMarketingStep.value = false;
 };
 
+const worldUsLegalOptions = [
+  { label: 'New Hampshire', key: 'New Hampshire' },
+  { label: 'Texas', key: 'Texas' },
+];
+
+const parseBoldText = (text = '') => {
+  return String(text)
+    .split(/(\*\*[^*]+\*\*)/g)
+    .filter(Boolean)
+    .map((part) => {
+      const bold = part.startsWith('**') && part.endsWith('**');
+      return {
+        bold,
+        text: bold ? part.slice(2, -2) : part,
+      };
+    });
+};
+
 const currentWorldFaq = computed(() => {
   const source =
     worldFaqContent[selectedWorldFaqKey.value] || worldFaqContent.shadowPins;
@@ -1290,15 +1415,15 @@ const currentWorldFaq = computed(() => {
   if (locale.value === 'ko') {
     return {
       title:
-        source.title === 'What kind of activities does Shadow Pins do?'
+        source.title === 'What does Shadow Pins do?'
           ? '셰도우 핀즈는 어떤 활동을 하는 단체인가요?'
-          : source.title === 'What is cyber flashing?'
+          : source.title === 'What is cyberflashing?'
             ? '사이버플래싱은 무엇인가요?'
             : '각 국가에서는 사이버플래싱을 어떻게 법에서 다루고 있나요?',
       body:
-        source.title === 'What kind of activities does Shadow Pins do?'
+        source.title === 'What does Shadow Pins do?'
           ? '셰도우 핀즈는 길거리 및 디지털 괴롭힘 문제를 데이터로 기록하고 지도 위에 시각화하는 시민 프로젝트입니다. 제보와 공공 데이터를 바탕으로 위험 패턴을 알리고, 예방을 위한 교육 콘텐츠를 제공합니다.'
-          : source.title === 'What is cyber flashing?'
+          : source.title === 'What is cyberflashing?'
             ? '사이버플래싱은 상대의 동의 없이 성적 이미지 또는 영상을 전송하는 행위를 말합니다. 메신저, 근거리 파일 전송, SNS 등 다양한 채널에서 발생하며 피해자에게 공포와 수치심, 장기적인 정신적 피해를 남길 수 있습니다.'
             : '국가별로 입법 수준은 다르지만, 최근에는 성적 괴롭힘 또는 성폭력 관련 법률로 처벌하는 추세가 확대되고 있습니다. 반복성, 고의성, 피해 규모에 따라 벌금형부터 실형까지 선고될 수 있습니다.',
       ...legalExtra,
@@ -1307,21 +1432,14 @@ const currentWorldFaq = computed(() => {
   return { ...source, ...legalExtra };
 });
 
-const countryLabelMap = {
-  England: '영국',
-  USA: '미국',
-  Austria: '오스트리아',
-  'South Korea': '한국',
-};
-
 const worldLegalDetailCountryLabel = computed(
-  () =>
-    countryLabelMap[selectedWorldLegalCountry.value] ||
-    selectedWorldLegalCountry.value,
+  () => currentWorldLegalDetail.value.title || selectedWorldLegalCountry.value,
 );
 
-const currentWorldLegalCases = computed(
-  () => cyberFlashingCases[selectedWorldLegalCountry.value] || [],
+const currentWorldLegalDetail = computed(
+  () =>
+    worldLegalTexts[selectedWorldLegalCountry.value] ||
+    worldLegalTexts.England,
 );
 </script>
 
@@ -1804,6 +1922,15 @@ const currentWorldLegalCases = computed(
   white-space: pre-line;
 }
 
+.WorldFaqPanel__source {
+  display: inline-block;
+  color: #8270cb;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-decoration: underline;
+}
+
 .WorldFaqPanel__sub_title {
   color: #fff;
   font-size: 18px;
@@ -1836,6 +1963,23 @@ const currentWorldLegalCases = computed(
   margin-left: 5px;
 }
 
+.WorldFaqPanel__sub_list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0 4px 18px;
+}
+
+.WorldFaqPanel__sub_list_button {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .WorldLegalDetail {
   background-color: #404040;
   padding: 28px 18px;
@@ -1853,39 +1997,58 @@ const currentWorldLegalCases = computed(
 
 .WorldLegalDetail__title {
   font-weight: bold;
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1.2;
   display: flex;
   padding-top: 16px;
-  padding-bottom: 16px;
-  color: #fff;
-}
-
-.WorldLegalDetail__case_list {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
   padding-bottom: 20px;
+  color: #fff4f4;
 }
 
-.WorldLegalDetail__case_item {
+.WorldLegalDetail__content {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding-left: 4px;
+  gap: 24px;
+  padding: 0 4px 28px;
 }
 
-.WorldLegalDetail__case_date {
-  font-size: 11px;
-  color: #a190df;
-  font-weight: bold;
+.WorldLegalDetail__label {
+  display: block;
+  margin-bottom: 10px;
+  color: #fff4f4;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.35;
 }
 
-.WorldLegalDetail__case_summary {
+.WorldLegalDetail__meta,
+.WorldLegalDetail__statute,
+.WorldLegalDetail__section,
+.WorldLegalDetail__penalty {
+  padding: 0;
+}
+
+.WorldLegalDetail__section h3 {
+  margin: 0 0 10px;
+  color: #fff4f4;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.WorldLegalDetail__content p {
+  margin: 0;
   font-size: 13px;
   color: #fff;
-  line-height: 1.6;
+  font-weight: 400;
+  line-height: 1.65;
   word-break: keep-all;
+  white-space: pre-line;
+}
+
+.WorldLegalDetail__emphasis {
+  color: #00ffc2;
+  font-weight: 800;
 }
 
 .WorldCasesPanel {
