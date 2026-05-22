@@ -77,7 +77,7 @@ export const worldFaqContent = {
   },
   legal: {
     title: 'How do different countries address cyberflashing in their laws?',
-    body: 'Cyberflashing is addressed differently across jurisdictions. Some laws define it as sending or giving an unwanted sexual image, while others treat it through broader provisions on sexual exposure, indecent transmission, or sexual harassment. Penalties may include fines, criminal records, or imprisonment depending on the jurisdiction, intent, consent, harm, and repeat-offense factors.',
+    // body: 'Cyberflashing is addressed differently across jurisdictions. Some laws define it as sending or giving an unwanted sexual image, while others treat it through broader provisions on sexual exposure, indecent transmission, or sexual harassment. Penalties may include fines, criminal records, or imprisonment depending on the jurisdiction, intent, consent, harm, and repeat-offense factors.',
     subTitle: 'Laws by Country',
     list: [
       'England',
