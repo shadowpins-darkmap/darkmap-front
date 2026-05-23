@@ -22,13 +22,13 @@
     </div>
     <div v-if="isWorldTour" class="BaseFootercontainer">
       <a
-        :href="'https://dune-purple-f80.notion.site/21325ce1e4e9803393abfe29d60323b4'"
+        :href="'https://dune-purple-f80.notion.site/About-Our-Services-ENG-36825ce1e4e9801694c7e0f6d12fd3d0'"
         target="_blank"
         class="BaseFooterlink"
         >About Our Services</a
       >
       <a
-        :href="'https://www.notion.so/20025ce1e4e980689f25e1db1373fd9c'"
+        :href="'https://dune-purple-f80.notion.site/V1-1-2026-3-7-ENG-36825ce1e4e980cf96d9c3370151487b'"
         target="_blank"
         rel="noopener noreferrer"
         class="BaseFooterlink"
