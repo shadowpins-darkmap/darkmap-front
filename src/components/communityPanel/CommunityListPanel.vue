@@ -183,8 +183,27 @@ const pageInfo = ref({
   isLast: false,
 });
 
-const openDetail = (item) => {
+const getPostBoardId = (post) => post?.boardId ?? post?.id ?? post?.board?.boardId;
+
+const openDetail = async (item) => {
+  const boardId = getPostBoardId(item);
+
   selectedPost.value = item;
+
+  if (boardId) {
+    try {
+      const response = await boardsApi.getBoardById(boardId);
+      const detail = response?.data;
+
+      if (detail) {
+        Object.assign(item, detail);
+        selectedPost.value = item;
+      }
+    } catch (error) {
+      console.error('게시글 상세 조회 실패:', error);
+    }
+  }
+
   isDetailPanelOpen.value = true;
 };
 

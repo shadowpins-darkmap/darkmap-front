@@ -403,19 +403,6 @@ const onReportComplete = (type, id) => {
   else if (type === 'comment') reportedComments.value.add(id);
 };
 
-const updatePostInfo = async () => {
-  try {
-    const boardId = getPostBoardId(props.post);
-    if (!boardId) return;
-    const updatedPost = await boardsApi.getBoardById(boardId);
-    if (updatedPost?.data) {
-      Object.assign(props.post, updatedPost.data);
-    }
-  } catch (error) {
-    console.error('게시글 정보 업데이트 실패:', error);
-  }
-};
-
 const handleBoardLike = async () => {
   try {
     const boardId = getPostBoardId(props.post);
@@ -423,8 +410,11 @@ const handleBoardLike = async () => {
     const response = await boardsApi.likeBoard(boardId);
     if (response?.data) {
       isPostLiked.value = response.data.isLiked;
+      Object.assign(props.post, {
+        likeCount: response.data.likeCount ?? props.post.likeCount,
+        isLiked: response.data.isLiked,
+      });
       showLikePopup.value = response.data.isLiked;
-      await updatePostInfo();
     }
   } catch (error) {
     console.error('게시글 좋아요 실패:', error);
@@ -436,7 +426,7 @@ const handleCommentLike = async (commentId) => {
     const response = await likeComment(commentId);
     if (response?.data) {
       const { isLiked, likeCount } = response.data;
-      const comment = comments.value.find((c) => c.id === commentId);
+      const comment = comments.value.find((c) => c.commentId === commentId);
       if (comment) {
         comment.likes = likeCount;
         comment.isLiked = isLiked;
@@ -504,7 +494,9 @@ const submitComment = async () => {
       showCommentPopup.value = true;
       comment.value = '';
       await loadComments();
-      await updatePostInfo();
+      Object.assign(props.post, {
+        commentCount: (props.post.commentCount || 0) + 1,
+      });
       if (auth.isLoggedIn) {
         await auth.fetchMyComments({}, { force: true });
       }
@@ -518,6 +510,9 @@ const handleDeleteComment = async (commentId) => {
   try {
     await deleteComment(commentId);
     await loadComments();
+    Object.assign(props.post, {
+      commentCount: Math.max((props.post.commentCount || 0) - 1, 0),
+    });
     showDeletePopup.value = true;
     if (auth.isLoggedIn) {
       await auth.fetchMyComments({}, { force: true });
