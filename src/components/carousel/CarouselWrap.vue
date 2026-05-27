@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, ref, onMounted } from 'vue';
+import { defineProps, defineExpose, ref, onMounted } from 'vue';
 import 'vue3-carousel/carousel.css';
 import { Carousel, Slide } from 'vue3-carousel';
 import { boardsApi } from '@/api/boards';
@@ -7,6 +7,8 @@ import { formatDate } from '@/utils/date';
 
 const cards = ref([]);
 const loading = ref(false);
+
+const getCardBoardId = (card) => card?.boardId ?? card?.id;
 
 const loadPopularBoards = async () => {
   try {
@@ -42,6 +44,23 @@ const loadPopularBoards = async () => {
     loading.value = false;
   }
 };
+
+const updateCard = (boardId, updates) => {
+  const index = cards.value.findIndex((c) => getCardBoardId(c) === boardId);
+  if (index !== -1) {
+    cards.value[index] = { ...cards.value[index], ...updates };
+  }
+};
+
+const removeCard = (boardId) => {
+  cards.value = cards.value.filter((c) => getCardBoardId(c) !== boardId);
+};
+
+defineExpose({
+  updateCard,
+  removeCard,
+  reload: loadPopularBoards,
+});
 
 onMounted(() => {
   loadPopularBoards();
