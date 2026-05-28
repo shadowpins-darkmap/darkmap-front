@@ -1,5 +1,6 @@
 # darkmap-front
-K-dark map frontend
+K-darkmap frontend
+
 
 ## Project setup
 
@@ -49,3 +50,4 @@ nvm use
 // TODO: 배포 주소 메인 도메인으로 변경필요
 
 ```
+
