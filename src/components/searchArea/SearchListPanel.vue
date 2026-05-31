@@ -171,7 +171,7 @@ const isPanel2depsOpen = ref(false);
 const searchPlaceholder = computed(() =>
   tourModeStore.isWorldTour
     ? 'Search the name of the area where you live.'
-    : '내가 사는 지역의 이름을 한 번 검색해보세요.',
+    : '내가 사는 지역의 이름을 한번 검색해보세요.',
 );
 
 const searchGuideText = computed(() =>
