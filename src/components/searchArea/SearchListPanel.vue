@@ -13,7 +13,7 @@
       <input
         v-model="keyword"
         type="text"
-        placeholder="내가 사는 지역의 이름을 한 번 검색해보세요."
+        placeholder="내가 사는 지역의 이름을 한번 검색해보세요."
         class="search_top_input"
         @keyup.enter="handleSearch"
       />
