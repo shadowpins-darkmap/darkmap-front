@@ -1,7 +1,7 @@
 <template>
   <footer class="BaseFooter">
     <div v-if="isWorldTour" class="BaseFooterintro">
-      <span>W-Dark Map Tour of</span>
+      <span>W-Darkmap Tour of</span>
       <a
         :href="'https://weareshadowpins.com/'"
         target="_blank"
