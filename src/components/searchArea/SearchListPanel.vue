@@ -13,7 +13,7 @@
       <input
         v-model="keyword"
         type="text"
-        placeholder="내가 사는 지역의 이름을 한 번 검색해보세요."
+        :placeholder="searchPlaceholder"
         class="search_top_input"
         @keyup.enter="handleSearch"
       />
@@ -25,9 +25,7 @@
           height="24"
         />
       </button>
-      <p class="search_guide">
-        띄어쓰기 공백을 포함해서 정확한 키워드를 입력해주세요!
-      </p>
+      <p class="search_guide">{{ searchGuideText }}</p>
     </div>
     <!-- 리스트 솔팅 탭 -->
     <GradientScroll
@@ -51,8 +49,8 @@
     <strong v-if="keyword && (hasSearched || loading)" class="search_title">
       {{
         loading
-          ? '검색중입니다.'
-          : `총 ${totalElements}건의 검색결과가 있습니다.`
+          ? loadingText
+          : resultCountText
       }}
     </strong>
 
@@ -70,11 +68,7 @@
               <span class="search_list_contents">
                 <span class="tag_button_wrap">
                   <span class="search_list_tag">
-                    {{
-                      item.resultType === 'ARTICLE'
-                        ? item.crimeType || '뉴스'
-                        : item.category || '커뮤니티'
-                    }}
+                    {{ getItemCategoryLabel(item) }}
                   </span>
                   <span class="search_list_arrow">
                     <img
@@ -102,10 +96,10 @@
           </li>
         </ul>
         <div v-else-if="hasSearched && !loading" class="no_results">
-          <p>검색 결과가 없습니다.</p>
+          <p>{{ noResultsText }}</p>
         </div>
         <PaginationWrap
-          v-if="totalElements > 10"
+          v-if="totalElements > itemsPerPage"
           :currentPage="currentPage + 1"
           :pageNumbers="pageNumbers.map((p) => p + 1)"
           @page-change="(page) => pageChange(page - 1)"
@@ -144,6 +138,8 @@ import CommunityListDetailPanel from '@/components/communityPanel/CommunityListD
 import GradientScroll from '@/components/gradientScroll/GradientScroll.vue';
 import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
 import SlidePanel from '@/components/slidePanel/SlidePanel.vue';
+import { useCyberFlashingStore } from '@/store/useCyberFlashingStore';
+import { useTourModeStore } from '@/store/useTourModeStore';
 
 const props = defineProps({
   selectedArticle: {
@@ -152,7 +148,14 @@ const props = defineProps({
   },
 });
 
-const categories = ['전체', '뉴스', '커뮤니티'];
+const tourModeStore = useTourModeStore();
+const cyberFlashingStore = useCyberFlashingStore();
+
+const koreaCategories = ['전체', '뉴스', '커뮤니티'];
+const worldCategories = ['All', 'News'];
+const categories = computed(() =>
+  tourModeStore.isWorldTour ? worldCategories : koreaCategories,
+);
 const selectedCategory = ref('전체');
 const selectedPost = ref(null);
 const keyword = ref('');
@@ -164,6 +167,72 @@ const showErrorPopup = ref(false);
 const currentPage = ref(0);
 const itemsPerPage = 10;
 const isPanel2depsOpen = ref(false);
+
+const searchPlaceholder = computed(() =>
+  tourModeStore.isWorldTour
+    ? 'Search the name of the area where you live.'
+    : '내가 사는 지역의 이름을 한 번 검색해보세요.',
+);
+
+const searchGuideText = computed(() =>
+  tourModeStore.isWorldTour
+    ? 'Please enter the exact keyword, including spaces!'
+    : '띄어쓰기 공백을 포함해서 정확한 키워드를 입력해주세요!',
+);
+
+const loadingText = computed(() =>
+  tourModeStore.isWorldTour ? 'Searching.' : '검색중입니다.',
+);
+
+const resultCountText = computed(() =>
+  tourModeStore.isWorldTour
+    ? `There are a total of ${totalElements.value} search results.`
+    : `총 ${totalElements.value}건의 검색결과가 있습니다.`,
+);
+
+const noResultsText = computed(() =>
+  tourModeStore.isWorldTour ? 'No search results.' : '검색 결과가 없습니다.',
+);
+
+const getItemCategoryLabel = (item) => {
+  if (item.resultType === 'CYBER_FLASHING') return 'News';
+  if (item.resultType === 'ARTICLE') return item.crimeType || '뉴스';
+  return item.category || '커뮤니티';
+};
+
+const normalizeWorldCase = (item) => ({
+  ...item,
+  id: item.id,
+  resultType: 'CYBER_FLASHING',
+  category: 'News',
+  title: item.title || item.summary || 'News Title',
+  content: [item.press, item.date, item.countryCode].filter(Boolean).join(' · '),
+});
+
+const searchWorldCyberFlashingCases = async () => {
+  await cyberFlashingStore.fetchAllCases();
+
+  const trimmedKeyword = keyword.value.trim().toLowerCase();
+  const results = cyberFlashingStore.cases
+    .map(normalizeWorldCase)
+    .filter((item) => {
+      const searchable = [
+        item.title,
+        item.summary,
+        item.content,
+        item.press,
+        item.countryCode,
+        item.date,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return searchable.includes(trimmedKeyword);
+    });
+
+  allSearchResults.value = results;
+  apiTotalElements.value = results.length;
+};
 
 // 카테고리 선택 함수
 const selectCategory = (cat) => {
@@ -191,6 +260,11 @@ const handleSearch = async () => {
   currentPage.value = 0;
 
   try {
+    if (tourModeStore.isWorldTour) {
+      await searchWorldCyberFlashingCases();
+      return;
+    }
+
     const data = await boardsApi.searchBoardByKeyword(
       keyword.value,
       currentPage.value + 1,
@@ -238,7 +312,10 @@ const highlightKeyword = (text) => {
 const openDetail = async (item) => {
   console.log('상세 페이지 열기:', item);
 
-  if (item.resultType === 'ARTICLE' && item.url) {
+  if (
+    (item.resultType === 'ARTICLE' || item.resultType === 'CYBER_FLASHING') &&
+    item.url
+  ) {
     window.open(item.url, '_blank');
     return;
   }
@@ -271,6 +348,10 @@ watch(
 // 필터링된 결과
 const filteredResults = computed(() => {
   let results = allSearchResults.value;
+
+  if (tourModeStore.isWorldTour) {
+    return results;
+  }
 
   if (selectedCategory.value === '뉴스') {
     results = results.filter((item) => item.resultType === 'ARTICLE');
@@ -346,6 +427,11 @@ const clickNext = async () => {
 const loadPage = async (page) => {
   if (loading.value) return;
 
+  if (tourModeStore.isWorldTour) {
+    currentPage.value = page;
+    return;
+  }
+
   loading.value = true;
   try {
     const data = await boardsApi.searchBoardByKeyword(
@@ -370,6 +456,19 @@ const loadPage = async (page) => {
     loading.value = false;
   }
 };
+
+watch(
+  () => tourModeStore.isWorldTour,
+  (isWorldTour) => {
+    selectedCategory.value = isWorldTour ? 'All' : '전체';
+    keyword.value = '';
+    allSearchResults.value = [];
+    apiTotalElements.value = 0;
+    hasSearched.value = false;
+    currentPage.value = 0;
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped lang="scss">
@@ -569,7 +668,7 @@ const loadPage = async (page) => {
 
 /* 하이라이트 스타일 */
 :deep(.highlight) {
-  background-color: #ffeb3b;
+  background-color: #00ffc2;
   color: #000;
   font-weight: bold;
   padding: 0 2px;
