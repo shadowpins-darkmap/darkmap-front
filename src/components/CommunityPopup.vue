@@ -395,31 +395,31 @@
           height="36"
         />
       </button>
-      <div class="BaseCommunity__greeting">
-        <div class="BaseCommunity__avatar">
-          <img src="@/assets/eyesBody.svg" alt="avatar body" />
-          <img
-            v-show="currentBubbleIndex === 0"
-            class="BaseCommunity__avatar_eyes"
-            src="@/assets/eyesOn.svg"
-            alt="avatar eyes"
-          />
-          <img
-            v-show="currentBubbleIndex === 1"
-            class="BaseCommunity__avatar_eyes off"
-            src="@/assets/eyesOff.svg"
-            alt="avatar eyes"
-          />
-        </div>
-        <p class="BaseCommunity__bubble world-bubble">
-          <span class="BaseCommunity__bubble_text">
-            <span class="world-bubble-nowrap">Hello feminists worldwide!</span><br />
-            Any cyberflashing cases in your country?
-          </span>
-        </p>
-      </div>
-
       <div class="world-tour-content" v-show="openSection === 'world-tour'">
+        <div class="BaseCommunity__greeting">
+          <div class="BaseCommunity__avatar">
+            <img src="@/assets/eyesBody.svg" alt="avatar body" />
+            <img
+              v-show="currentBubbleIndex === 0"
+              class="BaseCommunity__avatar_eyes"
+              src="@/assets/eyesOn.svg"
+              alt="avatar eyes"
+            />
+            <img
+              v-show="currentBubbleIndex === 1"
+              class="BaseCommunity__avatar_eyes off"
+              src="@/assets/eyesOff.svg"
+              alt="avatar eyes"
+            />
+          </div>
+          <p class="BaseCommunity__bubble world-bubble">
+            <span class="BaseCommunity__bubble_text">
+              <span class="world-bubble-nowrap">Hello feminists worldwide!</span><br />
+              Any cyberflashing cases in your country?
+            </span>
+          </p>
+        </div>
+
         <strong class="accordion__title world-tour-title">{{
           t('worldTour.title')
         }}</strong>
@@ -1532,19 +1532,24 @@ const currentWorldLegalDetail = computed(
   }
 
   .world-tour-popup &__avatar {
-    width: 74px;
+    width: 92px;
     flex-shrink: 0;
-    margin-bottom: -27px;
+    margin-left: 0;
+    margin-bottom: -34px;
+    transform: scale(0.62);
+    transform-origin: center top;
+    display: flex;
+    justify-content: center;
   }
 
   .world-tour-popup &__avatar_eyes {
-    left: -24px;
+    left: -15px;
     top: 28px;
   }
 
   &__avatar {
     position: relative;
-    margin-left: 14px;
+    margin-left: 6px;
     transform: scale(0.7);
     transform-origin: top left;
     margin-bottom: -27px;
