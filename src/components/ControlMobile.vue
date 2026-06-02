@@ -93,7 +93,32 @@
         </div>
       </div>
       <div class="body_title_wrap">
-        <strong class="body_title"><span>뉴스 투어</span></strong>
+        <strong class="body_title"><span>사건 투어</span></strong>
+        <div
+          class="case_tour_toggle"
+          role="group"
+          aria-label="사건 투어 데이터 유형"
+        >
+          <span
+            class="case_tour_toggle__label"
+            :class="{ active: caseTourStore.isNewsMode }"
+            >뉴스</span
+          >
+          <button
+            class="case_tour_toggle__switch"
+            :class="{ active: caseTourStore.isExperienceMode }"
+            type="button"
+            :aria-pressed="caseTourStore.isExperienceMode"
+            @click="toggleCaseTourMode"
+          >
+            <span class="case_tour_toggle__thumb" />
+          </button>
+          <span
+            class="case_tour_toggle__label"
+            :class="{ active: caseTourStore.isExperienceMode }"
+            >경험담</span
+          >
+        </div>
       </div>
       <div class="ControlMobile__articleTable">
         <div
@@ -102,7 +127,11 @@
           class="ControlMobile__articleTable--item"
         >
           <div class="ControlMobile__table-position">
-            {{ tArticle.address || '-' }}
+            {{
+              tArticle.reporterId
+                ? `제보자 ${tArticle.reporterId}`
+                : tArticle.address || '-'
+            }}
           </div>
           <div
             class="ControlMobile__table-title"
@@ -146,17 +175,20 @@ import BaseFooter from '@/components/BaseFooter.vue';
 import addressData from '@/constant/addresses.json';
 import { SIDO_SHORT_ORDER } from '@/constant/sidoShort';
 import { ref, computed, watch, onMounted } from 'vue';
+import { useCaseTourStore } from '@/store/useCaseTourStore';
 
 const { loadArticles } = useNewsListStore();
 const { articles, filteredArticles } = storeToRefs(useNewsListStore());
+const caseTourStore = useCaseTourStore();
 
 onMounted(async () => {
-  await loadArticles();
+  await Promise.all([loadArticles(), caseTourStore.loadExperienceCases()]);
   filteredArticles.value = [...articles.value];
   initPage();
 });
 
 const clickTitle = (url) => {
+  if (!url) return;
   window.open(url, '_blank');
 };
 
@@ -167,12 +199,26 @@ const tableArticles = ref([
   { title: '', address: '', url: '' },
 ]);
 const pageNumbers = ref([1]);
-const totalPages = computed(
-  () => parseInt(filteredArticles.value.length / 4) + 1,
+const rowSource = computed(() =>
+  caseTourStore.isNewsMode
+    ? filteredArticles.value
+    : filteredExperienceRows.value,
 );
+const totalPages = computed(() => {
+  const pageCount = Math.ceil(rowSource.value.length / 4);
+  return pageCount > 0 ? pageCount : 1;
+});
 const currentPage = ref(1);
 
 watch(filteredArticles, () => {
+  if (caseTourStore.isNewsMode) initPage();
+});
+
+watch(() => caseTourStore.experienceCases, () => {
+  if (caseTourStore.isExperienceMode) initPage();
+});
+
+watch(() => caseTourStore.mode, () => {
   initPage();
 });
 
@@ -181,13 +227,16 @@ const pageChange = (p) => {
 
   // tableArticles를 현재 페이지에 맞춰서 변경
   for (let i = 0; i < 4; i++) {
-    if ((p - 1) * 4 + i < filteredArticles.value.length) {
-      const tableArticle = filteredArticles.value[(p - 1) * 4 + i];
-      const address = tableArticle.address.split(' ').slice(0, 2).join(' ');
+    if ((p - 1) * 4 + i < rowSource.value.length) {
+      const tableArticle = rowSource.value[(p - 1) * 4 + i];
+      const address = tableArticle.address
+        ? tableArticle.address.split(' ').slice(0, 2).join(' ')
+        : tableArticle.category || '-';
       tableArticles.value[i] = {
         title: tableArticle.title,
         address: address,
         url: tableArticle.url,
+        reporterId: tableArticle.reporterId,
       };
     } else {
       tableArticles.value[i] = { title: '-', address: '-', url: '-' };
@@ -211,6 +260,23 @@ const initPage = () => {
   pageChange(1);
   chagnePageNumbers();
 };
+
+const toggleCaseTourMode = () => {
+  caseTourStore.toggleMode();
+  initPage();
+};
+
+const filteredExperienceRows = computed(() => {
+  const filterCrime = crimeTypes.value
+    .filter(({ checked }) => checked)
+    .map(({ crimeType }) => crimeType);
+  if (filterCrime.length === crimeTypes.value.length) {
+    return caseTourStore.experienceCases;
+  }
+  return caseTourStore.experienceCases.filter((row) =>
+    filterCrime.includes(row.category),
+  );
+});
 
 const clickPrev = () => {
   // 이전 클릭 불가능 시 바로 return
@@ -374,6 +440,7 @@ const changeFilter = () => {
       article.sido === filterSido && filterSigungu.includes(article.sigungu)
     );
   });
+  if (caseTourStore.isExperienceMode) initPage();
 };
 </script>
 
@@ -460,7 +527,50 @@ const changeFilter = () => {
   }
 
   .body_title_wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin-top: 32px;
+  }
+
+  .case_tour_toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  .case_tour_toggle__label {
+    color: rgba(255, 239, 235, 0.55);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+
+    &.active {
+      color: #ffefeb;
+    }
+  }
+
+  .case_tour_toggle__switch {
+    width: 42px;
+    height: 22px;
+    border-radius: 999px;
+    background: rgba(255, 239, 235, 0.35);
+    padding: 2px;
+    position: relative;
+  }
+
+  .case_tour_toggle__thumb {
+    display: block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s ease;
+  }
+
+  .case_tour_toggle__switch.active .case_tour_toggle__thumb {
+    transform: translateX(20px);
   }
 
   &__select-all {

@@ -9,6 +9,7 @@ import ControlPopup from './ControlPopup.vue';
 import BaseLoader from './BaseLoader.vue';
 import { useTourModeStore } from '@/store/useTourModeStore';
 import { useCyberFlashingStore } from '@/store/useCyberFlashingStore';
+import { useCaseTourStore } from '@/store/useCaseTourStore';
 import WorldTourMapPopup from '@/components/worldTour/WorldTourMapPopup.vue';
 import pinia from '@/store';
 
@@ -19,6 +20,7 @@ const mapDiv = ref(null);
 const isLoading = ref(false);
 const tourModeStore = useTourModeStore();
 const cyberFlashingStore = useCyberFlashingStore();
+const caseTourStore = useCaseTourStore();
 
 const loader = new Loader({
   apiKey: process.env.VUE_APP_GOOGLE_MAP_API_KEY,
@@ -44,6 +46,13 @@ const clusters = {
   폭행: null,
   기타: null,
 };
+const experienceClusters = {
+  바바리맨: null,
+  헌팅: null,
+  미행: null,
+  폭행: null,
+  기타: null,
+};
 
 let overlay = null;
 let worldTourMarkers = [];
@@ -55,28 +64,40 @@ const closeOverlay = () => {
   }
 };
 
-const setKoreaMarkersVisible = (visible) => {
-  articles.value.forEach(({ marker }) => {
+const setMarkerGroupVisible = (items, clusterGroup, visible) => {
+  items.forEach(({ marker }) => {
     if (marker) {
       marker.map = visible ? map : null;
     }
   });
 
-  Object.values(clusters).forEach((cluster) => {
+  Object.values(clusterGroup).forEach((cluster) => {
     if (!cluster) return;
     cluster.clearMarkers();
   });
 
   if (visible) {
-    Object.keys(clusters).forEach((crimeType) => {
-      if (!clusters[crimeType]) return;
-      clusters[crimeType].addMarkers(
-        articles.value
+    Object.keys(clusterGroup).forEach((crimeType) => {
+      if (!clusterGroup[crimeType]) return;
+      clusterGroup[crimeType].addMarkers(
+        items
           .filter(({ category, marker }) => category === crimeType && marker)
           .map(({ marker }) => marker),
       );
     });
   }
+};
+
+const setKoreaMarkersVisible = (visible) => {
+  setMarkerGroupVisible(articles.value, clusters, visible);
+};
+
+const setExperienceMarkersVisible = (visible) => {
+  setMarkerGroupVisible(
+    caseTourStore.experienceCases,
+    experienceClusters,
+    visible,
+  );
 };
 
 const setWorldTourMarkersVisible = (visible) => {
@@ -173,11 +194,9 @@ const onClickCluster = (e, cluster) => {
   };
 
   // 클러스터 내 마커들의 원본 기사 데이터를 찾아서 전달
-  const clusterArticles = cluster.markers.map((marker) => {
-    // marker의 content에서 title을 가져와서 원본 데이터 찾기
-    const title = marker.content.getAttribute('article_title');
-    return articles.value.find((article) => article.title === title);
-  });
+  const clusterArticles = cluster.markers
+    .map((marker) => marker.caseTourArticle)
+    .filter(Boolean);
 
   const container = document.createElement('div');
   const app = createApp(MarkerPopup, {
@@ -191,6 +210,7 @@ const onClickCluster = (e, cluster) => {
 
 // 단일 마커 생성 함수
 const createSingleMarker = (article) => {
+  if (!article.position) return;
   const markerTag = document.createElement('div');
   markerTag.classList.add('marker');
   if (Object.keys(markerColor).includes(article.category)) {
@@ -204,6 +224,7 @@ const createSingleMarker = (article) => {
     position: article.position,
     content: markerTag,
   });
+  article.marker.caseTourArticle = article;
   article.marker.addListener('click', () => {
     closeOverlay();
 
@@ -276,57 +297,68 @@ const getUserLocation = () => {
 };
 
 // 클러스터 생성 함수
-const createClusters = () => {
-  clusters.바바리맨 = new MarkerClusterer({
+const createClusterGroup = (clusterGroup, cases) => {
+  clusterGroup.바바리맨 = new MarkerClusterer({
     map,
-    markers: articles.value
+    markers: cases
       .filter(({ category }) => {
         return category === '바바리맨';
       })
-      .map(({ marker }) => marker),
+      .map(({ marker }) => marker)
+      .filter(Boolean),
     renderer,
     onClusterClick: onClickCluster,
   });
-  clusters.미행 = new MarkerClusterer({
+  clusterGroup.미행 = new MarkerClusterer({
     map,
-    markers: articles.value
+    markers: cases
       .filter(({ category }) => {
         return category === '미행';
       })
-      .map(({ marker }) => marker),
+      .map(({ marker }) => marker)
+      .filter(Boolean),
     renderer,
     onClusterClick: onClickCluster,
   });
-  clusters.헌팅 = new MarkerClusterer({
+  clusterGroup.헌팅 = new MarkerClusterer({
     map,
-    markers: articles.value
+    markers: cases
       .filter(({ category }) => {
         return category === '헌팅';
       })
-      .map(({ marker }) => marker),
+      .map(({ marker }) => marker)
+      .filter(Boolean),
     renderer,
     onClusterClick: onClickCluster,
   });
-  clusters.폭행 = new MarkerClusterer({
+  clusterGroup.폭행 = new MarkerClusterer({
     map,
-    markers: articles.value
+    markers: cases
       .filter(({ category }) => {
         return category === '폭행';
       })
-      .map(({ marker }) => marker),
+      .map(({ marker }) => marker)
+      .filter(Boolean),
     renderer,
     onClusterClick: onClickCluster,
   });
-  clusters.기타 = new MarkerClusterer({
+  clusterGroup.기타 = new MarkerClusterer({
     map,
-    markers: articles.value
+    markers: cases
       .filter(({ category }) => {
         return category === '기타';
       })
-      .map(({ marker }) => marker),
+      .map(({ marker }) => marker)
+      .filter(Boolean),
     renderer,
     onClusterClick: onClickCluster,
   });
+};
+
+const createClusters = () => {
+  createClusterGroup(clusters, articles.value);
+  createClusterGroup(experienceClusters, caseTourStore.experienceCases);
+  setExperienceMarkersVisible(false);
   filteredArticles.value = [...articles.value];
 };
 
@@ -391,6 +423,7 @@ const applyTourModeToMap = () => {
     map.setCenter(hasGpsLocation ? initialLocation : WORLD_CENTER);
     map.setZoom(hasGpsLocation ? WORLD_USER_ZOOM : WORLD_ZOOM);
     setKoreaMarkersVisible(false);
+    setExperienceMarkersVisible(false);
     setWorldTourMarkersVisible(true);
     return;
   }
@@ -398,7 +431,8 @@ const applyTourModeToMap = () => {
   map.setCenter(initialLocation);
   map.setZoom(DEFAULT_ZOOM);
   setWorldTourMarkersVisible(false);
-  setKoreaMarkersVisible(true);
+  setKoreaMarkersVisible(caseTourStore.isNewsMode);
+  setExperienceMarkersVisible(caseTourStore.isExperienceMode);
 };
 
 onMounted(async () => {
@@ -442,11 +476,16 @@ onMounted(async () => {
 
     // 4. 지도가 표시된 후 백그라운드에서 기사 로딩
     isLoading.value = true;
-    await Promise.all([loadArticles(), cyberFlashingStore.fetchAllCases()]);
+    await Promise.all([
+      loadArticles(),
+      cyberFlashingStore.fetchAllCases(),
+      caseTourStore.loadExperienceCases(),
+    ]);
     isLoading.value = false;
 
     // 5. 마커를 배치로 생성 (UI 블로킹 방지)
     await createMarkersBatched(articles.value);
+    await createMarkersBatched(caseTourStore.experienceCases);
 
     // 6. 모든 마커 생성 완료 후 클러스터 생성
     createClusters();
@@ -466,6 +505,16 @@ watch(
   },
 );
 
+watch(
+  () => caseTourStore.mode,
+  () => {
+    if (!map || tourModeStore.isWorldTour) return;
+    closeOverlay();
+    setKoreaMarkersVisible(caseTourStore.isNewsMode);
+    setExperienceMarkersVisible(caseTourStore.isExperienceMode);
+  },
+);
+
 const changeFilter = (crimeTypes, selectedSido, dongList) => {
   filteredArticles.value = [];
   const filterSido = selectedSido;
@@ -480,17 +529,11 @@ const changeFilter = (crimeTypes, selectedSido, dongList) => {
     filterCrime.push('기타');
   }
 
-  Object.keys(clusters).forEach((crimeType) => {
-    // filter에서 선택되지 않은 crimeType 거르기
-    if (!filterCrime.includes(crimeType)) {
-      clusters[crimeType].clearMarkers();
-      return;
-    }
-    const updatedArticles = articles.value.filter((article) => {
+  const filterCases = (cases, crimeType) => {
+    return cases.filter((article) => {
       if (article.category !== crimeType) return false;
       const allChecked = filterSigungu.length === dongList.length;
       if (isAllRegions) {
-        // "전국" 선택 시 filterSigungu는 시/도(lv1) 이름 목록
         return allChecked || filterSigungu.includes(article.sido);
       }
       if (allChecked) {
@@ -501,12 +544,34 @@ const changeFilter = (crimeTypes, selectedSido, dongList) => {
         filterSigungu.includes(article.sigungu)
       );
     });
+  };
 
-    filteredArticles.value = [...filteredArticles.value, ...updatedArticles];
+  const updateClusterGroup = (
+    clusterGroup,
+    cases,
+    syncFilteredArticles = false,
+  ) => {
+    Object.keys(clusterGroup).forEach((crimeType) => {
+      // filter에서 선택되지 않은 crimeType 거르기
+      if (!filterCrime.includes(crimeType)) {
+        clusterGroup[crimeType].clearMarkers();
+        return;
+      }
+      const updatedArticles = filterCases(cases, crimeType);
 
-    clusters[crimeType].clearMarkers();
-    clusters[crimeType].addMarkers(updatedArticles.map(({ marker }) => marker));
-  });
+      if (syncFilteredArticles) {
+        filteredArticles.value = [...filteredArticles.value, ...updatedArticles];
+      }
+
+      clusterGroup[crimeType].clearMarkers();
+      clusterGroup[crimeType].addMarkers(
+        updatedArticles.map(({ marker }) => marker).filter(Boolean),
+      );
+    });
+  };
+
+  updateClusterGroup(clusters, articles.value, true);
+  updateClusterGroup(experienceClusters, caseTourStore.experienceCases);
 };
 </script>
 

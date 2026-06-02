@@ -167,15 +167,45 @@
         <div class="body_title_wrap">
           <strong class="body_title"
             ><span>{{
-              tourModeStore.isKoreaTour ? '뉴스 투어' : 'Cyber Flashing Cases'
+              tourModeStore.isKoreaTour ? '사건 투어' : 'Cyber Flashing Cases'
             }}</span></strong
           >
+          <div
+            v-if="tourModeStore.isKoreaTour"
+            class="case_tour_toggle"
+            role="group"
+            aria-label="사건 투어 데이터 유형"
+          >
+            <span
+              class="case_tour_toggle__label"
+              :class="{ active: caseTourStore.isNewsMode }"
+              >뉴스</span
+            >
+            <button
+              class="case_tour_toggle__switch"
+              :class="{ active: caseTourStore.isExperienceMode }"
+              type="button"
+              :aria-pressed="caseTourStore.isExperienceMode"
+              @click="toggleCaseTourMode"
+            >
+              <span class="case_tour_toggle__thumb" />
+            </button>
+            <span
+              class="case_tour_toggle__label"
+              :class="{ active: caseTourStore.isExperienceMode }"
+              >경험담</span
+            >
+          </div>
         </div>
         <div class="news_table_wrap">
           <div class="news_table_line top"></div>
           <div v-for="(row, i) in currentRows" :key="i" class="article_table">
             <div class="table_position">
-              {{ row.address || row.date || '-' }}
+              {{
+                row.reporterId
+                  ? `제보자 ${row.reporterId}`
+                  : row.address || row.date || '-'
+              }}
             </div>
             <div
               class="table_title"
@@ -242,11 +272,13 @@ import { useTourModeStore } from '@/store/useTourModeStore';
 import { useTranslation } from '@/composables/useTranslation';
 import { worldCountries } from '@/constant/worldTourData';
 import { useCyberFlashingStore } from '@/store/useCyberFlashingStore';
+import { useCaseTourStore } from '@/store/useCaseTourStore';
 
 const showReportGuide = ref(false);
 const isListPanelOpen = ref(false);
 const tourModeStore = useTourModeStore();
 const cyberFlashingStore = useCyberFlashingStore();
+const caseTourStore = useCaseTourStore();
 const { t } = useTranslation();
 const selectedCountry = ref(worldCountries[0]);
 
@@ -283,7 +315,10 @@ const worldRows = computed(() => {
 });
 
 const rowSource = computed(() => {
-  return tourModeStore.isKoreaTour ? filteredArticles.value : worldRows.value;
+  if (tourModeStore.isWorldTour) return worldRows.value;
+  return caseTourStore.isNewsMode
+    ? filteredArticles.value
+    : filteredExperienceRows.value;
 });
 
 const totalPages = computed(() => {
@@ -292,10 +327,26 @@ const totalPages = computed(() => {
 });
 
 watch(filteredArticles, () => {
-  if (tourModeStore.isKoreaTour) {
+  if (tourModeStore.isKoreaTour && caseTourStore.isNewsMode) {
     initPage();
   }
 });
+watch(
+  () => caseTourStore.experienceCases,
+  () => {
+    if (tourModeStore.isKoreaTour && caseTourStore.isExperienceMode) {
+      initPage();
+    }
+  },
+);
+watch(
+  () => caseTourStore.mode,
+  () => {
+    if (tourModeStore.isKoreaTour) {
+      initPage();
+    }
+  },
+);
 watch(
   () => tourModeStore.mode,
   () => {
@@ -321,11 +372,14 @@ const pageChange = (p) => {
     if ((p - 1) * PAGE_SIZE + i < rowSource.value.length) {
       const row = rowSource.value[(p - 1) * PAGE_SIZE + i];
       if (tourModeStore.isKoreaTour) {
-        const address = row.address.split(' ').slice(0, 2).join(' ');
+        const address = row.address
+          ? row.address.split(' ').slice(0, 2).join(' ')
+          : row.category || '-';
         tableArticles.value[i] = {
           title: row.title,
           address,
           url: row.url,
+          reporterId: row.reporterId,
         };
       } else {
         tableArticles.value[i] = {
@@ -358,7 +412,10 @@ const changeCountry = (country) => {
 };
 
 onMounted(async () => {
-  await cyberFlashingStore.fetchAllCases();
+  await Promise.all([
+    cyberFlashingStore.fetchAllCases(),
+    caseTourStore.loadExperienceCases(),
+  ]);
   if (
     tourModeStore.isWorldTour &&
     !availableWorldCountries.value.includes(selectedCountry.value)
@@ -419,6 +476,7 @@ const clickAllCrime = () => {
   }
   // 필터링 로직 넣기
   emits('changeFilter', crimeTypes.value, selectGu.value, dongList.value);
+  if (caseTourStore.isExperienceMode) initPage();
 };
 
 const clickCrimeType = (idx) => {
@@ -427,7 +485,38 @@ const clickCrimeType = (idx) => {
   crimeTypes.value[idx].checked = !crimeTypes.value[idx].checked;
   // 필터링 로직 넣기
   emits('changeFilter', crimeTypes.value, selectGu.value, dongList.value);
+  if (caseTourStore.isExperienceMode) initPage();
 };
+
+const toggleCaseTourMode = () => {
+  caseTourStore.toggleMode();
+  emits('changeFilter', crimeTypes.value, selectGu.value, dongList.value);
+  initPage();
+};
+
+const filteredExperienceRows = computed(() => {
+  const filterCrime = crimeTypes.value
+    .filter(({ checked }) => checked)
+    .map(({ crimeType }) => crimeType);
+  const selectedRegions = dongList.value
+    .filter(({ checked }) => checked)
+    .map(({ name }) => name);
+  const allCrimeSelected = filterCrime.length === crimeTypes.value.length;
+  const allRegionSelected = selectedRegions.length === dongList.value.length;
+
+  return caseTourStore.experienceCases.filter((row) => {
+    const crimeMatches =
+      allCrimeSelected || filterCrime.includes(row.category || '기타');
+    if (!crimeMatches) return false;
+    if (allRegionSelected) {
+      return selectGu.value === ALL_REGIONS || row.sido === selectGu.value;
+    }
+    if (selectGu.value === ALL_REGIONS) {
+      return selectedRegions.includes(row.sido);
+    }
+    return row.sido === selectGu.value && selectedRegions.includes(row.sigungu);
+  });
+});
 
 // Address handling
 const ALL_REGIONS = '전국';
@@ -466,6 +555,7 @@ const changeGu = (newGu) => {
   selectGu.value = newGu;
   initializeDongList(newGu);
   emits('changeFilter', crimeTypes.value, selectGu.value, dongList.value);
+  if (caseTourStore.isExperienceMode) initPage();
 };
 
 const allDongChecked = computed(() => {
@@ -488,6 +578,7 @@ const clickAllDong = () => {
   });
   // 필터링 로직 넣기
   emits('changeFilter', crimeTypes.value, selectGu.value, dongList.value);
+  if (caseTourStore.isExperienceMode) initPage();
 };
 
 const clickDong = (idx) => {
@@ -495,6 +586,7 @@ const clickDong = (idx) => {
   dongList.value[idx].checked = !dongList.value[idx].checked;
   // 필터링 로직 넣기
   emits('changeFilter', crimeTypes.value, selectGu.value, dongList.value);
+  if (caseTourStore.isExperienceMode) initPage();
 };
 
 const currentRows = computed(() => tableArticles.value);

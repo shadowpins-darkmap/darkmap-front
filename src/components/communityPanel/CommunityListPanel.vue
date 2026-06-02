@@ -12,6 +12,7 @@
     <div class="community__card_wrap">
       <div class="community__card">
         <CarouselWrap
+          ref="carouselRef"
           :green="true"
           :items-to-show="1.14"
           :gap="4"
@@ -136,11 +137,11 @@
     :width="'380px'"
     :visible="isDetailPanelOpen"
     :right="'380px'"
-    @close="isDetailPanelOpen = false"
+    @close="handleDetailClose"
   >
     <CommunityListDetailPanel
       :post="selectedPost"
-      @close="isDetailPanelOpen = false"
+      @close="handleDetailClose"
       @deleted="handlePostDeleted"
       @updated="handlePostUpdated"
     />
@@ -167,6 +168,7 @@ const isWithdrawn = (item) =>
 const categories = ['전체', '공지', '제보', '기억', '고민', '질문', '미분류'];
 const selectedCategory = ref('전체');
 const selectedPost = ref(null);
+const carouselRef = ref(null);
 const defaultPageSize = 10;
 const currentPage = ref(1);
 const isDetailPanelOpen = ref(false);
@@ -185,10 +187,19 @@ const pageInfo = ref({
 
 const getPostBoardId = (post) => post?.boardId ?? post?.id ?? post?.board?.boardId;
 
+const updatePostInList = (boardId, updates) => {
+  const index = postList.value.findIndex(
+    (p) => getPostBoardId(p) === boardId
+  );
+  if (index !== -1) {
+    postList.value[index] = { ...postList.value[index], ...updates };
+  }
+};
+
 const openDetail = async (item) => {
   const boardId = getPostBoardId(item);
 
-  selectedPost.value = item;
+  selectedPost.value = { ...item };
 
   if (boardId) {
     try {
@@ -196,8 +207,12 @@ const openDetail = async (item) => {
       const detail = response?.data;
 
       if (detail) {
-        Object.assign(item, detail);
-        selectedPost.value = item;
+        updatePostInList(boardId, {
+          viewCount: detail.viewCount,
+          likeCount: detail.likeCount,
+          commentCount: detail.commentCount,
+        });
+        selectedPost.value = { ...item, ...detail };
       }
     } catch (error) {
       console.error('게시글 상세 조회 실패:', error);
@@ -338,14 +353,48 @@ const handleWriteComplete = () => {
   loadRecentBoards(0);
 };
 
-const handlePostDeleted = () => {
+const handleDetailClose = () => {
+  if (selectedPost.value) {
+    const boardId = getPostBoardId(selectedPost.value);
+    if (boardId) {
+      const updates = {
+        viewCount: selectedPost.value.viewCount,
+        likeCount: selectedPost.value.likeCount,
+        commentCount: selectedPost.value.commentCount,
+      };
+      updatePostInList(boardId, updates);
+      carouselRef.value?.updateCard(boardId, updates);
+    }
+  }
   isDetailPanelOpen.value = false;
-  selectedPost.value = null;
-  loadRecentBoards(pageInfo.value.currentPage);
 };
 
-const handlePostUpdated = () => {
-  loadRecentBoards(pageInfo.value.currentPage);
+const handlePostDeleted = (boardId) => {
+  isDetailPanelOpen.value = false;
+  selectedPost.value = null;
+  postList.value = postList.value.filter(
+    (p) => getPostBoardId(p) !== boardId
+  );
+  carouselRef.value?.removeCard(boardId);
+  if (postList.value.length === 0 && pageInfo.value.currentPage > 0) {
+    loadRecentBoards(pageInfo.value.currentPage - 1);
+  }
+};
+
+const handlePostUpdated = (boardId) => {
+  if (selectedPost.value) {
+    const updates = {
+      title: selectedPost.value.title,
+      content: selectedPost.value.content,
+      category: selectedPost.value.category,
+      viewCount: selectedPost.value.viewCount,
+      likeCount: selectedPost.value.likeCount,
+      commentCount: selectedPost.value.commentCount,
+      imageUrl: selectedPost.value.imageUrl,
+    };
+    updatePostInList(boardId, updates);
+    carouselRef.value?.updateCard(boardId, updates);
+  }
 };
 
 const handleReportClose = () => {
