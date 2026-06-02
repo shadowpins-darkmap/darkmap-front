@@ -118,6 +118,7 @@
   >
     <CommunityListDetailPanel
       :post="selectedPost"
+      close-icon-direction="left"
       @close="isPanel2depsOpen = false"
     />
   </SlidePanel>

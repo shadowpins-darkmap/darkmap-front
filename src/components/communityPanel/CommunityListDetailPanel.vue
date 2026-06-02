@@ -2,6 +2,8 @@
   <div class="slider_detail_wrap">
     <button class="slider_colse_button" @click="$emit('close')">
       <img
+        class="slider_close_icon"
+        :class="{ 'slider_close_icon--left': closeIconDirection === 'left' }"
         src="@/assets/detailCloseArrow.svg"
         alt="slider close icon"
         width="36"
@@ -324,6 +326,11 @@ const emit = defineEmits(['close', 'deleted', 'updated']);
 
 const props = defineProps({
   post: { type: Object, required: true },
+  closeIconDirection: {
+    type: String,
+    default: 'right',
+    validator: (value) => ['left', 'right'].includes(value),
+  },
 });
 
 const formatDate = (dateString) => {
@@ -601,6 +608,14 @@ watch(
   width: 100%;
   display: flex;
   justify-content: flex-end;
+}
+
+.slider_close_icon {
+  transform: none;
+
+  &--left {
+    transform: rotate(180deg);
+  }
 }
 
 .detail_title {
