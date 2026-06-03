@@ -128,8 +128,8 @@
         >
           <div class="ControlMobile__table-position">
             {{
-              tArticle.reporterId
-                ? tArticle.reporterId
+              tArticle.reporterNickname
+                ? tArticle.reporterNickname
                 : tArticle.address || '-'
             }}
           </div>
@@ -237,6 +237,7 @@ const pageChange = (p) => {
         address: address,
         url: tableArticle.url,
         reporterId: tableArticle.reporterId,
+        reporterNickname: tableArticle.reporterNickname,
       };
     } else {
       tableArticles.value[i] = { title: '-', address: '-', url: '-' };

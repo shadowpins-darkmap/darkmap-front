@@ -202,8 +202,8 @@
           <div v-for="(row, i) in currentRows" :key="i" class="article_table">
             <div class="table_position">
               {{
-                row.reporterId
-                  ? row.reporterId
+                row.reporterNickname
+                  ? row.reporterNickname
                   : row.address || row.date || '-'
               }}
             </div>
@@ -391,6 +391,7 @@ const pageChange = (p) => {
           address,
           url: row.url,
           reporterId: row.reporterId,
+          reporterNickname: row.reporterNickname,
           caseItem: row,
         };
       } else {
