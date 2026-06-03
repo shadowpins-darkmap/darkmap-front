@@ -29,7 +29,8 @@ export const useNewsListStore = defineStore('newsListStore', () => {
 
     loading.value = true;
     try {
-      articles.value = await articlesApi.getArticles();
+      const raw = await articlesApi.getArticles();
+      articles.value = Array.isArray(raw) ? [...raw].reverse() : raw;
       articles.value.forEach((article) => {
         if (article.category === '') article.category = '기타';
       });
@@ -50,7 +51,8 @@ export const useNewsListStore = defineStore('newsListStore', () => {
   const loadArticlesBySido = async (sido) => {
     loading.value = true;
     try {
-      filteredArticles.value = await articlesApi.getArticlesBySido(sido);
+      const raw = await articlesApi.getArticlesBySido(sido);
+      filteredArticles.value = Array.isArray(raw) ? [...raw].reverse() : raw;
     } catch (error) {
       console.error('시도별 기사 로딩 실패:', error);
       filteredArticles.value = [];
