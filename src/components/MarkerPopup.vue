@@ -206,7 +206,7 @@ const categoryCounts = computed(() => {
 });
 
 const getReporterText = (item) => {
-  return item.reporterId || item.address || '-';
+  return item.reporterNickname || item.reporterId || item.address || '-';
 };
 
 const handleArticleClick = (item) => {

@@ -28,8 +28,19 @@ const normalizeExperienceCase = (item) => {
   const crimeType = normalizeCrimeType(item.crimeType || item.category || item.tag);
   const sido = item.sido || item.region1 || item.address?.split(' ')?.[0] || '';
   const sigungu = item.sigungu || item.region2 || item.address?.split(' ')?.[1] || '';
-  const reporterId =
-    item.reporterId ?? item.memberId ?? item.userId ?? item.writerId ?? item.nickname;
+  const reporterNickname =
+    item.reporterNickname ??
+    item.reporterDisplayId ??
+    item.authorNickname ??
+    item.memberNickname ??
+    item.userNickname ??
+    item.writerNickname ??
+    item.nickname ??
+    item.displayName ??
+    item.reporterId ??
+    item.memberId ??
+    item.userId ??
+    item.writerId;
   const title =
     item.title ||
     item.articleTitle ||
@@ -39,10 +50,11 @@ const normalizeExperienceCase = (item) => {
     '제보 경험담';
 
   return {
-    id: item.id ?? item.boardId ?? item.caseId ?? `${reporterId || 'unknown'}-${title}`,
+    id: item.id ?? item.boardId ?? item.caseId ?? `${reporterNickname || 'unknown'}-${title}`,
     title,
     content: item.content || item.body || item.description || '',
-    reporterId: reporterId ? String(reporterId) : '익명',
+    reporterId: item.reporterId,
+    reporterNickname: reporterNickname ? String(reporterNickname) : '익명',
     address: item.address || [sido, sigungu].filter(Boolean).join(' ') || '경험담',
     category: crimeType,
     sido,
