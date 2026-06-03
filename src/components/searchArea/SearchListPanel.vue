@@ -118,6 +118,7 @@
   >
     <CommunityListDetailPanel
       :post="selectedPost"
+      close-icon-direction="left"
       @close="isPanel2depsOpen = false"
     />
   </SlidePanel>
@@ -151,7 +152,7 @@ const props = defineProps({
 const tourModeStore = useTourModeStore();
 const cyberFlashingStore = useCyberFlashingStore();
 
-const koreaCategories = ['전체', '뉴스', '커뮤니티'];
+const koreaCategories = ['전체', '뉴스', '경험담', '커뮤니티'];
 const worldCategories = ['All', 'News'];
 const categories = computed(() =>
   tourModeStore.isWorldTour ? worldCategories : koreaCategories,
@@ -171,7 +172,7 @@ const isPanel2depsOpen = ref(false);
 const searchPlaceholder = computed(() =>
   tourModeStore.isWorldTour
     ? 'Search the name of the area where you live.'
-    : '내가 사는 지역의 이름을 한 번 검색해보세요.',
+    : '내가 사는 지역의 이름을 한번 검색해보세요.',
 );
 
 const searchGuideText = computed(() =>
@@ -196,8 +197,23 @@ const noResultsText = computed(() =>
 
 const getItemCategoryLabel = (item) => {
   if (item.resultType === 'CYBER_FLASHING') return 'News';
+  if (item.resultType === 'CRIME_CASE_EXPERIENCE') {
+    return item.crimeType || '경험담';
+  }
   if (item.resultType === 'ARTICLE') return item.crimeType || '뉴스';
   return item.category || '커뮤니티';
+};
+
+const normalizeSearchResult = (item) => {
+  if (item.resultType !== 'CRIME_CASE_EXPERIENCE') return item;
+
+  const region = [item.sido, item.sigungu].filter(Boolean).join(' ');
+  return {
+    ...item,
+    title: item.title || `${region || '지역'} 경험담`,
+    content: item.content || '',
+    category: '경험담',
+  };
 };
 
 const normalizeWorldCase = (item) => ({
@@ -234,6 +250,30 @@ const searchWorldCyberFlashingCases = async () => {
   apiTotalElements.value = results.length;
 };
 
+const searchKoreaPage = async (page = 1) => {
+  const data = await boardsApi.searchBoardByKeyword(keyword.value, page);
+  const results = Array.isArray(data) ? data : data?.results || [];
+  return {
+    results: results.map(normalizeSearchResult),
+    totalElements: data?.totalElements || results.length,
+    totalPages: data?.totalPages || 1,
+  };
+};
+
+const searchKoreaAllPages = async () => {
+  const firstPage = await searchKoreaPage(1);
+  const results = [...firstPage.results];
+  const totalPages = Math.max(1, firstPage.totalPages);
+
+  for (let page = 2; page <= totalPages; page++) {
+    const nextPage = await searchKoreaPage(page);
+    results.push(...nextPage.results);
+  }
+
+  allSearchResults.value = results;
+  apiTotalElements.value = firstPage.totalElements || results.length;
+};
+
 // 카테고리 선택 함수
 const selectCategory = (cat) => {
   selectedCategory.value = cat;
@@ -265,24 +305,7 @@ const handleSearch = async () => {
       return;
     }
 
-    const data = await boardsApi.searchBoardByKeyword(
-      keyword.value,
-      currentPage.value + 1,
-      selectedCategory.value === '전체' ? null : selectedCategory.value,
-    );
-
-    if (data?.results) {
-      allSearchResults.value = data.results;
-      apiTotalElements.value = data.totalElements || data.results.length;
-    } else if (data && Array.isArray(data)) {
-      // Fallback for array response
-      allSearchResults.value = data;
-      apiTotalElements.value = data.length;
-    } else {
-      console.warn('API 응답 형식이 예상과 다릅니다:', data);
-      allSearchResults.value = [];
-      apiTotalElements.value = 0;
-    }
+    await searchKoreaAllPages();
 
     if (allSearchResults.value.length === 0) {
       console.log('검색 결과가 없습니다.');
@@ -311,6 +334,10 @@ const highlightKeyword = (text) => {
 // 상세 페이지 열기
 const openDetail = async (item) => {
   console.log('상세 페이지 열기:', item);
+
+  if (item.resultType === 'CRIME_CASE_EXPERIENCE') {
+    return;
+  }
 
   if (
     (item.resultType === 'ARTICLE' || item.resultType === 'CYBER_FLASHING') &&
@@ -355,6 +382,10 @@ const filteredResults = computed(() => {
 
   if (selectedCategory.value === '뉴스') {
     results = results.filter((item) => item.resultType === 'ARTICLE');
+  } else if (selectedCategory.value === '경험담') {
+    results = results.filter(
+      (item) => item.resultType === 'CRIME_CASE_EXPERIENCE',
+    );
   } else if (selectedCategory.value === '커뮤니티') {
     results = results.filter((item) => item.resultType === 'BOARD');
   }
@@ -427,34 +458,7 @@ const clickNext = async () => {
 const loadPage = async (page) => {
   if (loading.value) return;
 
-  if (tourModeStore.isWorldTour) {
-    currentPage.value = page;
-    return;
-  }
-
-  loading.value = true;
-  try {
-    const data = await boardsApi.searchBoardByKeyword(
-      keyword.value,
-      page + 1,
-      selectedCategory.value === '전체' ? null : selectedCategory.value,
-    );
-    if (data?.results) {
-      allSearchResults.value = data.results;
-      apiTotalElements.value = data.totalElements || data.results.length;
-    } else if (data && Array.isArray(data)) {
-      allSearchResults.value = data;
-      apiTotalElements.value = data.length;
-    } else {
-      allSearchResults.value = [];
-      apiTotalElements.value = 0;
-    }
-  } catch (error) {
-    console.error('페이지 로딩 실패:', error);
-    showErrorPopup.value = true;
-  } finally {
-    loading.value = false;
-  }
+  currentPage.value = page;
 };
 
 watch(

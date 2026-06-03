@@ -112,6 +112,46 @@
   align-items: center;
   gap: 8px;
 }
+
+.case_tour_toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.case_tour_toggle__label {
+  color: rgba(255, 239, 235, 0.55);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+
+  &.active {
+    color: #ffefeb;
+  }
+}
+
+.case_tour_toggle__switch {
+  width: 42px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(255, 239, 235, 0.35);
+  padding: 2px;
+  position: relative;
+}
+
+.case_tour_toggle__thumb {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s ease;
+}
+
+.case_tour_toggle__switch.active .case_tour_toggle__thumb {
+  transform: translateX(20px);
+}
 .body_title {
   display: inline-flex;
   width: fit-content;
