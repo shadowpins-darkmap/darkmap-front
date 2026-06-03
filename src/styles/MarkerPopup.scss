@@ -17,33 +17,18 @@
     cursor: default;
   }
 
-  // arrow
-  &::after {
-    content: '';
-    position: absolute;
-    top: 45%;
-    left: 0;
-    transform: translate(-100%, -50%);
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 30px 30px 0 0; // 위 + 오른쪽만
-    border-color: transparent #313457 transparent transparent;
-    z-index: 3;
-  }
-
+  // Tail point is used by CustomOverlay as the map-marker anchor.
   &::before {
     content: '';
     position: absolute;
     top: 50%;
-    left: 0;
-    transform: translate(-100%, -50%);
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 31px 31px 0 0;
-    border-color: transparent #4e5277 transparent transparent;
-    z-index: 2;
+    left: -28px;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    background: #313457;
+    clip-path: polygon(100% 0, 100% 100%, 0 50%);
+    z-index: 1;
   }
 
   &__header {
@@ -104,21 +89,6 @@
   &__category {
     border-bottom: 7px solid #1dd6ff;
     padding-bottom: 2px;
-  }
-
-  &__categoryCounts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 10px;
-  }
-
-  &__categoryCount {
-    color: #ffefeb;
-    font-size: 11px;
-    font-weight: 700;
-    border-bottom: 4px solid #1dd6ff;
-    padding-bottom: 1px;
   }
 
   &__articleData {

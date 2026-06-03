@@ -139,13 +139,11 @@ const initCustomOverlay = (OverlayView) => {
         const position = overlayProjection.fromLatLngToDivPixel(this.position);
 
         const popupHeight = this.div.offsetHeight;
+        const tailWidth = 28;
+        const tailRatioY = 0.5;
 
-        const offsetX = 16;
-        const offsetY = popupHeight / 2;
-
-        const gap = 20;
-        this.div.style.left = `${position.x + offsetX + gap}px`;
-        this.div.style.top = `${position.y - offsetY}px`;
+        this.div.style.left = `${position.x + tailWidth}px`;
+        this.div.style.top = `${position.y - popupHeight * tailRatioY}px`;
         this.div.style.zIndex = '1000';
       }
     }

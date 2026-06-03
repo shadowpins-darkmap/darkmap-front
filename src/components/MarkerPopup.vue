@@ -21,15 +21,6 @@
           <span class="MarkerPopup__category">{{ getCategoryText }}</span>
           길거리 괴롭힘이 있었습니다.
         </p>
-        <div v-if="isCluster" class="MarkerPopup__categoryCounts">
-          <span
-            v-for="item in categoryCounts"
-            :key="item.category"
-            class="MarkerPopup__categoryCount"
-          >
-            {{ item.category }} {{ item.count }}
-          </span>
-        </div>
       </div>
       <div class="MarkerPopup__articleData">
         <template v-if="selectedArticle">
@@ -61,27 +52,11 @@
               <span>{{ item.title }}</span>
             </button>
           </div>
-          <div class="MarkerPopup__pagination" v-if="totalPages > 1">
+          <div class="MarkerPopup__pagination">
             <button
+              v-if="totalPages > 1"
               class="MarkerPopup__paginationItem"
-              @click="currentPage = 1"
-              v-if="currentPage > 1"
-            >
-              <img
-                :src="leftArrow"
-                alt="맨 처음 페이지"
-                style="transform: translateX(-2px)"
-              />
-              <img
-                :src="leftArrow"
-                alt="맨 처음 페이지"
-                style="transform: translateX(2px); margin-left: -2px"
-              />
-            </button>
-            <button
-              class="MarkerPopup__paginationItem"
-              @click="currentPage = Math.max(1, visiblePages[0] - 5)"
-              v-if="currentPageGroup > 0"
+              @click="clickPrevPageGroup"
             >
               <img :src="leftArrow" alt="이전 페이지" />
             </button>
@@ -95,35 +70,11 @@
               {{ page }}
             </button>
             <button
+              v-if="totalPages > 1"
               class="MarkerPopup__paginationItem"
-              @click="
-                currentPage = Math.min(
-                  totalPages,
-                  visiblePages[visiblePages.length - 1] + 1,
-                )
-              "
-              v-if="currentPageGroup < Math.floor((totalPages - 1) / 5)"
+              @click="clickNextPageGroup"
             >
               <img :src="rightArrow" alt="다음 페이지" />
-            </button>
-            <button
-              class="MarkerPopup__paginationItem"
-              @click="currentPage = totalPages"
-              v-if="
-                currentPage < totalPages &&
-                currentPageGroup < Math.floor((totalPages - 1) / 5)
-              "
-            >
-              <img
-                :src="rightArrow"
-                alt="맨 끝 페이지"
-                style="transform: translateX(-2px)"
-              />
-              <img
-                :src="rightArrow"
-                alt="맨 끝 페이지"
-                style="transform: translateX(2px); margin-left: -2px"
-              />
             </button>
           </div>
         </template>
@@ -186,6 +137,17 @@ const paginatedArticles = computed(() => {
   return articleList.value.slice(start, start + pageSize);
 });
 
+const clickPrevPageGroup = () => {
+  if (currentPageGroup.value === 0) return;
+  currentPage.value = currentPageGroup.value * 5 - 4;
+};
+
+const clickNextPageGroup = () => {
+  const lastGroup = Math.floor((totalPages.value - 1) / 5);
+  if (currentPageGroup.value === lastGroup) return;
+  currentPage.value = (currentPageGroup.value + 1) * 5 + 1;
+};
+
 const popupTitle = computed(() => {
   const first = articleList.value[0] || {};
   return first.sido || first.address || '경험담';
@@ -194,15 +156,6 @@ const popupTitle = computed(() => {
 const popupAddress = computed(() => {
   const first = articleList.value[0] || {};
   return first.address || [first.sido, first.sigungu].filter(Boolean).join(' ');
-});
-
-const categoryCounts = computed(() => {
-  const counts = articleList.value.reduce((acc, item) => {
-    const category = item.category || '기타';
-    acc[category] = (acc[category] || 0) + 1;
-    return acc;
-  }, {});
-  return Object.entries(counts).map(([category, count]) => ({ category, count }));
 });
 
 const getReporterText = (item) => {
