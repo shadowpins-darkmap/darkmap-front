@@ -17,33 +17,18 @@
     cursor: default;
   }
 
-  // arrow
-  &::after {
-    content: '';
-    position: absolute;
-    top: 45%;
-    left: 0;
-    transform: translate(-100%, -50%);
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 30px 30px 0 0; // 위 + 오른쪽만
-    border-color: transparent #313457 transparent transparent;
-    z-index: 3;
-  }
-
+  // Tail point is used by CustomOverlay as the map-marker anchor.
   &::before {
     content: '';
     position: absolute;
     top: 50%;
-    left: 0;
-    transform: translate(-100%, -50%);
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 31px 31px 0 0;
-    border-color: transparent #4e5277 transparent transparent;
-    z-index: 2;
+    left: -28px;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    background: #313457;
+    clip-path: polygon(100% 0, 100% 100%, 0 50%);
+    z-index: 1;
   }
 
   &__header {
