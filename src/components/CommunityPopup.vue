@@ -1643,6 +1643,7 @@ const currentWorldLegalDetail = computed(
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-top: 20px;
     font-weight: 700;
     font-size: 14px;
     letter-spacing: -0.5px;
@@ -1708,10 +1709,9 @@ const currentWorldLegalDetail = computed(
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-right: 10px;
     justify-content: center;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
   }
 
   &__title {
