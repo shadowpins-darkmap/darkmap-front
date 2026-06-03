@@ -129,7 +129,7 @@
           <div class="ControlMobile__table-position">
             {{
               tArticle.reporterId
-                ? `제보자 ${tArticle.reporterId}`
+                ? tArticle.reporterId
                 : tArticle.address || '-'
             }}
           </div>

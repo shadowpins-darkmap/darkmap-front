@@ -206,7 +206,7 @@ const categoryCounts = computed(() => {
 });
 
 const getReporterText = (item) => {
-  return item.reporterId ? `제보자 ${item.reporterId}` : item.address || '-';
+  return item.reporterId || item.address || '-';
 };
 
 const handleArticleClick = (item) => {

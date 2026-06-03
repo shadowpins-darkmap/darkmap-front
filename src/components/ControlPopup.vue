@@ -203,13 +203,13 @@
             <div class="table_position">
               {{
                 row.reporterId
-                  ? `제보자 ${row.reporterId}`
+                  ? row.reporterId
                   : row.address || row.date || '-'
               }}
             </div>
             <div
               class="table_title"
-              @click="row.url ? clickTitle(row.url) : undefined"
+              @click="handleRowClick(row)"
             >
               {{ row.title || row.summary || '-' }}
             </div>
@@ -286,10 +286,21 @@ const handleListPanelClose = () => {
   isListPanelOpen.value = false;
 };
 
-const emits = defineEmits(['changeFilter']);
+const emits = defineEmits(['changeFilter', 'selectExperience']);
 
 const clickTitle = (url) => {
   window.open(url, '_blank');
+};
+
+const handleRowClick = (row) => {
+  if (!row || row.title === '-' || row.summary === '-') return;
+  if (row.url) {
+    clickTitle(row.url);
+    return;
+  }
+  if (caseTourStore.isExperienceMode && row.caseItem?.position) {
+    emits('selectExperience', row.caseItem);
+  }
 };
 
 const { filteredArticles } = storeToRefs(useNewsListStore());
@@ -380,6 +391,7 @@ const pageChange = (p) => {
           address,
           url: row.url,
           reporterId: row.reporterId,
+          caseItem: row,
         };
       } else {
         tableArticles.value[i] = {

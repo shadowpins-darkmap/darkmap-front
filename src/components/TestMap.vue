@@ -208,6 +208,45 @@ const onClickCluster = (e, cluster) => {
   overlay = new CustomOverlay(clusterPosition, container, map, cluster.count);
 };
 
+const openMarkerPopup = (position, popupArticles) => {
+  if (!position || !CustomOverlay) return;
+
+  closeOverlay();
+
+  const container = document.createElement('div');
+  const app = createApp(MarkerPopup, {
+    closeWindow: closeOverlay,
+    article: popupArticles.length === 1 ? popupArticles[0] : popupArticles,
+  });
+  app.mount(container);
+
+  overlay = new CustomOverlay(position, container, map, popupArticles.length);
+};
+
+const isSamePosition = (a, b) => {
+  if (!a || !b) return false;
+  return Math.abs(a.lat - b.lat) < 0.000001 && Math.abs(a.lng - b.lng) < 0.000001;
+};
+
+const getExperienceCasesAtPosition = (position) => {
+  return caseTourStore.experienceCases.filter((item) =>
+    isSamePosition(item.position, position),
+  );
+};
+
+const focusExperienceCase = (caseItem) => {
+  if (!map || !caseItem?.position) return;
+
+  setKoreaMarkersVisible(false);
+  setExperienceMarkersVisible(true);
+
+  map.panTo(caseItem.position);
+  map.setZoom(Math.max(map.getZoom() || DEFAULT_ZOOM, 16));
+
+  const samePositionCases = getExperienceCasesAtPosition(caseItem.position);
+  openMarkerPopup(caseItem.position, samePositionCases.length ? samePositionCases : [caseItem]);
+};
+
 // 단일 마커 생성 함수
 const createSingleMarker = (article) => {
   if (!article.position) return;
@@ -226,16 +265,7 @@ const createSingleMarker = (article) => {
   });
   article.marker.caseTourArticle = article;
   article.marker.addListener('click', () => {
-    closeOverlay();
-
-    const container = document.createElement('div');
-    const app = createApp(MarkerPopup, {
-      closeWindow: closeOverlay,
-      article: article,
-    });
-    app.mount(container);
-
-    overlay = new CustomOverlay(article.position, container, map, 1);
+    openMarkerPopup(article.position, [article]);
   });
 };
 
@@ -581,7 +611,10 @@ const changeFilter = (crimeTypes, selectedSido, dongList) => {
       <BaseLoader />
     </div>
     <div class="map" ref="mapDiv"></div>
-    <ControlPopup @change-filter="changeFilter" />
+    <ControlPopup
+      @change-filter="changeFilter"
+      @select-experience="focusExperienceCase"
+    />
   </div>
 </template>
 
