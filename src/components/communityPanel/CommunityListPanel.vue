@@ -14,8 +14,8 @@
         <CarouselWrap
           ref="carouselRef"
           :green="true"
-          :items-to-show="1.14"
-          :gap="4"
+          :items-to-show="1"
+          :gap="8"
           :onCardClick="openDetail"
         />
       </div>
@@ -150,9 +150,9 @@
 
 <script setup>
 import { ref, computed, onMounted, defineEmits } from 'vue';
+import CarouselWrap from '@/components/carousel/CarouselWrap.vue';
 
 defineEmits(['close', 'openDetail']);
-import CarouselWrap from '@/components/carousel/CarouselWrap.vue';
 import GradientScroll from '@/components/gradientScroll/GradientScroll.vue';
 import PaginationWrap from '@/components/pagination/PaginationWrap.vue';
 import CommonPopup from '@/components/commonPopup/CommonPopup.vue';
@@ -435,7 +435,7 @@ onMounted(() => {
   font-weight: bold;
   color: #a190df;
   display: flex;
-  padding-top: 14px;
+  padding: 12px 0;
 }
 
 .community__card_wrap {
