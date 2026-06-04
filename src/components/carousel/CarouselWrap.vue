@@ -3,22 +3,20 @@
     <!-- 카드 트랙 -->
     <div class="carousel-track-outer">
       <div
+        ref="trackRef"
         class="carousel-track"
         :style="trackStyle"
         @touchstart="onTouchStart"
         @touchmove="onTouchMove"
         @touchend="onTouchEnd"
         @mousedown="onMouseDown"
-        @mousemove="onMouseMove"
-        @mouseup="onMouseUp"
-        @mouseleave="onMouseLeave"
       >
         <div
           v-for="(item, index) in topPosts"
           :key="item.boardId ?? item.id ?? index"
           class="carousel-card"
           :class="{ green: green }"
-          @click="onCardClick && onCardClick(item)"
+          @click.stop="handleCardClick(item, $event)"
         >
           <!-- 카드 헤더: 카테고리 + 화살표 -->
           <div class="card-header">
@@ -122,21 +120,31 @@ const auth = useAuthStore();
 const topPosts = ref([]);
 const loading = ref(false);
 const currentIndex = ref(0);
+const trackRef = ref(null);
 let autoTimer = null;
-let touchStartX = 0;
-let touchDeltaX = 0;
-let mouseStartX = 0;
-let mouseDeltaX = 0;
-let isDragging = false;
 
+// ─── 드래그 상태 ───────────────────────────────────────────
+const dragState = ref({
+  startX: 0,
+  currentX: 0,
+  isDragging: false,
+  hasMoved: false,
+});
+const dragOffset = ref(0); // 드래그 중 실시간 px 오프셋
+
+// ─── trackStyle: 드래그 중에는 transition OFF + offset 반영 ──
 const trackStyle = computed(() => {
-  const offset = currentIndex.value * 100;
+  const baseOffset = currentIndex.value * 100;
   return {
-    transform: `translateX(-${offset}%)`,
+    transform: `translateX(calc(-${baseOffset}% + ${dragOffset.value}px))`,
+    transition: dragState.value.isDragging
+      ? 'none'
+      : 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
     gap: `${props.gap}px`,
   };
 });
 
+// ─── 날짜 포맷 ─────────────────────────────────────────────
 const formatDate = (dateStr) => {
   if (!dateStr) return '';
   const d = new Date(dateStr);
@@ -148,6 +156,7 @@ const formatDate = (dateStr) => {
   return `${yy}.${mm}.${dd} ${hh}:${min}`;
 };
 
+// ─── 슬라이드 이동 ─────────────────────────────────────────
 const goTo = (index) => {
   const max = topPosts.value.length - 1;
   currentIndex.value = Math.max(0, Math.min(index, max));
@@ -158,6 +167,7 @@ const next = () => {
   currentIndex.value = (currentIndex.value + 1) % topPosts.value.length;
 };
 
+// ─── 자동 재생 ─────────────────────────────────────────────
 const startAuto = () => {
   stopAuto();
   autoTimer = setInterval(next, props.autoInterval);
@@ -171,55 +181,104 @@ const stopAuto = () => {
 };
 
 const pauseAuto = () => stopAuto();
-
 const resumeAuto = () => startAuto();
 
-// 터치 스와이프
-const onTouchStart = (e) => {
-  touchStartX = e.touches[0].clientX;
-  touchDeltaX = 0;
+// ─── 드래그 공통 로직 ──────────────────────────────────────
+const onDragStart = (clientX) => {
+  dragState.value = {
+    startX: clientX,
+    currentX: clientX,
+    isDragging: true,
+    hasMoved: false,
+  };
+  dragOffset.value = 0;
   pauseAuto();
 };
 
-const onTouchMove = (e) => {
-  touchDeltaX = e.touches[0].clientX - touchStartX;
-};
-
-const onTouchEnd = () => {
-  if (touchDeltaX < -40) next();
-  else if (touchDeltaX > 40) goTo(currentIndex.value - 1);
-  resumeAuto();
-};
-
-// 마우스 드래그
-const onMouseDown = (e) => {
-  isDragging = true;
-  mouseStartX = e.clientX;
-  mouseDeltaX = 0;
-  pauseAuto();
-  e.preventDefault();
-};
-
-const onMouseMove = (e) => {
-  if (!isDragging) return;
-  mouseDeltaX = e.clientX - mouseStartX;
-};
-
-const onMouseUp = () => {
-  if (!isDragging) return;
-  isDragging = false;
-  if (mouseDeltaX < -40) next();
-  else if (mouseDeltaX > 40) goTo(currentIndex.value - 1);
-  resumeAuto();
-};
-
-const onMouseLeave = () => {
-  if (isDragging) {
-    isDragging = false;
-    resumeAuto();
+const onDragMove = (clientX) => {
+  if (!dragState.value.isDragging) return;
+  dragState.value.currentX = clientX;
+  const delta = clientX - dragState.value.startX;
+  dragOffset.value = delta; // 실시간 카드 이동
+  if (Math.abs(delta) > 10) {
+    dragState.value.hasMoved = true;
   }
 };
 
+const onDragEnd = () => {
+  if (!dragState.value.isDragging) return;
+
+  const delta = dragState.value.currentX - dragState.value.startX;
+
+  if (Math.abs(delta) > 50) {
+    if (delta < 0) {
+      next();
+    } else {
+      goTo(currentIndex.value - 1);
+    }
+  }
+
+  // offset을 0으로 되돌리면서 transition이 자연스럽게 처리됨
+  dragOffset.value = 0;
+  dragState.value.isDragging = false;
+  resumeAuto();
+
+  // 클릭 이벤트 처리 후 hasMoved 리셋
+  setTimeout(() => {
+    dragState.value.hasMoved = false;
+  }, 50);
+};
+
+// ─── 터치 이벤트 ───────────────────────────────────────────
+const onTouchStart = (e) => {
+  onDragStart(e.touches[0].clientX);
+};
+
+const onTouchMove = (e) => {
+  if (!dragState.value.isDragging) return;
+  const delta = e.touches[0].clientX - dragState.value.startX;
+  // 수평 드래그가 확실할 때만 스크롤 막기
+  if (Math.abs(delta) > 5) {
+    e.preventDefault();
+  }
+  onDragMove(e.touches[0].clientX);
+};
+
+const onTouchEnd = () => {
+  onDragEnd();
+};
+
+// ─── 마우스 이벤트 ─────────────────────────────────────────
+const onMouseDown = (e) => {
+  e.preventDefault();
+  onDragStart(e.clientX);
+  document.addEventListener('mousemove', onDocumentMouseMove);
+  document.addEventListener('mouseup', onDocumentMouseUp);
+};
+
+const onDocumentMouseMove = (e) => {
+  onDragMove(e.clientX);
+};
+
+const onDocumentMouseUp = () => {
+  onDragEnd();
+  document.removeEventListener('mousemove', onDocumentMouseMove);
+  document.removeEventListener('mouseup', onDocumentMouseUp);
+};
+
+// ─── 클릭 핸들러 ───────────────────────────────────────────
+const handleCardClick = (item, e) => {
+  if (dragState.value.hasMoved) {
+    e.preventDefault();
+    e.stopPropagation();
+    return;
+  }
+  if (props.onCardClick) {
+    props.onCardClick(item);
+  }
+};
+
+// ─── 데이터 정규화 ─────────────────────────────────────────
 const normalizeBoard = (board) => ({
   id: board.id,
   boardId: board.boardId ?? board.id,
@@ -237,7 +296,7 @@ const normalizeBoard = (board) => ({
   commentCount: board.commentCount || 0,
 });
 
-// 1순위: 공개 인기글 API — response.data 가 Board[] 직접 배열
+// ─── API 호출 ──────────────────────────────────────────────
 const loadPopularBoards = async () => {
   const response = await boardsApi.getPopularBoards(props.limit * 2);
   if (response && Array.isArray(response.data)) {
@@ -246,32 +305,22 @@ const loadPopularBoards = async () => {
   return [];
 };
 
-// 2순위: 최근글 API — _retry:true 플래그로 인터셉터의 forceLogout 우회
-// 로그인 시: 요청 인터셉터가 자동으로 토큰 추가 → 데이터 반환
-// 비로그인 시: 401 → 인터셉터 _retry 분기로 조용히 종료 (세션만료 경고 없음)
 const loadRecentBoards = async () => {
   const { data } = await api.get('/api/v1/boards/recent', {
     params: { page: 1, size: 50, sortBy: 'createdAt', direction: 'DESC' },
     _retry: true,
   });
-  // data = CommonApiResponse: { success, data: { boards: [], pageInfo: {} } }
   const boards = data?.data?.boards || [];
   return boards.map(normalizeBoard);
 };
 
-// 조회수 상위 N개 불러오기
 const fetchTopPosts = async () => {
   loading.value = true;
   try {
-    // 1순위: 공개 인기글 (popular, 비로그인 가능)
     let boards = await loadPopularBoards();
-
-    // 2순위: popular이 비어있으면 최근글 시도
-    // _retry:true 덕분에 비로그인 401도 세션만료 없이 조용히 실패
     if (!boards.length) {
       boards = await loadRecentBoards().catch(() => []);
     }
-
     topPosts.value = [...boards]
       .sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))
       .slice(0, props.limit);
@@ -284,9 +333,15 @@ const fetchTopPosts = async () => {
   }
 };
 
+// ─── 라이프사이클 ──────────────────────────────────────────
 onMounted(fetchTopPosts);
-onBeforeUnmount(stopAuto);
+onBeforeUnmount(() => {
+  stopAuto();
+  document.removeEventListener('mousemove', onDocumentMouseMove);
+  document.removeEventListener('mouseup', onDocumentMouseUp);
+});
 
+// ─── 외부 노출 API ─────────────────────────────────────────
 const updateCard = (boardId, updates) => {
   const index = topPosts.value.findIndex((post) => post.boardId === boardId || post.id === boardId);
   if (index !== -1) {
@@ -319,9 +374,10 @@ defineExpose({ goTo, next, updateCard, removeCard, reload: fetchTopPosts });
 
 .carousel-track {
   display: flex;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
   cursor: grab;
+  /* touch-action: none — 수평/수직 모두 JS가 직접 제어 */
+  touch-action: none;
 
   &:active {
     cursor: grabbing;
@@ -341,6 +397,8 @@ defineExpose({ goTo, next, updateCard, removeCard, reload: fetchTopPosts });
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: box-shadow 0.2s;
   color: #fff;
+  user-select: none;
+  -webkit-user-drag: none;
 
   &:hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
@@ -349,6 +407,11 @@ defineExpose({ goTo, next, updateCard, removeCard, reload: fetchTopPosts });
   &.green {
     background: #01523e;
     border-color: #00ffc2;
+  }
+
+  img {
+    -webkit-user-drag: none;
+    pointer-events: none;
   }
 }
 
