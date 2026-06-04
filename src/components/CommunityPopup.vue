@@ -36,9 +36,15 @@
         <p class="BaseCommunity__bubble">
           <span class="BaseCommunity__bubble_text">
             <span v-show="currentBubbleIndex === 0">
-              <span v-if="auth.isLoggedIn" class="bubble-nickname">{{ auth.nickname }}님 </span>
-              안녕하세요!<br />
-              오늘 하루 길거리에서 무슨 일 없으셨나요?
+              <template v-if="auth.isLoggedIn">
+                <span class="bubble-nickname">{{ auth.nickname }}님 </span>
+                안녕하세요!<br />
+                오늘 하루 길거리에서 무슨 일 없으셨나요?
+              </template>
+              <template v-else>
+                안녕하세요! 페미니스트 여러분<br />
+                오늘 하루 길거리에서 무슨 일 없으셨나요?
+              </template>
             </span>
             <span v-show="currentBubbleIndex === 1" class="next_bubble_text">
               잠깐! 모두가 지켜야할 커뮤니티 가이드를 읽으셨나요?
@@ -1586,7 +1592,7 @@ const currentWorldLegalDetail = computed(
     line-height: 1.4;
     position: relative;
     z-index: 2;
-    text-align: center;
+    text-align: left;
     word-break: keep-all;
   }
 
