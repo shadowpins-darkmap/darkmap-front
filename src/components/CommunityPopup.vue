@@ -36,7 +36,7 @@
         <p class="BaseCommunity__bubble">
           <span class="BaseCommunity__bubble_text">
             <span v-show="currentBubbleIndex === 0">
-              <span v-if="auth.isLoggedIn">{{ auth.nickname }}님 </span>
+              <span v-if="auth.isLoggedIn" class="bubble-nickname">{{ auth.nickname }}님 </span>
               안녕하세요!<br />
               오늘 하루 길거리에서 무슨 일 없으셨나요?
             </span>
@@ -1561,46 +1561,40 @@ const currentWorldLegalDetail = computed(
   }
 
   &__bubble {
-    width: 200px;
-    height: 50px;
-    background-color: #fff;
-    padding: 8px 10px;
-    border-radius: 10px 10px 10px 0;
+    width: 256px;
+    height: 66px;
+    background-image: url('@/assets/tooltip.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 0 10px 20px 10px;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &__bubble::after {
-    content: '';
-    position: absolute;
-    z-index: 1;
-    top: 25px;
-    left: 4px;
-    bottom: 0;
-    height: 0;
-    transform: rotate(180deg) skewY(-40deg) scale(1.26, 1.8) translate(0, -50%);
-    background-color: inherit;
-    width: 30px;
-    height: 10px;
-    border-top-right-radius: 10%;
+    content: none;
   }
 
   &__bubble_text {
-    display: inline-block;
+    display: block;
     color: #6d54ce;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 10px;
-    line-height: 1.5;
+    line-height: 1.4;
     position: relative;
     z-index: 2;
+    text-align: center;
+    word-break: keep-all;
   }
 
   .world-tour-popup &__bubble {
-    flex: 1;
-    width: auto;
-    min-width: 0;
-    min-height: 56px;
-    padding: 12px 12px;
-    border-radius: 10px 10px 10px 0;
+    width: 256px;
+    height: 82px;
+    min-height: 82px;
+    padding: 12px 40px 20px 20px;
   }
 
   .world-tour-popup &__bubble_text {
@@ -1625,7 +1619,7 @@ const currentWorldLegalDetail = computed(
 
   .next_bubble_text {
     color: #6d54ce;
-    font-weight: 400;
+    font-weight: 500;
     font-size: 10px;
     word-break: keep-all;
     position: relative;
@@ -1637,6 +1631,15 @@ const currentWorldLegalDetail = computed(
     bottom: -3px;
     text-decoration: underline;
     font-size: 9px;
+  }
+
+  .bubble-nickname {
+    display: inline-block;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
   }
 
   &__hot_title {
