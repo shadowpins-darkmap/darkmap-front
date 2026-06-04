@@ -1,345 +1,517 @@
+<template>
+  <div class="carousel-wrap" @mouseenter="pauseAuto" @mouseleave="resumeAuto">
+    <!-- 카드 트랙 -->
+    <div class="carousel-track-outer">
+      <div
+        class="carousel-track"
+        :style="trackStyle"
+        @touchstart="onTouchStart"
+        @touchmove="onTouchMove"
+        @touchend="onTouchEnd"
+        @mousedown="onMouseDown"
+        @mousemove="onMouseMove"
+        @mouseup="onMouseUp"
+        @mouseleave="onMouseLeave"
+      >
+        <div
+          v-for="(item, index) in topPosts"
+          :key="item.boardId ?? item.id ?? index"
+          class="carousel-card"
+          :class="{ green: green }"
+          @click="onCardClick && onCardClick(item)"
+        >
+          <!-- 카드 헤더: 카테고리 + 화살표 -->
+          <div class="card-header">
+            <span class="card-tag">{{ item.category || item.tag || '미분류' }}</span>
+            <img
+              src="@/assets/slideCardArrow.svg"
+              class="card-arrow"
+              alt="상세보기"
+              width="12"
+              height="12"
+            />
+          </div>
+
+          <!-- 카드 본문 -->
+          <div class="card-body">
+            <div class="card-text">
+              <p class="card-title ellipsis-2">{{ item.title }}</p>
+              <p class="card-preview ellipsis-1">{{ item.content }}</p>
+            </div>
+            <div v-if="item.imageUrl" class="card-thumbnail">
+              <img :src="item.imageUrl" alt="게시글 이미지" />
+            </div>
+          </div>
+
+          <!-- 카드 푸터: 닉네임, 날짜, 조회수, 좋아요 -->
+          <div class="card-footer">
+            <span class="card-nickname">{{ item.authorNickname || '익명' }}</span>
+            <span class="card-date">{{ formatDate(item.createdAt) }}</span>
+            <span class="card-stats">
+              <span class="stat-views">조회수 {{ item.viewCount ?? 0 }}</span>
+              <span class="stat-likes">
+                <img
+                  src="@/assets/heartButtonIcon.svg"
+                  alt="좋아요"
+                  width="10"
+                  height="10"
+                />
+                {{ item.likeCount ?? 0 }}
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 닷 인디케이터 -->
+    <div class="carousel-dots" v-if="topPosts.length > 0">
+      <button
+        v-for="(_, i) in topPosts"
+        :key="i"
+        class="carousel-dot"
+        :class="{ active: i === currentIndex }"
+        @click="goTo(i)"
+        :aria-label="`${i + 1}번 슬라이드`"
+      />
+    </div>
+
+    <!-- 로딩 / 빈 상태 -->
+    <div v-if="loading" class="carousel-empty">불러오는 중...</div>
+    <div v-else-if="topPosts.length === 0 && !auth.isLoggedIn" class="carousel-empty">
+      로그인하면 인기글을 볼 수 있어요
+    </div>
+    <div v-else-if="topPosts.length === 0" class="carousel-empty">게시글이 없습니다</div>
+  </div>
+</template>
+
 <script setup>
-import { defineProps, defineExpose, ref, onMounted } from 'vue';
-import 'vue3-carousel/carousel.css';
-import { Carousel, Slide } from 'vue3-carousel';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import api from '@/lib/api';
 import { boardsApi } from '@/api/boards';
-import { formatDate } from '@/utils/date';
-
-const cards = ref([]);
-const loading = ref(false);
-
-const getCardBoardId = (card) => card?.boardId ?? card?.id;
-
-const loadPopularBoards = async () => {
-  try {
-    loading.value = true;
-    const response = await boardsApi.getPopularBoards(5);
-    if (response && response.data) {
-      cards.value = response.data.map((board) => ({
-        id: board.id,
-        boardId: board.id,
-        url: board.imageUrl || '',
-        category: board.category || '기본',
-        title: board.title,
-        content: board.content || '',
-        user:
-          board.authorNickname ||
-          board.nickname ||
-          board.author?.nickname ||
-          '익명',
-        authorNickname: board.authorNickname,
-        authorDeleted: board.authorDeleted,
-        authorAnonymized: board.authorAnonymized,
-        authorId: board.authorId ?? board.userId ?? board.writerId,
-        createdAt: board.createdAt,
-        viewCount: board.viewCount || 0,
-        likeCount: board.likeCount || 0,
-        commentCount: board.commentCount || 0,
-      }));
-    }
-  } catch (error) {
-    console.error('인기 게시글 로딩 실패:', error);
-    cards.value = [];
-  } finally {
-    loading.value = false;
-  }
-};
-
-const updateCard = (boardId, updates) => {
-  const index = cards.value.findIndex((c) => getCardBoardId(c) === boardId);
-  if (index !== -1) {
-    cards.value[index] = { ...cards.value[index], ...updates };
-  }
-};
-
-const removeCard = (boardId) => {
-  cards.value = cards.value.filter((c) => getCardBoardId(c) !== boardId);
-};
-
-defineExpose({
-  updateCard,
-  removeCard,
-  reload: loadPopularBoards,
-});
-
-onMounted(() => {
-  loadPopularBoards();
-});
+import { useAuthStore } from '@/store/useAuthStore';
 
 const props = defineProps({
-  itemsToShow: { type: Number, default: 1.1 },
-  gap: { type: Number, default: 4 },
-  autoplay: { type: Number, default: 3000 },
-  wrapAround: { type: Boolean, default: true },
-  pauseAutoplayOnHover: { type: Boolean, default: true },
-  height: { type: [String, Number], default: 200 },
-  green: { type: Boolean, default: false },
+  green: {
+    type: Boolean,
+    default: false,
+  },
+  itemsToShow: {
+    type: Number,
+    default: 1,
+  },
+  gap: {
+    type: Number,
+    default: 8,
+  },
   onCardClick: {
     type: Function,
     default: null,
   },
+  autoInterval: {
+    type: Number,
+    default: 2000,
+  },
+  limit: {
+    type: Number,
+    default: 5,
+  },
 });
 
-const carouselConfig = {
-  height: props.height,
-  itemsToShow: props.itemsToShow,
-  snapAlign: 'start',
-  gap: props.gap,
-  autoplay: props.autoplay,
-  wrapAround: props.wrapAround,
-  pauseAutoplayOnHover: props.pauseAutoplayOnHover,
+const auth = useAuthStore();
+const topPosts = ref([]);
+const loading = ref(false);
+const currentIndex = ref(0);
+let autoTimer = null;
+let touchStartX = 0;
+let touchDeltaX = 0;
+let mouseStartX = 0;
+let mouseDeltaX = 0;
+let isDragging = false;
+
+const trackStyle = computed(() => {
+  const offset = currentIndex.value * 100;
+  return {
+    transform: `translateX(-${offset}%)`,
+    gap: `${props.gap}px`,
+  };
+});
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  const yy = String(d.getFullYear()).slice(2);
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  return `${yy}.${mm}.${dd} ${hh}:${min}`;
 };
+
+const goTo = (index) => {
+  const max = topPosts.value.length - 1;
+  currentIndex.value = Math.max(0, Math.min(index, max));
+};
+
+const next = () => {
+  if (topPosts.value.length === 0) return;
+  currentIndex.value = (currentIndex.value + 1) % topPosts.value.length;
+};
+
+const startAuto = () => {
+  stopAuto();
+  autoTimer = setInterval(next, props.autoInterval);
+};
+
+const stopAuto = () => {
+  if (autoTimer) {
+    clearInterval(autoTimer);
+    autoTimer = null;
+  }
+};
+
+const pauseAuto = () => stopAuto();
+
+const resumeAuto = () => startAuto();
+
+// 터치 스와이프
+const onTouchStart = (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchDeltaX = 0;
+  pauseAuto();
+};
+
+const onTouchMove = (e) => {
+  touchDeltaX = e.touches[0].clientX - touchStartX;
+};
+
+const onTouchEnd = () => {
+  if (touchDeltaX < -40) next();
+  else if (touchDeltaX > 40) goTo(currentIndex.value - 1);
+  resumeAuto();
+};
+
+// 마우스 드래그
+const onMouseDown = (e) => {
+  isDragging = true;
+  mouseStartX = e.clientX;
+  mouseDeltaX = 0;
+  pauseAuto();
+  e.preventDefault();
+};
+
+const onMouseMove = (e) => {
+  if (!isDragging) return;
+  mouseDeltaX = e.clientX - mouseStartX;
+};
+
+const onMouseUp = () => {
+  if (!isDragging) return;
+  isDragging = false;
+  if (mouseDeltaX < -40) next();
+  else if (mouseDeltaX > 40) goTo(currentIndex.value - 1);
+  resumeAuto();
+};
+
+const onMouseLeave = () => {
+  if (isDragging) {
+    isDragging = false;
+    resumeAuto();
+  }
+};
+
+const normalizeBoard = (board) => ({
+  id: board.id,
+  boardId: board.boardId ?? board.id,
+  category: board.category || board.tag || '미분류',
+  title: board.title || '',
+  content: board.content || '',
+  imageUrl: board.imageUrl || board.url || '',
+  authorNickname: board.authorNickname || board.nickname || board.user || '익명',
+  authorDeleted: board.authorDeleted,
+  authorAnonymized: board.authorAnonymized,
+  authorId: board.authorId ?? board.userId ?? board.writerId,
+  createdAt: board.createdAt,
+  viewCount: board.viewCount || 0,
+  likeCount: board.likeCount || 0,
+  commentCount: board.commentCount || 0,
+});
+
+// 1순위: 공개 인기글 API — response.data 가 Board[] 직접 배열
+const loadPopularBoards = async () => {
+  const response = await boardsApi.getPopularBoards(props.limit * 2);
+  if (response && Array.isArray(response.data)) {
+    return response.data.map(normalizeBoard);
+  }
+  return [];
+};
+
+// 2순위: 최근글 API — _retry:true 플래그로 인터셉터의 forceLogout 우회
+// 로그인 시: 요청 인터셉터가 자동으로 토큰 추가 → 데이터 반환
+// 비로그인 시: 401 → 인터셉터 _retry 분기로 조용히 종료 (세션만료 경고 없음)
+const loadRecentBoards = async () => {
+  const { data } = await api.get('/api/v1/boards/recent', {
+    params: { page: 1, size: 50, sortBy: 'createdAt', direction: 'DESC' },
+    _retry: true,
+  });
+  // data = CommonApiResponse: { success, data: { boards: [], pageInfo: {} } }
+  const boards = data?.data?.boards || [];
+  return boards.map(normalizeBoard);
+};
+
+// 조회수 상위 N개 불러오기
+const fetchTopPosts = async () => {
+  loading.value = true;
+  try {
+    // 1순위: 공개 인기글 (popular, 비로그인 가능)
+    let boards = await loadPopularBoards();
+
+    // 2순위: popular이 비어있으면 최근글 시도
+    // _retry:true 덕분에 비로그인 401도 세션만료 없이 조용히 실패
+    if (!boards.length) {
+      boards = await loadRecentBoards().catch(() => []);
+    }
+
+    topPosts.value = [...boards]
+      .sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))
+      .slice(0, props.limit);
+  } catch (err) {
+    console.error('[CarouselWrap] 인기 게시글 로딩 실패:', err);
+    topPosts.value = [];
+  } finally {
+    loading.value = false;
+    if (topPosts.value.length > 0) startAuto();
+  }
+};
+
+onMounted(fetchTopPosts);
+onBeforeUnmount(stopAuto);
+
+const updateCard = (boardId, updates) => {
+  const index = topPosts.value.findIndex((post) => post.boardId === boardId || post.id === boardId);
+  if (index !== -1) {
+    topPosts.value[index] = { ...topPosts.value[index], ...updates };
+  }
+};
+
+const removeCard = (boardId) => {
+  topPosts.value = topPosts.value.filter((post) => post.boardId !== boardId && post.id !== boardId);
+  if (currentIndex.value >= topPosts.value.length) {
+    currentIndex.value = Math.max(0, topPosts.value.length - 1);
+  }
+};
+
+defineExpose({ goTo, next, updateCard, removeCard, reload: fetchTopPosts });
 </script>
 
-<template>
-  <Carousel v-bind="carouselConfig" v-if="!loading">
-    <Slide v-for="card in cards" :key="card.id">
-      <div
-        class="slide_wrap"
-        :class="{ green: props.green }"
-        @click="props.onCardClick && props.onCardClick(card)"
-      >
-        <div class="slide_card">
-          <span class="slide_card_tag">{{ card.category }}</span>
-          <span class="slide_card_arrow">
-            <img
-              :src="
-                props.green
-                  ? require('@/assets/slideCardArrowGreen.svg')
-                  : require('@/assets/slideCardArrow.svg')
-              "
-              class="card_arrow_icon"
-              alt="card arrow icon"
-              width="18"
-              height="18"
-            />
-          </span>
-        </div>
-        <div class="slide_card">
-          <span class="slide_card_contents text_wrap">
-            <span class="ellipsis__2 contents_title">{{ card.title }}</span>
-            <span class="ellipsis__1 contents_detail">{{ card.content }}</span>
-          </span>
-          <span class="slide_card_contents img_wrap">
-            <img v-if="card.url" :src="card.url" alt="card" />
-          </span>
-        </div>
-        <div class="slide_card lines">
-          <div class="card_bottom_meta">
-            <span class="card_bottom_text user">{{ card.user }}</span>
-            <span class="card_bottom_text data">{{
-              formatDate(card.createdAt)
-            }}</span>
-            <span class="card_bottom_text count"
-              >조회수 {{ card.viewCount }}</span
-            >
-          </div>
-          <button class="card_bottom_button">
-            <img
-              :src="
-                props.green
-                  ? require('@/assets/heartButtonIconGreen.svg')
-                  : require('@/assets/heartButtonIcon.svg')
-              "
-              class="like__toggle"
-              alt="like toggle icon"
-              color="#F1CFC8"
-              width="16"
-              height="16"
-            />
-            <span class="card_bottom_like_count">{{ card.likeCount }}</span>
-          </button>
-        </div>
-      </div>
-    </Slide>
-  </Carousel>
-</template>
 <style scoped lang="scss">
-/* .carousel {} */
-.carousel__slide {
-  transform: translateX(0);
-}
-
-.slide_wrap {
-  box-sizing: border-box;
-  width: 328px;
-  height: 172px;
-  border: 1px solid #f1cfc8;
+.carousel-wrap {
+  position: relative;
+  width: 100%;
   overflow: hidden;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-  padding: 16px 12px 0;
+  user-select: none;
+}
+
+.carousel-track-outer {
+  width: 100%;
+  overflow: hidden;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.carousel-card {
+  flex: 0 0 100%;
+  background: #01523e;
+  border: 1px solid #00ffc2;
+  border-radius: 12px;
+  padding: 12px;
   cursor: pointer;
-}
-
-.slide_card {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: 0;
-}
-
-.slide_card:first-child {
-  margin-bottom: 12px;
-}
-
-.slide_card:nth-child(2) {
-  margin-bottom: 16px;
-}
-
-.slide_card_tag {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px 8px;
-  height: 21px;
-  line-height: 17px;
-  border: 1px solid #f1cfc8;
-  border-radius: 15px;
-  color: #f1cfc8;
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: -0.5px;
-}
-
-.slide_card_arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.slide_card_contents {
-  display: flex;
-}
-
-.text_wrap {
-  width: 224px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s;
+  color: #fff;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
+  }
+
+  &.green {
+    background: #01523e;
+    border-color: #00ffc2;
+  }
 }
 
-.contents_title {
+/* 카드 헤더 */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-tag {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #00ffc2;
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 11px;
   font-weight: 700;
-  font-size: 16px;
-  line-height: 140%;
+  color: #00ffc2;
   letter-spacing: -0.5px;
-  color: #fff;
 }
 
-.contents_detail {
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 140%;
-  letter-spacing: -0.5px;
-  color: #fff;
+.card-arrow {
+  opacity: 0.5;
 }
 
-.img_wrap {
+/* 카드 본문 */
+.card-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex: 1;
+}
+
+.card-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #fff;
+  margin-bottom: 4px;
+  word-break: keep-all;
+}
+
+.card-preview {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.4;
+}
+
+.card-thumbnail {
+  flex: 0 0 72px;
   width: 72px;
   height: 72px;
   border-radius: 8px;
   overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+/* 카드 푸터 */
+.card-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  border-top: 1px solid #00ffc2;
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+.card-nickname {
+  font-size: 11px;
+  font-weight: 600;
+  color: #00ffc2;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-date {
+  font-size: 11px;
+  color: #00ffc2;
   flex-shrink: 0;
 }
 
-.slide_card.lines {
-  margin: 0 -12px;
-  padding: 7px 10px;
-  border-top: 1px solid #f1cfc8;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.card_bottom_meta {
+.card-stats {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
+  flex-shrink: 0;
 }
 
-.card_bottom_text {
-  color: #f1cfc8;
-  font-family: 'Noto Sans KR';
-  font-weight: 400;
+.stat-views,
+.stat-likes {
   font-size: 11px;
-  line-height: 16px;
-  letter-spacing: -0.5px;
-  display: block;
-  word-break: keep-all;
-  white-space: nowrap;
-  padding: 0;
-}
-
-.card_bottom_text.user {
-  flex: 1;
-  min-width: 0;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.card_bottom_text.data {
-  flex-shrink: 0;
-}
-
-.card_bottom_text.count {
-  flex-shrink: 0;
-}
-
-.card_bottom_button {
-  display: inline-flex;
+  color: #00ffc2;
+  display: flex;
   align-items: center;
-  height: 16px;
-  line-height: 1;
-  width: auto;
-  min-width: 35px;
-  justify-content: flex-end;
+  gap: 3px;
+}
+
+/* 닷 인디케이터 */
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.carousel-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  border: none;
   padding: 0;
-  margin-left: 10px;
-  flex-shrink: 0;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.25s;
+
+  &.active {
+    background: #fff;
+    transform: scale(1.3);
+  }
 }
 
-.card_bottom_like_count {
-  color: #f1cfc8;
-  font-family: 'Noto Sans KR';
-  font-weight: 400;
-  font-size: 11px;
-  line-height: 16px;
-  display: block;
-  min-width: 10px;
+/* 유틸 */
+.ellipsis-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.like__toggle {
-  display: block;
-  width: 16px;
-  height: 16px;
-  flex: 0 0 16px;
+.ellipsis-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.slide_wrap.green {
-  background-color: #01523e;
-  border: 1px solid #00ffc2;
-}
-
-.slide_wrap.green .card_bottom_text {
-  color: #00ffc2;
-}
-
-.slide_wrap.green .card_bottom_like_count {
-  color: #00ffc2;
-}
-
-.slide_wrap.green .slide_card_tag {
-  border: 1px solid #00ffc2;
-  color: #00ffc2;
-}
-
-.slide_wrap.green .slide_card.lines {
-  border-top: 1px solid #00ffc2;
+/* 빈 상태 */
+.carousel-empty {
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 16px 0;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
