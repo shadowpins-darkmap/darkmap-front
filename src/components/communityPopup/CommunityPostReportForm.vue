@@ -31,7 +31,7 @@
   </div>
   <BaseAlertPopup v-if="showSuccessPopup" title="신고를 완료했습니다." @confirm="handleSuccessConfirm">
     <p>
-      사이트 운영진의 검토가 끝나면<br />등록하신 이메일로 관련 조치를 알려드려요<br />해당 안내는 3~14일정도 소요될 수 있습니다
+      사이트 운영진의 검토가 끝나면<br />다음 로그인 시 팝업으로 공지드려요<br />해당 안내는 3~14일정도 소요될 수 있습니다
     </p>
   </BaseAlertPopup>
   <BaseAlertPopup v-if="showErrorPopup" title="신고 실패" @confirm="showErrorPopup = false">
