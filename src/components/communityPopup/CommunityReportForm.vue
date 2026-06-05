@@ -51,7 +51,7 @@
     confirmText="확인"
   >
     <p>
-      사이트 운영진의 검토후 장소가 등록되면<br />등록하신 이메일로 알려드려요
+      사이트 운영진의 검토후 장소가 등록되면<br />다음 로그인 시 팝업으로 공지드려요
     </p>
   </BaseAlertPopup>
   <BaseAlertPopup
