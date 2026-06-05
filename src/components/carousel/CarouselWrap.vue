@@ -1,9 +1,13 @@
 <template>
-  <div class="carousel-wrap" @mouseenter="pauseAuto" @mouseleave="resumeAuto">
+  <div
+    ref="outerRef"
+    class="carousel-wrap"
+    @mouseenter="pauseAuto"
+    @mouseleave="resumeAuto"
+  >
     <!-- 카드 트랙 -->
     <div class="carousel-track-outer">
       <div
-        ref="trackRef"
         class="carousel-track"
         :style="trackStyle"
         @touchstart="onTouchStart"
@@ -16,6 +20,7 @@
           :key="item.boardId ?? item.id ?? index"
           class="carousel-card"
           :class="{ green: green }"
+          :style="cardStyle"
           @click.stop="handleCardClick(item, $event)"
         >
           <!-- 카드 헤더: 카테고리 + 화살표 -->
@@ -84,7 +89,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import api from '@/lib/api';
 import { boardsApi } from '@/api/boards';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -120,8 +125,10 @@ const auth = useAuthStore();
 const topPosts = ref([]);
 const loading = ref(false);
 const currentIndex = ref(0);
-const trackRef = ref(null);
+const outerRef = ref(null);
+const containerWidth = ref(0);
 let autoTimer = null;
+let resizeObserver = null;
 
 // ─── 드래그 상태 ───────────────────────────────────────────
 const dragState = ref({
@@ -130,17 +137,32 @@ const dragState = ref({
   isDragging: false,
   hasMoved: false,
 });
-const dragOffset = ref(0); // 드래그 중 실시간 px 오프셋
 
-// ─── trackStyle: 드래그 중에는 transition OFF + offset 반영 ──
+// ─── 카드 크기 계산 (px 기반) ──────────────────────────────
+const PEEK = 20; // 양 옆 인접 카드 노출 px
+const GAP = 8;
+const cardWidth = computed(() =>
+  containerWidth.value > 0 ? containerWidth.value - PEEK * 2 - GAP : 260
+);
+const slideStep = computed(() => cardWidth.value + GAP);
+
+const cardStyle = computed(() => ({
+  flex: `0 0 ${cardWidth.value}px`,
+  width: `${cardWidth.value}px`,
+}));
+
+// ─── trackStyle: 첫 카드는 PEEK만큼 들여쓰기, 이후 slideStep씩 이동 ──
 const trackStyle = computed(() => {
-  const baseOffset = currentIndex.value * 100;
+  const dragDelta = dragState.value.isDragging
+    ? dragState.value.currentX - dragState.value.startX
+    : 0;
+  const basePx = PEEK - currentIndex.value * slideStep.value + dragDelta;
   return {
-    transform: `translateX(calc(-${baseOffset}% + ${dragOffset.value}px))`,
+    transform: `translateX(${basePx}px)`,
     transition: dragState.value.isDragging
       ? 'none'
       : 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-    gap: `${props.gap}px`,
+    gap: `${GAP}px`,
   };
 });
 
@@ -191,16 +213,14 @@ const onDragStart = (clientX) => {
     isDragging: true,
     hasMoved: false,
   };
-  dragOffset.value = 0;
   pauseAuto();
 };
 
 const onDragMove = (clientX) => {
   if (!dragState.value.isDragging) return;
   dragState.value.currentX = clientX;
-  const delta = clientX - dragState.value.startX;
-  dragOffset.value = delta; // 실시간 카드 이동
-  if (Math.abs(delta) > 10) {
+  const delta = Math.abs(clientX - dragState.value.startX);
+  if (delta > 10) {
     dragState.value.hasMoved = true;
   }
 };
@@ -218,12 +238,9 @@ const onDragEnd = () => {
     }
   }
 
-  // offset을 0으로 되돌리면서 transition이 자연스럽게 처리됨
-  dragOffset.value = 0;
   dragState.value.isDragging = false;
   resumeAuto();
 
-  // 클릭 이벤트 처리 후 hasMoved 리셋
   setTimeout(() => {
     dragState.value.hasMoved = false;
   }, 50);
@@ -334,9 +351,25 @@ const fetchTopPosts = async () => {
 };
 
 // ─── 라이프사이클 ──────────────────────────────────────────
-onMounted(fetchTopPosts);
+const measureContainer = () => {
+  if (outerRef.value) {
+    containerWidth.value = outerRef.value.offsetWidth;
+  }
+};
+
+onMounted(async () => {
+  // 컨테이너 너비 먼저 측정
+  await nextTick();
+  measureContainer();
+  resizeObserver = new ResizeObserver(measureContainer);
+  if (outerRef.value) resizeObserver.observe(outerRef.value);
+
+  await fetchTopPosts();
+});
+
 onBeforeUnmount(() => {
   stopAuto();
+  resizeObserver?.disconnect();
   document.removeEventListener('mousemove', onDocumentMouseMove);
   document.removeEventListener('mouseup', onDocumentMouseUp);
 });
@@ -363,31 +396,33 @@ defineExpose({ goTo, next, updateCard, removeCard, reload: fetchTopPosts });
 .carousel-wrap {
   position: relative;
   width: 100%;
-  overflow: hidden;
   user-select: none;
 }
 
 .carousel-track-outer {
   width: 100%;
-  overflow: hidden;
+  overflow: hidden;        /* 여기서만 카드 클리핑 */
+  padding: 8px 0 10px;    /* 상하 여백 — 그림자가 잘리지 않도록 */
 }
 
 .carousel-track {
   display: flex;
   will-change: transform;
   cursor: grab;
-  /* touch-action: none — 수평/수직 모두 JS가 직접 제어 */
-  touch-action: none;
+  touch-action: pan-y;
+  align-items: stretch;
 
   &:active {
     cursor: grabbing;
   }
 }
 
+/* ── 기본(외부, 분홍) 테마 ── */
 .carousel-card {
-  flex: 0 0 100%;
-  background: #01523e;
-  border: 1px solid #00ffc2;
+  flex-shrink: 0;
+  /* width/flex-basis는 :style="cardStyle"로 JS에서 동적 지정 */
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid #f1cfc8;
   border-radius: 12px;
   padding: 12px;
   cursor: pointer;
@@ -404,14 +439,34 @@ defineExpose({ goTo, next, updateCard, removeCard, reload: fetchTopPosts });
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
   }
 
-  &.green {
-    background: #01523e;
-    border-color: #00ffc2;
-  }
-
   img {
     -webkit-user-drag: none;
     pointer-events: none;
+  }
+
+  /* ── 초록(내부, 리스트패널) 테마 ── */
+  &.green {
+    background: #01523e;
+    border-color: #00ffc2;
+
+    .card-tag {
+      border-color: #00ffc2;
+      color: #00ffc2;
+    }
+
+    .card-footer {
+      border-top-color: #00ffc2;
+    }
+
+    .card-nickname,
+    .card-date {
+      color: #00ffc2;
+    }
+
+    .stat-views,
+    .stat-likes {
+      color: #00ffc2;
+    }
   }
 }
 
@@ -425,12 +480,12 @@ defineExpose({ goTo, next, updateCard, removeCard, reload: fetchTopPosts });
 .card-tag {
   display: inline-flex;
   align-items: center;
-  border: 1px solid #00ffc2;
+  border: 1px solid #f1cfc8;
   border-radius: 20px;
   padding: 2px 8px;
   font-size: 11px;
   font-weight: 700;
-  color: #00ffc2;
+  color: #f1cfc8;
   letter-spacing: -0.5px;
 }
 
@@ -487,7 +542,7 @@ defineExpose({ goTo, next, updateCard, removeCard, reload: fetchTopPosts });
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
-  border-top: 1px solid #00ffc2;
+  border-top: 1px solid #f1cfc8;
   padding-top: 8px;
   margin-top: 4px;
 }
@@ -495,7 +550,7 @@ defineExpose({ goTo, next, updateCard, removeCard, reload: fetchTopPosts });
 .card-nickname {
   font-size: 11px;
   font-weight: 600;
-  color: #00ffc2;
+  color: #f1cfc8;
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -505,7 +560,7 @@ defineExpose({ goTo, next, updateCard, removeCard, reload: fetchTopPosts });
 
 .card-date {
   font-size: 11px;
-  color: #00ffc2;
+  color: #f1cfc8;
   flex-shrink: 0;
 }
 
@@ -519,7 +574,7 @@ defineExpose({ goTo, next, updateCard, removeCard, reload: fetchTopPosts });
 .stat-views,
 .stat-likes {
   font-size: 11px;
-  color: #00ffc2;
+  color: #f1cfc8;
   display: flex;
   align-items: center;
   gap: 3px;
@@ -530,7 +585,7 @@ defineExpose({ goTo, next, updateCard, removeCard, reload: fetchTopPosts });
   display: flex;
   justify-content: center;
   gap: 5px;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .carousel-dot {
