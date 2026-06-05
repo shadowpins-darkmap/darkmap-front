@@ -56,6 +56,7 @@ const experienceClusters = {
 
 let overlay = null;
 let worldTourMarkers = [];
+let markerJustClicked = false;
 
 const closeOverlay = () => {
   if (overlay) {
@@ -260,9 +261,11 @@ const createSingleMarker = (article) => {
     map,
     position: article.position,
     content: markerTag,
+    gmpClickable: true,
   });
   article.marker.caseTourArticle = article;
-  article.marker.addListener('click', () => {
+  article.marker.addEventListener('gmp-click', () => {
+    markerJustClicked = true;
     openMarkerPopup(article.position, [article]);
   });
 };
@@ -424,9 +427,11 @@ const createWorldTourMarkers = () => {
       anchorLeft: '-50%',
       anchorTop: '-50%',
       zIndex: 2000 + country.count,
+      gmpClickable: true,
     });
 
-    marker.addListener('click', () => {
+    marker.addEventListener('gmp-click', () => {
+      markerJustClicked = true;
       closeOverlay();
 
       const container = document.createElement('div');
@@ -499,8 +504,15 @@ onMounted(async () => {
       fullscreenControl: false,
       mapTypeControl: false,
       streetViewControl: false,
+      clickableIcons: false,
     });
-    map.addListener('click', closeOverlay);
+    map.addListener('click', () => {
+      if (markerJustClicked) {
+        markerJustClicked = false;
+        return;
+      }
+      closeOverlay();
+    });
 
     // 4. 지도가 표시된 후 백그라운드에서 기사 로딩
     isLoading.value = true;
