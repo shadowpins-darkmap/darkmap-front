@@ -35,12 +35,9 @@
       >
         Privacy Policy
       </a>
-      <a
-        :href="'https://forms.gle/Kr93YqK5ZjsiqvpF6'"
-        target="_blank"
-        class="BaseFooterlink"
-        >Contact Us</a
-      >
+      <button class="BaseFooterlink BaseFooterlink--btn" @click="showContact = true">
+        Contact Us
+      </button>
     </div>
     <div v-else class="BaseFootercontainer">
       <a
@@ -65,15 +62,41 @@
       >
     </div>
   </footer>
+
+  <Teleport to="body">
+    <div v-if="showContact" class="ContactModal__backdrop" @click.self="showContact = false">
+      <div class="ContactModal">
+        <p class="ContactModal__title">Contact Us</p>
+        <p class="ContactModal__email">weareshadowpins@gmail.com</p>
+        <a
+          href="mailto:weareshadowpins@gmail.com"
+          class="ContactModal__btn ContactModal__btn--primary"
+          @click="showContact = false"
+        >Open mail app</a>
+        <a
+          href="https://mail.google.com/mail/?view=cm&to=weareshadowpins@gmail.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="ContactModal__btn ContactModal__btn--secondary"
+          @click="showContact = false"
+        >Send via Gmail (web)</a>
+        <button class="ContactModal__close" @click="showContact = false">Close</button>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>
+import { ref } from 'vue';
+
 defineProps({
   isWorldTour: {
     type: Boolean,
     default: false,
   },
 });
+
+const showContact = ref(false);
 </script>
 
 <style lang="scss" scoped>
@@ -104,6 +127,81 @@ defineProps({
     font-weight: 500;
     color: #ffefeb;
     text-decoration: underline;
+    cursor: pointer;
+
+    &--btn {
+      background: none;
+      border: none;
+      padding: 0;
+    }
+  }
+}
+</style>
+
+<style lang="scss">
+.ContactModal__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.ContactModal {
+  width: min(90vw, 300px);
+  border: 1px solid #f1cfc8;
+  border-radius: 12px;
+  background: #6d54ce;
+  padding: 34px 24px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+  color: #fff;
+
+  &__title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  &__email {
+    margin: 0;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.75);
+    word-break: break-all;
+  }
+
+  &__btn {
+    display: block;
+    padding: 11px 10px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+
+    &--primary {
+      background: #000;
+      color: #fff;
+    }
+
+    &--secondary {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+  }
+
+  &__close {
+    margin-top: 2px;
+    background: none;
+    border: none;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
     cursor: pointer;
   }
 }
