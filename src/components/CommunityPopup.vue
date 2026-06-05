@@ -420,7 +420,7 @@
         <p class="BaseCommunity__bubble world-bubble">
           <span class="BaseCommunity__bubble_text">
             <span class="world-bubble-nowrap">Hello feminists worldwide!</span><br />
-            Any cyberflashing cases in your country?
+            Any cyberflashing cases<br />in your country?
           </span>
         </p>
       </div>
@@ -1508,8 +1508,8 @@ const currentWorldLegalDetail = computed(
     display: block;
     text-align: left;
     padding: 4px 0;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 400;
     line-height: 1.35;
   }
 
@@ -1532,15 +1532,17 @@ const currentWorldLegalDetail = computed(
   }
 
   .world-tour-popup &__greeting {
-    align-items: center;
-    gap: 6px;
     padding-top: 8px;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
   }
 
   .world-tour-popup &__avatar {
-    width: 74px;
-    flex-shrink: 0;
-    margin-bottom: -27px;
+    transform: scale(0.68);
+    transform-origin: top center;
+    margin-left: 0;
+    margin-bottom: -28px;
   }
 
   .world-tour-popup &__avatar_eyes {
@@ -1587,7 +1589,7 @@ const currentWorldLegalDetail = computed(
   &__bubble_text {
     display: block;
     color: #6d54ce;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 10px;
     line-height: 1.4;
     position: relative;
@@ -1597,15 +1599,17 @@ const currentWorldLegalDetail = computed(
   }
 
   .world-tour-popup &__bubble {
-    width: 256px;
-    height: 82px;
-    min-height: 82px;
-    padding: 12px 40px 20px 20px;
+    background-image: url('@/assets/tooltipM.svg');
+    width: 188px;
+    height: 88px;
+    min-height: 88px;
+    padding: 4px 8px 23px 8px;
   }
 
   .world-tour-popup &__bubble_text {
     font-size: 11px;
     line-height: 1.55;
+    text-align: center;
   }
 
   .world-bubble-nowrap {
@@ -1689,7 +1693,7 @@ const currentWorldLegalDetail = computed(
 
   &__card {
     width: 100%;
-    overflow: hidden;
+    padding-bottom: 8px;
   }
 
   &__setting {
@@ -1719,8 +1723,8 @@ const currentWorldLegalDetail = computed(
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 7px;
+    margin-bottom: 5px;
   }
 
   &__title {
@@ -1944,7 +1948,7 @@ const currentWorldLegalDetail = computed(
     align-items: center;
     padding: 3px 0;
     font-weight: 400;
-    font-size: 10px;
+    font-size: 12px;
     color: #fff;
   }
 
