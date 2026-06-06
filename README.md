@@ -2,7 +2,7 @@
 
 > 🇺🇸 [English README](./README.en.md)
 
-**다크맵투어(DarkMap Tour)**는 길거리 괴롭힘·성범죄 사건을 지도 위에 시각화하고,  
+**다크맵투어(DarkMap Tour)** 는 길거리 괴롭힘·성범죄 사건을 지도 위에 시각화하고,  
 시민 제보와 커뮤니티를 통해 안전한 거리를 만들어가는 **시빅 해킹 프로젝트**입니다.  
 이 레포지토리는 [ShadowPins](https://weareshadowpins.com)가 운영합니다.
 
