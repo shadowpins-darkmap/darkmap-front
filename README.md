@@ -163,13 +163,13 @@ src/
 (실제 키 값은 팀 내부 채널을 통해 공유됩니다.)
 
 ```env
-VUE_APP_GOOGLE_MAPS_API_KEY=   # Google Cloud Console에서 Maps JS API 키 발급
+VUE_APP_GOOGLE_MAP_API_KEY=    # Google Cloud Console에서 Maps JS API 키 발급
 VUE_APP_API_BASE_URL=          # 로컬 개발 시 http://localhost:3000 등으로 대체 가능
 ```
 
 | 변수명 | 설명 |
 |---|---|
-| `VUE_APP_GOOGLE_MAPS_API_KEY` | Google Maps JavaScript API 키 |
+| `VUE_APP_GOOGLE_MAP_API_KEY` | Google Maps JavaScript API 키 |
 | `VUE_APP_API_BASE_URL` | 백엔드 API 베이스 URL |
 
 
